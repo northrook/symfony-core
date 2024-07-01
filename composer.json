@@ -1,0 +1,25 @@
+{
+  "name": "northrook/symfony-core",
+  "type": "library",
+  "description": "Various support classes for Symfony.",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Northrook\\Symfony\\": ""
+    }
+  },
+  "authors": [
+    {
+      "name": "Martin",
+      "email": "mn@northrook.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require": {
+    "php": ">=8.2",
+    "northrook/core": "dev-main",
+    "symfony/console": "@stable",
+    "symfony/filesystem": "^7.1"
+  }
+}
