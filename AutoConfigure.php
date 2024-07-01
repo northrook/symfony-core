@@ -10,33 +10,35 @@ use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use function Northrook\Core\Function\normalizePath;
 
-final class AutoConfigure
+abstract class AutoConfigure
 {
     /** @var bool Has this been instantiated anywhere? */
     private static bool $instantiated = false;
 
-    private static string $configDirectory;
+    private static string         $configDirectory;
+    protected readonly Filesystem $file;
 
-    private Filesystem $file;
+    final public function __construct( string $projectDirectory ) {
 
-    public function __construct( string $projectDirectory ) {
         $this->file             = new Filesystem();
         $this::$configDirectory ??= normalizePath( $projectDirectory . '/config' );
 
-        if ( 'cli' === PHP_SAPI ) {
-            Output::init( 'AutoConfigure: Initialized' );
-        }
-        else {
-            // AutoConfigure should only be called by CLI or when SymfonyCoreBundle is building the container.
+        // AutoConfigure should only be called by CLI or when SymfonyCoreBundle is building the container.
+        if ( 'cli' !== PHP_SAPI ) {
             die;
+        }
+
+        if ( !AutoConfigure::$instantiated ) {
+            AutoConfigure::$instantiated = true;
+            Output::init( 'AutoConfigure: Initialized' );
         }
     }
 
-    private function path( string $name ) : string {
+    final protected function path( string $name ) : string {
         return normalizePath( "{$this::$configDirectory}/{$name}" );
     }
 
-    public function removeConfigFile( string $name ) : void {
+    final protected function removeConfigFile( string $name ) : void {
 
         $path = $this->path( $name );
 
@@ -56,7 +58,7 @@ final class AutoConfigure
 
     }
 
-    public function createConfigFile( string $name, string $config ) : void {
+    final protected function createConfigFile( string $name, string $config ) : void {
 
         $path = $this->path( $name );
 
