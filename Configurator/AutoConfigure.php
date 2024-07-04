@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace Northrook\Symfony;
+namespace Northrook\Symfony\Configurator;
 
 use Northrook\Logger\Log;
 use Northrook\Symfony\Console\Output;
