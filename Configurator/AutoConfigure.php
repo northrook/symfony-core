@@ -8,7 +8,7 @@ use Northrook\Logger\Log;
 use Northrook\Symfony\Console\Output;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
-use function Northrook\Core\Function\normalizePath;
+use function Northrook\normalizePath;
 
 abstract class AutoConfigure
 {
