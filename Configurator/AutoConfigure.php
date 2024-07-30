@@ -25,7 +25,9 @@ abstract class AutoConfigure
 
         if ( !AutoConfigure::$instantiated ) {
             AutoConfigure::$instantiated = true;
-            Output::init( 'AutoConfigure: Initialized' );
+            if ( PHP_SAPI === 'cli' ) {
+                Output::init( 'AutoConfigure: Initialized' );
+            }
         }
     }
 
