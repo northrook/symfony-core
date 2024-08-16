@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 
 namespace Northrook\Symfony\Console;
 
-use Northrook\Core\Trait\StaticClass;
+use Northrook\Trait\StaticClass;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 
