@@ -38,7 +38,7 @@ abstract class AutoConfigure
         return normalizePath( "{$this->projectDir}/{$fromProjectDir}" );
     }
 
-    final protected function removeConfigFile( string $name ) : void
+    final protected function removeFile( string $name ) : void
     {
         $path = $this->path( $name );
 
