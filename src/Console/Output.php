@@ -1,6 +1,5 @@
 <?php
 
-
 declare( strict_types = 1 );
 
 namespace Northrook\Symfony\Console;
@@ -18,13 +17,15 @@ final class Output
 {
     use StaticClass;
 
+
+
     /**
      * Print an [ INIT ] message to the console.
      *
      * @param string  ...$messages
      */
-    public static function init( string ...$messages ) : void {
-
+    public static function init( string ...$messages ) : void
+    {
         $output = new OutputFormatterStyle();
         $output->setBackground( 'magenta' );
         $output->setForeground( 'black' );
@@ -38,8 +39,8 @@ final class Output
      *
      * @param string  ...$messages
      */
-    public static function info( string ...$messages ) : void {
-
+    public static function info( string ...$messages ) : void
+    {
         $output = new OutputFormatterStyle();
         $output->setBackground( 'cyan' );
         $output->setForeground( 'black' );
@@ -53,8 +54,8 @@ final class Output
      *
      * @param string  ...$messages
      */
-    public static function OK( string ...$messages ) : void {
-
+    public static function OK( string ...$messages ) : void
+    {
         $output = new OutputFormatterStyle();
         $output->setBackground( 'green' );
         $output->setForeground( 'black' );
@@ -68,8 +69,8 @@ final class Output
      *
      * @param string  ...$messages
      */
-    public static function warning( string ...$messages ) : void {
-
+    public static function warning( string ...$messages ) : void
+    {
         $output = new OutputFormatterStyle();
         $output->setBackground( 'yellow' );
         $output->setForeground( 'black' );
@@ -78,14 +79,13 @@ final class Output
         Output::print( $output->apply( ' [ WARNING ] ' ), $messages );
     }
 
-
     /**
      * Print an [ ERROR ] message to the console.
      *
      * @param string  ...$messages
      */
-    public static function error( string ...$messages ) : void {
-
+    public static function error( string ...$messages ) : void
+    {
         $output = new OutputFormatterStyle();
         $output->setBackground( 'red' );
         $output->setForeground( 'black' );
@@ -95,17 +95,20 @@ final class Output
     }
 
     /**
-     * @param string  $output
-     * @param array   $messages
-     *
      * @internal
+     *
+     * @param string    $output
+     * @param string[]  $messages
+     *
      */
-    private static function print( string $output, array $messages ) : void {
+    private static function print( string $output, array $messages ) : void
+    {
         array_walk(
-            $messages,
-            static function ( $message ) use ( &$print ) {
-                $print[] = " $message";
-            },
+                $messages,
+                static function( $message ) use ( &$print )
+                {
+                    $print[] = " $message";
+                },
         );
 
         echo $output . implode( PHP_EOL, $print ) . PHP_EOL . PHP_EOL;

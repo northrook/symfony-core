@@ -3,17 +3,20 @@
   "type": "library",
   "description": "Various support classes for Symfony.",
   "license": "MIT",
-  "autoload": {
-    "psr-4": {
-      "Northrook\\Symfony\\": ""
-    }
-  },
   "authors": [
     {
       "name": "Martin",
       "email": "mn@northrook.com"
     }
   ],
+  "autoload": {
+    "psr-4": {
+      "Northrook\\Symfony\\": "src/"
+    }
+  },
+  "scripts": {
+    "phpstan": "vendor/bin/phpstan analyse"
+  },
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
@@ -21,5 +24,8 @@
     "northrook/core": "dev-main",
     "symfony/console": "*",
     "symfony/filesystem": "*"
+  },
+  "require-dev": {
+    "phpstan/phpstan": "^1.12"
   }
 }
