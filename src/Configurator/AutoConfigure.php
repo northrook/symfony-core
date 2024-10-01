@@ -7,9 +7,9 @@ namespace Northrook\Symfony\Configurator;
 use JetBrains\PhpStorm\Language;
 use Northrook\Logger\Log;
 use Northrook\Symfony\Console\Output;
+use Support\Normalize;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
-use function Northrook\normalizePath;
 
 abstract class AutoConfigure
 {
@@ -21,7 +21,7 @@ abstract class AutoConfigure
 
     final public function __construct( string $rootDir )
     {
-        $this->projectDir = normalizePath( $rootDir );
+        $this->projectDir = Normalize::path( $rootDir );
 
         $this->file = new Filesystem();
 
@@ -35,7 +35,7 @@ abstract class AutoConfigure
 
     final protected function path( string $fromProjectDir ) : string
     {
-        return normalizePath( "{$this->projectDir}/{$fromProjectDir}" );
+        return Normalize::path( "{$this->projectDir}/{$fromProjectDir}" );
     }
 
     final protected function removeFile( string $name ) : void
