@@ -1,6 +1,6 @@
 <?php
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Core\Console;
 
@@ -19,7 +19,7 @@ final class Output
     /**
      * Print an [ INIT ] message to the console.
      *
-     * @param string  ...$messages
+     * @param string ...$messages
      */
     public static function init( string ...$messages ) : void
     {
@@ -34,7 +34,7 @@ final class Output
     /**
      * Print an [ INFO ] message to the console.
      *
-     * @param string  ...$messages
+     * @param string ...$messages
      */
     public static function info( string ...$messages ) : void
     {
@@ -49,7 +49,7 @@ final class Output
     /**
      * Print an [ OK ] message to the console.
      *
-     * @param string  ...$messages
+     * @param string ...$messages
      */
     public static function OK( string ...$messages ) : void
     {
@@ -64,7 +64,7 @@ final class Output
     /**
      * Print an [ WARNING ] message to the console.
      *
-     * @param string  ...$messages
+     * @param string ...$messages
      */
     public static function warning( string ...$messages ) : void
     {
@@ -79,7 +79,7 @@ final class Output
     /**
      * Print an [ ERROR ] message to the console.
      *
-     * @param string  ...$messages
+     * @param string ...$messages
      */
     public static function error( string ...$messages ) : void
     {
@@ -94,21 +94,18 @@ final class Output
     /**
      * @internal
      *
-     * @param string    $output
-     * @param string[]  $messages
-     *
+     * @param string   $output
+     * @param string[] $messages
      */
     private static function print( string $output, array $messages ) : void
     {
-        array_walk(
-                $messages,
-                static function( $message ) use ( &$print )
-                {
-                    $print[] = " $message";
-                },
+        \array_walk(
+            $messages,
+            static function( $message ) use ( &$print ) {
+                $print[] = " {$message}";
+            },
         );
 
-        echo $output . implode( PHP_EOL, $print ) . PHP_EOL . PHP_EOL;
+        echo $output.\implode( PHP_EOL, $print ).PHP_EOL.PHP_EOL;
     }
-
 }

@@ -10,6 +10,7 @@ use Support\Normalize;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
+use function Assert\isCLI;
 
 final class CoreBundle extends AbstractBundle
 {
@@ -35,6 +36,10 @@ final class CoreBundle extends AbstractBundle
     public function build( ContainerBuilder $container ) : void
     {
         parent::build( $container );
+
+        if ( ! isCLI() ) {
+            return;
+        }
 
         $container->addCompilerPass( new ApplicationCompilerPass() );
     }

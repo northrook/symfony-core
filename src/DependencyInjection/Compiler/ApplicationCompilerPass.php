@@ -21,15 +21,13 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
     #[Override]
     public function process( ContainerBuilder $container ) : void
     {
-        if ( ! isCLI() ) {
-            dump( $this::class.' terminated.', $this );
-        }
+        $this->projectDirectory = $container->getParameter( 'kernel.project_dir' );
 
-        $this->projectDirectory = $container->getParameter( 'dir.root' ) ;
+        Output::info( "Using project directory: " . $this->projectDirectory );
 
         $this->appKernel()
             ->publicIndex()
-            ->coreControllerRoutes()
+                // ->coreControllerRoutes()
             ->appControllerRouteConfiguration()
             ->createConfigServices()
             ->configurePreload();
@@ -43,17 +41,16 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
                 <?php
                     
                 declare(strict_types=1);
-                
+                    
                 namespace App;
-                
+                    
                 use Symfony\Bundle\FrameworkBundle\Kernel as FrameworkKernel;
                 use Symfony\Component\HttpKernel\Kernel as HttpKernel;
-                
+                    
                 final class Kernel extends HttpKernel
                 {
                     use FrameworkKernel\MicroKernelTrait;
                 }
-
                 PHP,
         );
         return $this;
@@ -65,15 +62,14 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
             'public/index.php',
             <<<PHP
                 <?php
-
+                    
                 declare(strict_types=1);
-                
+                    
                 require_once \dirname(__DIR__).'/vendor/autoload_runtime.php';
-                
+                    
                 return function (array \$context): App\Kernel {
                     return new App\Kernel(\$context['APP_ENV'], (bool) \$context['APP_DEBUG']);
                 };
-                
                 PHP,
         );
 
@@ -82,26 +78,26 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
 
     public function coreControllerRoutes() : self
     {
-        $routes = Yaml::dump( [
+        $routes = [
             'core.controller.api' => [
-                'resource' => '@SymfonyCoreBundle/config/routes/api.php',
+                'resource' => '@CoreBundle/config/routes/api.php',
                 'prefix'   => '/api',
             ],
             'core.controller.admin' => [
-                'resource' => '@SymfonyCoreBundle/config/routes/admin.php',
+                'resource' => '@CoreBundle/config/routes/admin.php',
                 'prefix'   => '/admin',
             ],
             'core.controller.security' => [
-                'resource' => '@SymfonyCoreBundle/config/routes/security.php',
+                'resource' => '@CoreBundle/config/routes/security.php',
                 'prefix'   => '/',
             ],
             'core.controller.public' => [
-                'resource' => '@SymfonyCoreBundle/config/routes/public.php',
+                'resource' => '@CoreBundle/config/routes/public.php',
                 'prefix'   => '/',
             ],
-        ] );
+        ] ;
 
-        $this->createFile( 'config/routes/core.yaml', $routes );
+        $this->createYamlFile( 'config/routes/core.yaml', $routes );
 
         return $this;
     }
@@ -178,13 +174,12 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
             'config/preload.php',
             <<<'PHP'
                 <?php
-
+                    
                 declare(strict_types=1);
-                
+                    
                 if (\file_exists(\dirname(__DIR__).'/var/cache/prod/App_KernelProdContainer.preload.php')) {
                     \opcache_compile_file(\dirname(__DIR__).'/var/cache/prod/App_KernelProdContainer.preload.php');
                 }
-
                 PHP,
         );
 
@@ -207,6 +202,23 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
         }
     }
 
+    private function createYamlFile(
+        string $fromProjectDir,
+        #[Language( 'PHP' )] mixed  $input,
+        bool   $overwrite = false,
+    ) : void {
+        $path    = new Path( "{$this->projectDirectory}/{$fromProjectDir}" );
+        $content = Yaml::dump( $input );
+
+        if ( $path->exists && false === $overwrite ) {
+            return;
+        }
+
+        if ( $content && $path->save( $content ) ) {
+            Output::info( "Compiler generated {$fromProjectDir}." );
+        }
+    }
+
     private function createFile(
         string $fromProjectDir,
         #[Language( 'PHP' )] string $php,
@@ -225,8 +237,9 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
         }
     }
 
-    private function parsePhpString( #[Language( 'PHP' )] string $php ) : string
-    {
+    private function parsePhpString(
+        #[Language( 'PHP' )] string $php,
+    ) : string {
         if ( ! \str_starts_with( $php, '<?php' ) ) {
             throw new UnexpectedValueException( 'Autoconfigure was provided a PHP string without an opening tag.' );
         }
