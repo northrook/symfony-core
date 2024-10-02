@@ -28,7 +28,9 @@
     "northrook/core": "dev-main",
     "symfony/http-kernel": "^7.1",
     "symfony/dependency-injection": "^7.1",
-    "symfony/yaml": "^7.1"
+    "symfony/yaml": "^7.1",
+    "northrook/clerk": "dev-main",
+    "symfony/profiler-pack": "^1.0"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",

@@ -14,6 +14,14 @@ use function Assert\isCLI;
 
 final class CoreBundle extends AbstractBundle
 {
+    private const array CONFIG = [
+        // '../config/application.php',
+        '../config/controllers.php',
+        '../config/settings.php',
+        '../config/services.php',
+        '../config/telemetry.php',
+    ];
+
     #[Override]
     public function getPath() : string
     {
@@ -23,7 +31,13 @@ final class CoreBundle extends AbstractBundle
     #[Override]
     public function boot() : void
     {
+        dump( __FUNCTION__.' pre' );
         parent::boot();
+        dump( __FUNCTION__.' post' );
+        new App(
+            $this->container->getParameter( 'kernel.environment' ),
+            $this->container->getParameter( 'kernel.debug' ),
+        );
     }
 
     #[Override]
@@ -57,10 +71,12 @@ final class CoreBundle extends AbstractBundle
         ContainerConfigurator $container,
         ContainerBuilder      $builder,
     ) : void {
-        $this->coreParameters( $builder );
+        $this->setCoreParameters( $builder );
+
+        \array_map( [$container, 'import'], $this::CONFIG );
     }
 
-    private function coreParameters( ContainerBuilder $builder ) : void
+    private function setCoreParameters( ContainerBuilder $builder ) : void
     {
         $directoryParameters = [
             'dir.root'           => '%kernel.project_dir%',
