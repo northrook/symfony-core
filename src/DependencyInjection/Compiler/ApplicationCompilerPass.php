@@ -24,7 +24,12 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
 
         Output::info( 'Using project directory: '.$this->projectDirectory );
 
-        $this->appKernel()
+        // TODO : Purge debug.yaml, explain why
+        // TODO : Update monolog.yaml
+
+        $this
+            ->removeFile( 'config/packages/debug.yaml' )
+            ->appKernel()
             ->publicIndex()
             ->coreControllerRoutes()
             ->appControllerRouteConfiguration()
@@ -254,13 +259,15 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
         return $content;
     }
 
-    private function removeFile( string $fromProjectDir ) : void
+    private function removeFile( string $fromProjectDir ) : self
     {
         $path = new Path( "{$this->projectDirectory}/{$fromProjectDir}" );
 
         if ( $path->delete() ) {
             Output::info( "Compiler removed {$fromProjectDir}." );
         }
+
+        return $this;
     }
 
     private function path( string $fromProjectDir ) : Path
