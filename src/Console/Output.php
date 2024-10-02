@@ -2,11 +2,10 @@
 
 declare( strict_types = 1 );
 
-namespace Northrook\Symfony\Console;
+namespace Core\Console;
 
 use Northrook\Trait\StaticClass;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
-
 
 /**
  * Provides a simple output formatter.
@@ -16,8 +15,6 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 final class Output
 {
     use StaticClass;
-
-
 
     /**
      * Print an [ INIT ] message to the console.

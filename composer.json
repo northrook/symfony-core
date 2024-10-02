@@ -1,7 +1,7 @@
 {
   "name": "northrook/symfony-core",
-  "type": "library",
-  "description": "Various support classes for Symfony.",
+  "description": "Symfony bundle that provides custom core Controllers, Entity Management, and Services.",
+  "type": "symfony-bundle",
   "license": "MIT",
   "authors": [
     {
@@ -11,7 +11,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "Northrook\\Symfony\\": "src/"
+      "Core\\": "src/"
     }
   },
   "scripts": {
@@ -21,8 +21,28 @@
   "prefer-stable": true,
   "require": {
     "php": ">=8.3",
+    "ext-ctype": "*",
+    "ext-zend-opcache": "*",
+    "ext-intl": "*",
+    "ext-mbstring": "*",
     "northrook/core": "dev-main",
-    "symfony/console": "*",
-    "symfony/filesystem": "*"
+    "symfony/http-kernel": "^7.1",
+    "symfony/dependency-injection": "^7.1",
+    "symfony/yaml": "^7.1"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-latest",
+    "phpstan/phpstan": "@stable",
+    "northrook/php-cs": "dev-main"
+  },
+  "replace": {
+    "symfony/polyfill-ctype": "*",
+    "symfony/polyfill-mbstring": "*",
+    "symfony/polyfill-intl-normalizer": "*",
+    "symfony/polyfill-intl-grapheme": "*",
+    "symfony/polyfill-php80": "*",
+    "symfony/polyfill-php81": "*",
+    "symfony/polyfill-php82": "*",
+    "symfony/polyfill-php83": "*"
   }
 }
