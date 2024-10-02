@@ -2,6 +2,7 @@
 
 namespace Core\Response;
 
+use Core\Service\CurrentRequest;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -9,8 +10,9 @@ use Symfony\Component\HttpFoundation\Response;
  */
 abstract class Controller
 {
-    final public function router( ?string $route ) : Response
+    final public function router( ?string $route, CurrentRequest $request ) : Response
     {
+        dump( $request);
         $message = __METHOD__.' rendering route: '.$route ;
         return new Response(
                 <<<HTML

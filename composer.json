@@ -30,6 +30,7 @@
     "symfony/http-kernel": "^7.1",
     "symfony/dependency-injection": "^7.1",
     "symfony/yaml": "^7.1",
+    "symfony/serializer": "^7.1",
     "symfony/profiler-pack": "^1.0",
     "symfony/debug-bundle": "7.1.*",
     "symfony/monolog-bundle": "^3.10"
