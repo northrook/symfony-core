@@ -22,7 +22,10 @@ return static function( ContainerConfigurator $container ) : void {
     $container->services()
             // Router
         ->set( RouteHandler::class )
-        ->tag( 'kernel.event_listener', ['priority' => 100] )
+        ->tag( 'kernel.event_listener', [
+            'method'   => 'matchControllerMethod',
+            'priority' => 100,
+        ] )
         ->tag( 'controller.service_arguments' )
 
         /**
