@@ -11,7 +11,6 @@ abstract class Controller
 {
     final public function router( ?string $route ) : Response
     {
-        dump( $this );
         $message = __METHOD__.' rendering route: '.$route ;
         return new Response(
                 <<<HTML

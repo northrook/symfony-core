@@ -9,7 +9,7 @@ return static function( RoutingConfigurator $routes ) : void {
         ->add( 'core:public', '/{route}' )
         ->controller( ['core.controller.public', 'router'] )
         ->requirements( ['route' => '(?!_).+'] ) // exclude routes prefixed by underscore
-        ->defaults( ['route' => null] )
+        ->defaults( ['route' => 'index'] )
         ->schemes( ['https'] )
         ->methods( ['GET', 'HEAD', 'OPTIONS'] );
 };
