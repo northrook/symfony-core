@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use RuntimeException;
 
 /**
  * @property Request $current
@@ -35,7 +36,7 @@ final readonly class CurrentRequest
      * @param HttpKernelInterface $kernel
      */
     public function __construct(
-        public Http\RequestStack $stack,
+        public Http\RequestStack    $stack,
         private HttpKernelInterface $kernel,
     ) {
         if ( ! $this->stack->getCurrentRequest() ) {
@@ -66,6 +67,7 @@ final readonly class CurrentRequest
             'isHtmx'     => $this->type( 'htmx' ),
             'isJson'     => $this->type( 'json' ),
             'isHtml'     => $this->type( 'html' ),
+            default      => throw new RuntimeException( 'Undefined property: '.$property ),
         };
     }
 
@@ -105,7 +107,7 @@ final readonly class CurrentRequest
             return $get ? $this->currentRequest()->getSession()->get( $get ) : $this->currentRequest()->getSession();
         }
         catch ( Http\Exception\SessionNotFoundException $exception ) {
-            throw new Http\Exception\LogicException( message  : 'Sessions are disabled. Enable them in "config/packages/framework".', previous : $exception);
+            throw new Http\Exception\LogicException( message  : 'Sessions are disabled. Enable them in "config/packages/framework".', previous : $exception );
         }
     }
 

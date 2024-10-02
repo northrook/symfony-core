@@ -33,7 +33,9 @@
     "symfony/serializer": "^7.1",
     "symfony/profiler-pack": "^1.0",
     "symfony/debug-bundle": "7.1.*",
-    "symfony/monolog-bundle": "^3.10"
+    "symfony/monolog-bundle": "^3.10",
+    "northrook/html": "dev-main",
+    "northrook/assets": "dev-main"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",

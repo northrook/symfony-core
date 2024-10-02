@@ -15,7 +15,7 @@ use function Assert\isCLI;
 final class CoreBundle extends AbstractBundle
 {
     private const array CONFIG = [
-        // '../config/application.php',
+        '../config/assets.php',
         '../config/controllers.php',
         '../config/settings.php',
         '../config/services.php',
