@@ -31,9 +31,9 @@ final class CoreBundle extends AbstractBundle
     #[Override]
     public function boot() : void
     {
-        dump( __FUNCTION__.' pre' );
+        // dump( __FUNCTION__.' pre' );
         parent::boot();
-        dump( __FUNCTION__.' post' );
+        // dump( __FUNCTION__.' post' );
         new App(
             $this->container->getParameter( 'kernel.environment' ),
             $this->container->getParameter( 'kernel.debug' ),

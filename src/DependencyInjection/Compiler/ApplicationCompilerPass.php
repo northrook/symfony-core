@@ -26,7 +26,7 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
 
         $this->appKernel()
             ->publicIndex()
-                // ->coreControllerRoutes()
+            ->coreControllerRoutes()
             ->appControllerRouteConfiguration()
             ->createConfigServices()
             ->configurePreload();
@@ -78,25 +78,25 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
     public function coreControllerRoutes() : self
     {
         $routes = [
-            'core.controller.api' => [
-                'resource' => '@CoreBundle/config/routes/api.php',
-                'prefix'   => '/api',
-            ],
-            'core.controller.admin' => [
-                'resource' => '@CoreBundle/config/routes/admin.php',
-                'prefix'   => '/admin',
-            ],
-            'core.controller.security' => [
-                'resource' => '@CoreBundle/config/routes/security.php',
-                'prefix'   => '/',
-            ],
+            // 'core.controller.api' => [
+            //     'resource' => '@CoreBundle/config/routes/api.php',
+            //     'prefix'   => '/api',
+            // ],
+            // 'core.controller.admin' => [
+            //     'resource' => '@CoreBundle/config/routes/admin.php',
+            //     'prefix'   => '/admin',
+            // ],
             'core.controller.public' => [
                 'resource' => '@CoreBundle/config/routes/public.php',
                 'prefix'   => '/',
             ],
+            // 'core.controller.security' => [
+            //     'resource' => '@CoreBundle/config/routes/security.php',
+            //     'prefix'   => '/',
+            // ],
         ] ;
 
-        $this->createYamlFile( 'config/routes/core.yaml', $routes );
+        $this->createYamlFile( 'config/routes/core.yaml', $routes, true );
 
         return $this;
     }

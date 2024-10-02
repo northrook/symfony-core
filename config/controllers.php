@@ -8,13 +8,20 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use Core\Service\CurrentRequest;
+use Core\Controller\PublicController;
+use Symfony\Component\HttpKernel\Profiler\Profiler;
 
 return static function( ContainerConfigurator $container ) : void {
 
-    // $container->services()->defaults()->public()
-    //
-    //         // Current Request Service
-    //     ->set( CurrentRequest::class )
-    //     ->args( [service( 'request_stack' ), service( 'http_kernel' )] );
+    /**
+     * Profiler Alias for `autowiring`.
+     */
+    $container->services()->alias( Profiler::class, 'profiler' );
+
+    $container->services()
+        /**
+         * Core `Public` Controller.
+         */
+        ->set( 'core.controller.public', PublicController::class )
+        ->tag( 'controller.service_arguments' );
 };
