@@ -22,7 +22,7 @@ return static function( ContainerConfigurator $container ) : void {
     $container->services()->alias( Profiler::class, 'profiler' );
 
     $container->services()
-            // Router
+        // Router
         ->set( RouteHandler::class )
         ->tag( 'kernel.event_listener', [
             'method'   => 'matchControllerMethod',
@@ -30,15 +30,20 @@ return static function( ContainerConfigurator $container ) : void {
         ] )
         ->tag( 'controller.service_arguments' )
 
-            // Controller Document autowire
+        // Controller Document autowire
         ->set( Document::class )
         ->tag( 'controller.service_arguments' )
         ->args( [service( AssetManager::class )] )
         ->autowire()
 
-            // Document render preprocessing
+        // Document render preprocessing
         ->set( DocumentService::class )
         ->args( [service( 'request_stack' ), service( Document::class )] )
+
+        //
+        ->set( ResponseHandler::class )
+        ->tag( 'controller.service_arguments' )
+        ->args( [service_closure( DocumentService::class )] )
 
         /**
          * Core `Public` Controller.
