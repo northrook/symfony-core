@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Core;
 
-use Core\DependencyInjection\Compiler\ApplicationCompilerPass;
+use Core\DependencyInjection\Compiler\{ApplicationCompilerPass, AssetDiscoveryPass};
 use Override;
 use Support\Normalize;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -31,9 +31,7 @@ final class CoreBundle extends AbstractBundle
     #[Override]
     public function boot() : void
     {
-        // dump( __FUNCTION__.' pre' );
         parent::boot();
-        // dump( __FUNCTION__.' post' );
         new App(
             $this->container->getParameter( 'kernel.environment' ),
             $this->container->getParameter( 'kernel.debug' ),
@@ -55,7 +53,9 @@ final class CoreBundle extends AbstractBundle
             return;
         }
 
-        $container->addCompilerPass( new ApplicationCompilerPass() );
+        $container
+            ->addCompilerPass( new ApplicationCompilerPass() )
+            ->addCompilerPass( new AssetDiscoveryPass() );
     }
 
     /**
@@ -82,6 +82,7 @@ final class CoreBundle extends AbstractBundle
             'dir.root'           => '%kernel.project_dir%',
             'dir.var'            => '%dir.root%/var',
             'dir.assets'         => '%dir.root%/assets',
+            'dir.assets.storage' => '%dir.var%/assets',
             'dir.templates'      => '%dir.root%/templates',
             'dir.public'         => '%dir.root%/public',
             'dir.public.assets'  => '%dir.root%/public/assets',

@@ -9,9 +9,17 @@ declare(strict_types=1);
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Core\Service\{AssetManager, AssetManager\Manifest, CurrentRequest};
+use Support\Normalize;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 
 return static function( ContainerConfigurator $container ) : void {
+
+    foreach ( [
+        'asset.public.stylesheet' => '%dir.assets.storage%/style/public.css',
+        'asset.admin.stylesheet'  => '%dir.assets.storage%/style/admin.css',
+    ] as $name => $path ) {
+        $container->parameters()->set( $name, Normalize::path( $path ) );
+    }
 
     $container->services()
 

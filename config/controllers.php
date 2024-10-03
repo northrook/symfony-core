@@ -42,7 +42,7 @@ return static function( ContainerConfigurator $container ) : void {
         //
         ->set( ResponseHandler::class )
         ->tag( 'controller.service_arguments' )
-        ->args( [service_closure( DocumentService::class )] )
+        ->args( [service( DocumentService::class )] )
 
         /**
          * Core `Public` Controller.
