@@ -19,7 +19,7 @@ use RuntimeException;
  * @property string  $method
  * @property string  $type
  * @property string  $controller
- * @property bool    $isHtmx
+ * @property bool    $isHtmx Checks for the 'HX-Request' header
  * @property bool    $isJson
  * @property bool    $isHtml
  */
@@ -64,7 +64,7 @@ final readonly class CurrentRequest
             'method'     => $this->currentRequest()->getMethod(),
             'controller' => $this->requestController(),
             'type'       => $this->type(),
-            'isHtmx'     => $this->type( 'htmx' ),
+            'isHtmx'     => $this->headerBag( has: 'HX-Request' ),
             'isJson'     => $this->type( 'json' ),
             'isHtml'     => $this->type( 'html' ),
             default      => throw new RuntimeException( 'Undefined property: '.$property ),

@@ -9,9 +9,8 @@ declare(strict_types=1);
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Core\Controller\PublicController;
+use Core\Service\{AssetManager, DocumentService};
 use Core\Response\{Document, ResponseHandler, RouteHandler};
-use Core\Service\DocumentService;
-use Northrook\Assets\AssetManager;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 
 return static function( ContainerConfigurator $container ) : void {

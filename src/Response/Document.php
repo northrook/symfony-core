@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace Core\Response;
 
-use Northrook\{ArrayAccessor,
-    Assets\AssetManager,
-    Assets\Link,
-    Assets\Script,
-    Assets\Style,
+use Northrook\{
     Clerk,
+    ArrayAccessor,
+    Assets\Link,
+    Assets\Style,
+    Assets\Script,
+    Resource\Path,
     Exception\Trigger,
-    Resource\Path};
+};
+use Core\Service\AssetManager;
 use Northrook\HTML\Element;
 use Support\Normalize;
 use function Support\toString;
@@ -31,9 +33,7 @@ final class Document extends ArrayAccessor
     /** @var bool Determines how robot tags will be set */
     public bool $isPublic = false;
 
-    public function __construct(
-        private readonly AssetManager $assetManager,
-    ) {}
+    public function __construct( protected readonly AssetManager $assetManager ) {}
 
     public function __invoke(
         ?string           $title = null,
@@ -66,6 +66,7 @@ final class Document extends ArrayAccessor
     public function meta( string $name, null|string|array $content ) : Document
     {
         $this->set( $this->metaGroup( $name ), toString( $content, ', ' ) );
+
         return $this;
     }
 
@@ -128,7 +129,7 @@ final class Document extends ArrayAccessor
         Clerk::event( $this::class.'::asset', 'document' );
 
         foreach ( $enqueue as $assets ) {
-            foreach ( $this->assetManager->getAssets( $assets ) as $type => $asset ) {
+            foreach ( $this->assetManager->getAsset( $assets ) as $type => $asset ) {
                 $this->add( "asset.{$type}", toString( $asset ) );
             }
         }
@@ -207,6 +208,7 @@ final class Document extends ArrayAccessor
         string  $scheme = 'dark light',
         ?string $name = 'system',
     ) : Document {
+
         // Needs to generate theme.scheme.color,
         // this is to allow for different colors based on light/dark
 

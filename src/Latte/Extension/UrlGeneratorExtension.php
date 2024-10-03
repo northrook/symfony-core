@@ -8,13 +8,13 @@ use Core\DependencyInjection\Component\UrlGenerator;
 use Latte\Extension;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-/**
- * @uses \Core\DependencyInjection\Component\UrlGenerator
- */
 final class UrlGeneratorExtension extends Extension
 {
     use UrlGenerator;
 
+    /**
+     * @param UrlGeneratorInterface $urlGenerator
+     */
     public function __construct( protected readonly UrlGeneratorInterface $urlGenerator ) {}
 
     public function getFunctions() : array
