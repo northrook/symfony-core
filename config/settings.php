@@ -8,14 +8,11 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Core\Settings;
 
 return static function( ContainerConfigurator $container ) : void {
-    // $container->services()
-    //           ->set( Clerk::class )
-    //           ->args( [service( Stopwatch::class )] )
-    //
-    //         // TelemetryEventSubscriber
-    //           ->set( Telemetry\TelemetryEventSubscriber::class )
-    //           ->tag( 'kernel.event_subscriber' )
-    //           ->args( [service( Clerk::class )] );
+    $container->services()
+        ->set( Settings::class )
+        ->args( ['%kernel.build_dir%'] )
+        ->public();
 };

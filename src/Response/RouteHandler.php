@@ -7,12 +7,19 @@ namespace Core\Response;
 use JetBrains\PhpStorm\Pure;
 use Core\Controller\PublicController;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
+use Symfony\Component\Routing\RouterInterface;
 
 final class RouteHandler
 {
     public const array CONTROLLERS = [
         PublicController::class,
     ];
+
+    // TODO : Dynamically update routes as they are discovered
+
+    public function __construct(
+        private readonly RouterInterface $router,
+    ) {}
 
     public function matchControllerMethod( ControllerEvent $event ) : void
     {

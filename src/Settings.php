@@ -5,9 +5,11 @@ namespace Core;
 use Northrook\ArrayStore;
 use Northrook\Trait\{SingletonClass};
 
-final class Settings extends ArrayStore
+final class Settings
 {
     use SingletonClass;
+
+    private readonly ArrayStore $settings;
 
     /**
      * @param string $storageDirectory
@@ -16,16 +18,13 @@ final class Settings extends ArrayStore
         string $storageDirectory,
     ) {
         $this->instantiationCheck();
-        parent::__construct( $this::class, $storageDirectory );
+        $this->settings  = new ArrayStore( $this::class, $storageDirectory );
         $this::$instance = $this;
     }
 
-    public static function __callStatic( string $method, array $arguments )
+    public static function get( ?string $name = null ) : mixed
     {
-        return match ( $method ) {
-            'get'   => Settings::$instance->get( $arguments[0] ),
-            default => null,
-        };
+        return $name ? Settings::$instance->get( $name ) : Settings::$instance->settings;
     }
 
     /**
@@ -35,6 +34,6 @@ final class Settings extends ArrayStore
      */
     final public function setDefault( array $settings ) : void
     {
-        $this->arrayValue( $settings, true );
+        $this->settings->setDefault( $settings );
     }
 }

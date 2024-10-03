@@ -35,7 +35,15 @@ final class CoreBundle extends AbstractBundle
     {
         parent::boot();
 
-        $this->container?->get( App::class );
+        if ( isCLI() ) {
+            return;
+        }
+
+        new App(
+            $this->container->getParameter( 'kernel.environment' ),
+            $this->container->getParameter( 'kernel.debug' ),
+        );
+
         $this->container?->get( Settings::class );
     }
 
@@ -73,13 +81,6 @@ final class CoreBundle extends AbstractBundle
         ContainerBuilder      $builder,
     ) : void {
         $this->setCoreParameters( $builder );
-
-        $container->services()
-            ->set( App::class )
-            ->args( ['kernel.environment', 'kernel.debug'] )
-
-            ->set( Settings::class )
-            ->args( ['%kernel.build_dir%'] );
 
         \array_map( [$container, 'import'], $this::CONFIG );
     }
