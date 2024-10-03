@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace Core;
 
-use Core\DependencyInjection\Compiler\{ApplicationCompilerPass, AssetDiscoveryPass};
+use Core\DependencyInjection\Compiler\{ApplicationCompilerPass, DiscoveryPass};
 use Override;
 use Support\Normalize;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use function Assert\isCLI;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 
 final class CoreBundle extends AbstractBundle
 {
@@ -32,10 +34,9 @@ final class CoreBundle extends AbstractBundle
     public function boot() : void
     {
         parent::boot();
-        new App(
-            $this->container->getParameter( 'kernel.environment' ),
-            $this->container->getParameter( 'kernel.debug' ),
-        );
+
+        $this->container?->get( App::class );
+        $this->container?->get( Settings::class );
     }
 
     #[Override]
@@ -54,8 +55,8 @@ final class CoreBundle extends AbstractBundle
         }
 
         $container
-            ->addCompilerPass( new ApplicationCompilerPass() )
-            ->addCompilerPass( new AssetDiscoveryPass() );
+            ->addCompilerPass( new ApplicationCompilerPass(), PassConfig::TYPE_OPTIMIZE )
+            ->addCompilerPass( new DiscoveryPass(), PassConfig::TYPE_OPTIMIZE );
     }
 
     /**
@@ -72,6 +73,13 @@ final class CoreBundle extends AbstractBundle
         ContainerBuilder      $builder,
     ) : void {
         $this->setCoreParameters( $builder );
+
+        $container->services()
+            ->set( App::class )
+            ->args( ['kernel.environment', 'kernel.debug'] )
+
+            ->set( Settings::class )
+            ->args( ['%kernel.build_dir%'] );
 
         \array_map( [$container, 'import'], $this::CONFIG );
     }

@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace Core\DependencyInjection\Compiler;
 
 use Core\Console\Output;
+use Core\Service\AssetManager\Manifest;
+use Core\Settings;
 use Northrook\Resource\Path;
-use Support\Normalize;
+use Support\{Normalize, Str};
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Override;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-final readonly class AssetDiscoveryPass implements CompilerPassInterface
+final readonly class DiscoveryPass implements CompilerPassInterface
 {
     private string $projectDirectory;
 
@@ -23,16 +25,35 @@ final readonly class AssetDiscoveryPass implements CompilerPassInterface
     {
         $this->projectDirectory = $container->getParameter( 'kernel.project_dir' );
         $this->parameterBag     = $container->getParameterBag();
-        $assetManifest          = $container->getParameter( 'asset.manifest' );
+        $manifestDefinition     = $container->getDefinition( Manifest::class );
+        $settingsDefinition     = $container->getDefinition( Settings::class );
+
+        [$paths, $settings] = $this->parseParameters();
 
         dump(
-            $assetManifest,
+            $manifestDefinition,
+            $settingsDefinition,
+            $settings,
+            $paths,
             $this->parameterBag->all(),
-            $this->getPathEntries(),
         );
 
         Output::info( 'Using project directory: '.$this->projectDirectory );
 
+    }
+
+    private function parseParameters() : array
+    {
+        $paths    = [];
+        $settings = $this->parameterBag->all();
+
+        foreach ( $settings as $name => $parameter ) {
+            if ( \is_string( $parameter ) && Str::startsWith( $name, ['dir', 'path', 'asset'] ) ) {
+                $paths[$name] = $parameter;
+            }
+        }
+
+        return [$paths, $settings];
     }
 
     /**
@@ -46,6 +67,12 @@ final readonly class AssetDiscoveryPass implements CompilerPassInterface
      */
     private function getPathEntries() : array
     {
+        $paths = [];
+
+        foreach ( $this->parameterBag->all() as $name => $parameter ) {
+
+        }
+
         $paths = \array_filter(
             array    : $this->parameterBag->all(),
             callback : fn( $value, $key ) => \is_string( $value )

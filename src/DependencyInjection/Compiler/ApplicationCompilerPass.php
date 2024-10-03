@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Core\DependencyInjection\Compiler;
 
 use Core\Console\Output;
+use Core\Settings;
 use JetBrains\PhpStorm\{Deprecated, Language};
 use Northrook\Resource\Path;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
