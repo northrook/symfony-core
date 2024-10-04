@@ -91,10 +91,10 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
             //     'resource' => '@CoreBundle/config/routes/api.php',
             //     'prefix'   => '/api',
             // ],
-            // 'core.controller.admin' => [
-            //     'resource' => '@CoreBundle/config/routes/admin.php',
-            //     'prefix'   => '/admin',
-            // ],
+            'core.controller.admin' => [
+                'resource' => '@CoreBundle/config/routes/admin.php',
+                'prefix'   => '/admin',
+            ],
             'core.controller.public' => [
                 'resource' => '@CoreBundle/config/routes/public.php',
                 'prefix'   => '/',

@@ -4,85 +4,66 @@ declare(strict_types=1);
 
 namespace Core\Response;
 
-use Core\Service\DocumentService;
-use LogicException;
+use Core\Service\CurrentRequest;
 use Northrook\Clerk;
+use Closure;
+use Symfony\Component\HttpFoundation\Response;
+use const HTTP\OK_200;
+use InvalidArgumentException;
 
 final class ResponseHandler
 {
-    private ?string $content = null;
+    protected ?string $template = null;
 
-    private null|array|object $parameters = null;
+    protected ?string $content = null;
 
     /**
-     * @param DocumentService $documentService
+     * @param Document       $document
+     * @param Parameters     $parameters
+     * @param CurrentRequest $request
+     * @param Closure        $lazyLatte
      */
     public function __construct(
-        private DocumentService $documentService,
+        public readonly Document        $document,
+        public readonly Parameters      $parameters,
+        private readonly CurrentRequest $request,
+        private readonly Closure        $lazyLatte,
     ) {
         Clerk::event( $this::class, 'controller' );
     }
 
+    public function html(
+        string $string,
+        int    $status = OK_200,
+        array  $headers = [],
+    ) : Response {
+
+        return $this->response( $string, $status, $headers );
+    }
+
     /**
-     * @param ?string $content
+     * @param string               $template
+     * @param array<string, mixed> $parameters
      *
-     * @return HtmlResponse
+     * @return Response
      */
-    public function __invoke( ?string $content = null ) : HtmlResponse
+    public function template(
+        string $template,
+        array  $parameters = [],
+    ) : Response {
+        $this->template = \str_ends_with( $template, '.latte' )
+                ? $template
+                : throw new InvalidArgumentException( "The '{$template}' string is not valid.\nIt should end with '.latte' and point to a valid template file.}'" );
+
+        dump( $this->template );
+
+        return new Response( $template );
+    }
+
+    private function response( $string, $status, $headers ) : Response
     {
-        $content ??= $this->content;
-        $response = new HtmlResponse(
-            $content,
-            $this->parameters,
-            $this->documentService,
-        );
+        $response = new Response( $string, $status, $headers );
         Clerk::stopGroup( 'controller' );
         return $response;
-    }
-
-    public function html( string $html, bool $override = false ) : self
-    {
-        $this->assignContent( $html, $override, __METHOD__ );
-
-        return $this;
-    }
-
-    public function template( string $template, array|object $parameters = [], bool $override = false ) : self
-    {
-        $this->assignContent( $template, $override, __METHOD__ );
-
-        $this->parameters = $parameters;
-        return $this;
-    }
-
-    public function addParameter( string $key, $value ) : self
-    {
-        $this->parameters[$key] ??= $value;
-        return $this;
-    }
-
-    public function setParameter( string $key, $value ) : self
-    {
-        $this->parameters[$key] = $value;
-        return $this;
-    }
-
-    public function hasParameter( string $key ) : bool
-    {
-        return \array_key_exists( $key, $this->parameters );
-    }
-
-    public function getParameter( string $key ) : mixed
-    {
-        return $this->parameters[$key] ?? null;
-    }
-
-    private function assignContent( string $value, bool $override, string $__METHOD__ ) : void
-    {
-        if ( $this->content && ! $override ) {
-            throw new LogicException( 'The content has already been set.' );
-        }
-        Clerk::event( $__METHOD__, 'controller' );
-        $this->content = $value;
     }
 }

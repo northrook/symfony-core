@@ -9,8 +9,9 @@ declare(strict_types=1);
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Core\Controller\PublicController;
-use Core\Service\{AssetManager, DocumentService};
-use Core\Response\{Document, ResponseHandler, RouteHandler};
+use Core\Service\{AssetManager, CurrentRequest, DocumentService};
+use Core\Response\{Document, Parameters, ResponseHandler, RouteHandler};
+use Northrook\Latte;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 
 return static function( ContainerConfigurator $container ) : void {
@@ -35,14 +36,23 @@ return static function( ContainerConfigurator $container ) : void {
         ->args( [service( AssetManager::class )] )
         ->autowire()
 
-        // Document render preprocessing
-        ->set( DocumentService::class )
-        ->args( [service( 'request_stack' ), service( Document::class )] )
+        // Template parameters
+        ->set( Parameters::class )
+        ->tag( 'controller.service_arguments' )
+        ->autowire()
 
-        //
+        // Document render preprocessing
         ->set( ResponseHandler::class )
         ->tag( 'controller.service_arguments' )
-        ->args( [service( DocumentService::class )] )
+        ->args( [
+            service( Document::class ),
+            service( Parameters::class ),
+            service( CurrentRequest::class ),
+            service_closure( Latte::class ),
+        ] )
+
+            // ->set( DocumentService::class )
+        // ->args( [service( 'request_stack' ), service( Document::class )] )
 
         /**
          * Core `Public` Controller.

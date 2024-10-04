@@ -21,6 +21,9 @@ use const Cache\EPHEMERAL;
 
 /**
  * Handles all Document related properties.
+ *
+ * @internal
+ * @author Martin Nielsen <mn@northrook.com>
  */
 final class Document extends ArrayAccessor
 {

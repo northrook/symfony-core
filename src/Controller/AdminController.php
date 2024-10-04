@@ -2,30 +2,29 @@
 
 namespace Core\Controller;
 
-use Core\Response\{Controller, Document};
+use Core\Response\{Controller, Document, Parameters};
 use Core\Service\CurrentRequest;
 use Symfony\Component\HttpFoundation\Response;
 
-final class PublicController extends Controller
+final class AdminController extends Controller
 {
     protected function setDefaults( Document $document ) : void
     {
         $document(
-            'Welcome - Public!',
+            'Welcome - Admin!',
             'This is an example template.',
         );
 
         $this->response->template( 'welcome.latte' );
     }
 
-    public function index( ?string $route, Document $document ) : Response
+    public function index( ?string $route, Document $document, Parameters $parameters ) : Response
     {
         $document(
             'Index says welcome',
         );
-        $this->response->template( 'welcome.latte' );
 
-        return $this->response->html( 'Hello there' );
+        return $this->response->template( $route );
     }
 
     public function blog( ?string $route, CurrentRequest $request ) : Response
