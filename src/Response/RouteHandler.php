@@ -15,41 +15,84 @@ final class RouteHandler
         PublicController::class,
     ];
 
+    /** @var array{0:object, 1:string} */
+    private array $controller;
+
+    /** @var array{0:string, 1:string} */
+    private array $_controller;
+
     // TODO : Dynamically update routes as they are discovered
 
-    public function __construct(
-        private readonly RouterInterface $router,
-    ) {}
+    public function __construct( private readonly RouterInterface $router ) {}
 
     public function matchControllerMethod( ControllerEvent $event ) : void
     {
-        $controller = $this->getValidController( $event );
-
         // Bail if the controller doesn't pass validation
-        if ( false === $controller ) {
+        if ( false === $this->getValidController( $event ) ) {
             return;
         }
-
-        // The new route to match
-        $method = $event->getRequest()->get( 'route' );
 
         // Check if the $controller has a valid $method
-        if ( ! $method || false === \method_exists( $controller, $method ) ) {
+        if ( false === $this->getRouteMethod( $event ) ) {
             return;
         }
 
-        $_controller = $event->getRequest()->get( '_controller' )[0] ?? false;
-
         // Bail if the request has no _controller attribute set
-        if ( ! $_controller ) {
+        if ( false === $this->getControllerAttributes( $event ) ) {
             return;
         }
 
         // Set the new controller and attributes respectively
-        $event->setController( [$controller, $method] );
-        $event->getRequest()->attributes->set( '_controller', [$_controller, $method] );
+        $event->setController( $this->controller );
+        $event->getRequest()->attributes->set( '_controller', $this->_controller );
 
-        // All done!
+        // * All done!
+
+        // TODO : Avoid having to discover and validate routes on each request.
+        //        Find a way to update the compiled RouteCollection, or simply cache the route.
+
+        // $name  = $event->getRequest()->attributes->get( '_route' );
+        // $route = clone $this->router->getRouteCollection()->get( $name );
+        //
+        // $name .= ":{$this->method}";
+        // $route->setPath( $event->getRequest()->attributes->get( 'route' ) );
+        // $route->setDefaults( [ '_controller' => $this->_controller ] );
+        // $route->setRequirements( [] );
+        // $this->router->getRouteCollection()->add( $name, $route );
+        //
+        // RouteCompiler::compile( $route );
+    }
+
+    private function getControllerAttributes( ControllerEvent $event ) : bool
+    {
+        // Get the _controller attribute
+        $_controller = $event->getRequest()->get( '_controller' );
+
+        if ( ! $_controller || ! \is_array( $_controller ) ) {
+            return false;
+        }
+
+        $_controller[1] = $this->controller[1];
+
+        $this->_controller = $_controller;
+
+        unset( $_controller );
+
+        return true;
+    }
+
+    private function getRouteMethod( ControllerEvent $event ) : bool
+    {
+        // The new route to match
+        $route = $event->getRequest()->get( 'route' );
+
+        if ( ! $route || ! \is_string( $route ) ) {
+            return false;
+        }
+
+        $this->controller[1] = \strtolower( \str_replace( '/', '_', $route ) );
+
+        return \method_exists( $this->controller[0], $this->controller[1] );
     }
 
     /**
@@ -58,7 +101,7 @@ final class RouteHandler
      * @return false|object
      */
     #[Pure( true )]
-    private function getValidController( ControllerEvent $event ) : object|false
+    private function getValidController( ControllerEvent $event ) : bool
     {
         // Only parse main requests
         if ( ! $event->isMainRequest() ) {
@@ -75,6 +118,10 @@ final class RouteHandler
             return false;
         }
 
-        return $controller[0];
+        $this->controller = $controller;
+
+        unset( $controller );
+
+        return true;
     }
 }

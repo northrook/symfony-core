@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Core\DependencyInjection\Compiler;
 
 use Core\Console\Output;
-use Core\Settings;
 use JetBrains\PhpStorm\{Deprecated, Language};
 use Northrook\Resource\Path;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -30,15 +29,15 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
 
         $this
             ->removeFile( 'config/packages/debug.yaml' )
-            ->appKernel()
-            ->publicIndex()
+            ->appKernel( true )
+            ->publicIndex( true )
             ->coreControllerRoutes()
             ->appControllerRouteConfiguration()
             ->createConfigServices()
             ->configurePreload();
     }
 
-    public function appKernel() : self
+    public function appKernel( bool $override = false ) : self
     {
         $this->createPhpFile(
             'src/Kernel.php',
@@ -56,12 +55,14 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
                 {
                     use FrameworkKernel\MicroKernelTrait;
                 }
+
                 PHP,
+            $override,
         );
         return $this;
     }
 
-    public function publicIndex() : self
+    public function publicIndex( bool $override = false ) : self
     {
         $this->createPhpFile(
             'public/index.php',
@@ -75,7 +76,9 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
                 return function (array \$context): App\Kernel {
                     return new App\Kernel(\$context['APP_ENV'], (bool) \$context['APP_DEBUG']);
                 };
+
                 PHP,
+            $override,
         );
 
         return $this;
@@ -107,15 +110,15 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
         return $this;
     }
 
-    public function appControllerRouteConfiguration() : self
+    public function appControllerRouteConfiguration( bool $override = false ) : self
     {
-        if ( $this->path( 'routes.php' )->exists ) {
+        if ( $this->path( 'config/routes.php' )->exists ) {
             return $this;
         }
 
         $this->removeFile( 'config/routes.yaml' );
         $this->createPhpFile(
-            'routes.php',
+            'config/routes.php',
             <<<PHP
                 <?php
                 
@@ -138,9 +141,9 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
         return $this;
     }
 
-    public function createConfigServices() : self
+    public function createConfigServices( bool $override = false ) : self
     {
-        if ( $this->path( 'config/services.php' )->exists ) {
+        if ( ! $this->path( 'config/services.php' )->exists ) {
             return $this;
         }
         $this->removeFile( 'config/services.yaml' );
@@ -180,7 +183,7 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
         return $this;
     }
 
-    public function configurePreload() : self
+    public function configurePreload( bool $override = false ) : self
     {
         $this->createPhpFile(
             'config/preload.php',
@@ -193,6 +196,7 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
                     \opcache_compile_file(\dirname(__DIR__).'/var/cache/prod/App_KernelProdContainer.preload.php');
                 }
                 PHP,
+            $override,
         );
 
         return $this;
@@ -226,11 +230,11 @@ final readonly class ApplicationCompilerPass implements CompilerPassInterface
     private function createPhpFile(
         string $fromProjectDir,
         #[Language( 'PHP' )] string $php,
-        bool   $overwrite = false,
+        bool   $override = false,
     ) : void {
         $path = $this->path( $fromProjectDir );
 
-        if ( $path->exists && false === $overwrite ) {
+        if ( $path->exists && false === $override ) {
             return;
         }
 

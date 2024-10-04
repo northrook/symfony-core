@@ -28,7 +28,6 @@ return static function( ContainerConfigurator $container ) : void {
             'method'   => 'matchControllerMethod',
             'priority' => 100,
         ] )
-        ->tag( 'controller.service_arguments' )
 
         // Controller Document autowire
         ->set( Document::class )
