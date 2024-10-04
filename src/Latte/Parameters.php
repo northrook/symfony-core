@@ -36,7 +36,7 @@ final readonly class Parameters
         public string                     $environment,
         private bool                      $debug,
         private RequestStack              $requestStack,
-        private TokenStorageInterface     $tokenStorage,
+        private ?TokenStorageInterface     $tokenStorage,
         private CsrfTokenManagerInterface $csrfTokenManager,
     ) {}
 

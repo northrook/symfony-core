@@ -34,8 +34,8 @@ final class ResponseHandler
     public function __construct(
         protected readonly Document     $document,
         protected readonly Parameters   $parameters,
-        private readonly CacheInterface $cache,
         private readonly CurrentRequest $request,
+        private readonly CacheInterface $cache,
         private readonly Closure        $lazyLatte,
     ) {
         Clerk::event( $this::class, 'controller' );

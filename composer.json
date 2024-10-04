@@ -38,7 +38,8 @@
     "symfony/monolog-bundle": "^3.10",
     "northrook/html": "dev-main",
     "northrook/assets": "dev-main",
-    "northrook/latte-bundle": "dev-main"
+    "northrook/latte-bundle": "dev-main",
+    "northrook/ui": "dev-main"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
