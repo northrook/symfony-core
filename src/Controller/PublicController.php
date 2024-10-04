@@ -2,13 +2,13 @@
 
 namespace Core\Controller;
 
-use Core\Response\{Controller, Document};
+use Core\Response\{Controller, Document, Parameters};
 use Core\Service\CurrentRequest;
 use Symfony\Component\HttpFoundation\Response;
 
 final class PublicController extends Controller
 {
-    protected function setDefault( Document $document ) : void
+    protected function setDefault( Document $document, Parameters $parameters ) : void
     {
         $document(
             'Welcome - Public!',
