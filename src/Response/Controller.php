@@ -8,31 +8,16 @@ namespace Core\Response;
 abstract class Controller
 {
     final public function __construct(
+        Document                           $document,
+        Parameters                         $parameters,
         protected readonly ResponseHandler $response,
     ) {
-        $this->setDefaults( $this->response->document );
-    }
-
-    final protected function template() : HtmlResponse
-    {
-
+        $this->setDefault( $document, $parameters );
     }
 
     /**
-     * @param Document $document
+     * @param Document   $document
+     * @param Parameters $parameters
      */
-    abstract protected function setDefaults( Document $document ) : void;
-
-    /**
-     * @param ?string                     $content
-     * @param array<string, mixed>|object $parameters
-     *
-     * @return HtmlResponse
-     */
-    final protected function response( ?string $content = null, array|object $parameters = [] ) : HtmlResponse
-    {
-        $this->response->assignContent( $content, $parameters, __METHOD__ );
-
-        return $this->response->__invoke( $content );
-    }
+    abstract protected function setDefault( Document $document, Parameters $parameters ) : void;
 }

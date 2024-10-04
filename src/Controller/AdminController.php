@@ -8,14 +8,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class AdminController extends Controller
 {
-    protected function setDefaults( Document $document ) : void
+    protected function setDefault( Document $document, Parameters $parameters ) : void
     {
         $document(
             'Welcome - Admin!',
             'This is an example template.',
         );
 
-        $this->response->template( 'welcome.latte' );
+        $this->response->template = 'welcome.latte';
     }
 
     public function index( ?string $route, Document $document, Parameters $parameters ) : Response
@@ -30,7 +30,7 @@ final class AdminController extends Controller
     public function blog( ?string $route, CurrentRequest $request ) : Response
     {
         dump( $request );
-        $message = __METHOD__.' rendering route: '.$route ;
+        $message = __METHOD__.' rendering route: '.$route;
         return new Response(
             <<<HTML
                 <!DOCTYPE html>
@@ -44,7 +44,6 @@ final class AdminController extends Controller
                 {$message}
                 </body> 
                 </html> 
-                    
                 HTML,
         );
     }

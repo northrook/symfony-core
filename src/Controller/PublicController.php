@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 final class PublicController extends Controller
 {
-    protected function setDefaults( Document $document ) : void
+    protected function setDefault( Document $document ) : void
     {
         $document(
             'Welcome - Public!',

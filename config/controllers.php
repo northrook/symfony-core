@@ -12,6 +12,7 @@ use Core\Controller\PublicController;
 use Core\Service\{AssetManager, CurrentRequest, DocumentService};
 use Core\Response\{Document, Parameters, ResponseHandler, RouteHandler};
 use Northrook\Latte;
+use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 
 return static function( ContainerConfigurator $container ) : void {
@@ -22,6 +23,12 @@ return static function( ContainerConfigurator $container ) : void {
     $container->services()->alias( Profiler::class, 'profiler' );
 
     $container->services()
+
+        // Template cache
+        ->set( 'cache.response', PhpFilesAdapter::class )
+        ->args( ['response', 0, '%kernel.cache_dir%/response'] )
+        ->tag( 'cache.pool' )
+
         // Router
         ->set( RouteHandler::class )
         ->args( [service( 'router' )] )
@@ -48,6 +55,7 @@ return static function( ContainerConfigurator $container ) : void {
             service( Document::class ),
             service( Parameters::class ),
             service( CurrentRequest::class ),
+            service( 'cache.response' ),
             service_closure( Latte::class ),
         ] )
 
@@ -58,6 +66,10 @@ return static function( ContainerConfigurator $container ) : void {
          * Core `Public` Controller.
          */
         ->set( 'core.controller.public', PublicController::class )
-        ->args( [service( Document::class ), service( ResponseHandler::class )] )
+        ->args( [
+            service( Document::class ),
+            service( Parameters::class ),
+            service( ResponseHandler::class ),
+        ] )
         ->tag( 'controller.service_arguments' );
 };
