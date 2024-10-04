@@ -7,8 +7,27 @@ namespace Core\Response;
  */
 abstract class Controller
 {
-    public function __construct(
-        protected readonly Document        $document,
+    final public function __construct(
+        private readonly Document          $document,
         protected readonly ResponseHandler $response,
     ) {}
+
+    /**
+     * @param Document $document
+     *
+     * @return void
+     */
+    abstract protected function setDefaults( Document $document ) : void;
+
+    /**
+     * @param ?string $content
+     *
+     * @return HtmlResponse
+     */
+    final protected function response( ?string $content = null ) : HtmlResponse
+    {
+        $this->setDefaults( $this->document );
+
+        return $this->response->__invoke( $content );
+    }
 }
