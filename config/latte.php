@@ -36,8 +36,8 @@ return static function( ContainerConfigurator $container ) : void {
         ->set( Latte::class )
         ->args(
             [
+                param( 'dir.root' ),
                 param( 'dir.cache.latte' ),
-                param( 'kernel.default_locale' ),
                 param( 'kernel.default_locale' ),
                 service( 'debug.stopwatch' )->nullOnInvalid(),
                 service( 'logger' )->nullOnInvalid(),
@@ -46,10 +46,8 @@ return static function( ContainerConfigurator $container ) : void {
         )
         ->call( 'addGlobalVariable', ['get', service( Parameters::class )] )
         ->call( 'addExtension', [service( UrlGeneratorExtension::class )] )
-        ->call( 'addTemplateDirectory', [
-            param( 'dir.templates' ), 100,
-            param( 'dir.core.templates' ), 10,
-        ] )
+        ->call( 'addTemplateDirectory', [param( 'dir.templates' ), 100] )
+        ->call( 'addTemplateDirectory', [param( 'dir.core.templates' ), 10] )
 
             // Global Parameters
         ->set( Parameters::class )
