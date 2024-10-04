@@ -39,8 +39,6 @@ return static function( ContainerConfigurator $container ) : void {
                 param( 'dir.root' ),
                 param( 'dir.cache.latte' ),
                 param( 'kernel.default_locale' ),
-                service( 'debug.stopwatch' )->nullOnInvalid(),
-                service( 'logger' )->nullOnInvalid(),
                 param( 'kernel.debug' ),
             ],
         )
