@@ -18,8 +18,10 @@ final class Asset
         $this->name = Normalize::key( $name );
     }
 
-    public function addSource( Path $source ) : void
+    public function addSource(  ...$path ) : void
     {
-        $this->sources[$source->mimeType][] = $source;
+        foreach ( $path as $source ) {
+            $this->sources[$source->mimeType][] = $source;
+        }
     }
 }

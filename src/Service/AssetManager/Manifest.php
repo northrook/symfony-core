@@ -38,7 +38,8 @@ final class Manifest
      */
     public function register( string $name, string $path ) : Manifest
     {
-        $this->manifest()->set( "inventory.{$name}", new Path( $path ) );
+        $asset = new Path( $path );
+        $this->manifest()->set( "inventory.{$name}.{$asset->extension}", $asset );
         return $this;
     }
 
