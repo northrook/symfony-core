@@ -4,22 +4,17 @@ declare(strict_types=1);
 
 namespace Core\Response;
 
-use Core\Service\CurrentRequest;
-use Core\View\Message;
+use Core\DependencyInjection\ServiceContainer;
+use Core\Response\Compiler\DocumentHtml;
 use Northrook\Clerk;
-use Closure;
-use Northrook\HTML\Element\Attributes;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Cache\CacheInterface;
-use function String\hashKey;
-use function Support\toString;
 use const HTTP\OK_200;
-use InvalidArgumentException;
-use const Support\EMPTY_STRING;
-use const Support\WHITESPACE;
 
 final class ResponseHandler
 {
+    use ServiceContainer;
+
     public bool $cacheEnabled = true;
 
     public ?string $template = null;
@@ -28,20 +23,23 @@ final class ResponseHandler
      * @param Document       $document
      * @param Parameters     $parameters
      * @param CacheInterface $cache
-     * @param CurrentRequest $request
-     * @param Closure        $lazyLatte
+     * @param DocumentHtml   $documentHtml
      */
     public function __construct(
         protected readonly Document     $document,
         protected readonly Parameters   $parameters,
-        private readonly CurrentRequest $request,
         private readonly CacheInterface $cache,
-        private readonly Closure        $lazyLatte,
+        private readonly DocumentHtml   $documentHtml,
     ) {
         Clerk::event( $this::class, 'controller' );
     }
 
     /**
+     * ## Raw HTML response.
+     *
+     * - Inject Head and Notifications.
+     * - Optimizer pass.
+     *
      * @param string                $string
      * @param int                   $status
      * @param array<string, string> $headers
@@ -54,33 +52,44 @@ final class ResponseHandler
     }
 
     /**
+     * ## Latte Template response.
+     *
+     * - Render template.
+     * - Inject Head and Notifications.
+     * - Optimizer pass.
+     *
      * @param null|string $template
      *
      * @return Response
      */
     public function template( ?string $template = null ) : Response
     {
-
         // This would probably get a great spot for a HTML cache
         // use the $template, $this->document, and $this->parameters as hashKey
 
         // : The innerHTML / Content
         // ? This can be used to generate meta tags etc
-        $content = $this->latte( $template );
+        $content = $this->renderLatte( $template );
 
         return $this->response( $content );
     }
 
     /**
+     * ## Full Document response
+     * Using a Latte Template as content.
+     *
+     * - Render template.
+     * - Render Document.
+     * - Inject Notifications.
+     * - Optimizer pass.
+     *
      * @param ?string $template
      *
      * @return Response
      */
     public function document( ?string $template = null ) : Response
     {
-        // : The innerHTML / Content
-        // ? This can be used to generate meta tags etc
-        $content = $this->latte( $template );
+        $content = $this->renderLatte( $template );
 
         $this->document->add(
             [
@@ -99,32 +108,9 @@ final class ResponseHandler
             // $this->request()->headers->set( 'X-Robots-Tag', 'noindex, nofollow' );
         }
 
+        $content = $this->documentHtml->document( $content );
+
         return $this->response( $content );
-    }
-
-    /**
-     * @param string $template
-     *
-     * @return string
-     */
-    protected function latte( string $template ) : string
-    {
-        if ( ! \str_ends_with( $template, '.latte' ) ) {
-            throw new InvalidArgumentException( "The '{$template}' string is not valid.\nIt should end with '.latte' and point to a valid template file.}'" );
-        }
-
-        if ( $this->template ) {
-            $this->parameters->set( 'template', $template );
-            $template = $this->template;
-        }
-
-        $hashKey = hashKey( [$template, $this->document, $this->parameters] );
-        $latte   = ( $this->lazyLatte )();
-        $content = $latte->render( $template, $this->parameters->getParameters() );
-
-        dump( $hashKey, $latte, $content );
-
-        return $content;
     }
 
     /**
@@ -142,71 +128,12 @@ final class ResponseHandler
         return $response;
     }
 
-    private function flashBagHandler() : string
+    private function renderLatte( ?string $template ) : string
     {
-        $flashes       = $this->request->flashBag()->all();
-        $notifications = EMPTY_STRING;
-
-        foreach ( $flashes as $type => $flash ) {
-            foreach ( $flash as $toast ) {
-                dump( $toast );
-                // $notification = match ( $toast instanceof Message ) {
-                //     true => new Notification(
-                //         $toast->type,
-                //         $toast->message,
-                //         $toast->description,
-                //         $toast->timeout,
-                //     ),
-                //     false => new Notification(
-                //         $type,
-                //         toString( $toast ),
-                //     ),
-                // };
-                //
-                // if ( ! $notification->description ) {
-                //     $notification->attributes->add( 'class', 'compact' );
-                // }
-                //
-                // if ( ! $notification->timeout && 'error' !== $notification->type ) {
-                //     $notification->setTimeout( Settings::get( 'notification.timeout' ) ?? 5_000 );
-                // }
-                // $notifications .= $notification;
-
-            }
+        if ( $this->template ) {
+            $this->parameters->add( 'template', $template );
+            $template = $this->template;
         }
-
-        return $notifications;
-    }
-
-    private function getDocumentHtml( string ...$content ) : string
-    {
-        $this->document->
-
-        $attributes = $this->document->pull( 'html' );
-
-        return toString(
-                [
-                        '<!DOCTYPE html>',
-                        '<html'.$this->documentHtmlAttributes() . '>',
-                        ...$this->documentHead(),
-                        ...$this->documentBody( $content ),
-                        '</html>',
-                ],
-                PHP_EOL,
-        );
-    }
-
-    private function documentHtmlAttributes() : string
-    {
-        $attributes = $this->document->pull( 'html' );
-        if ( ! $attributes || ! \is_array( $attributes ) ) {
-            return EMPTY_STRING;
-        }
-        return WHITESPACE.Attributes::from( $attributes );
-    }
-
-    private function headElements()
-    {
-
+        return $this->documentHtml->latte( $template, $this->parameters->getParameters() );
     }
 }

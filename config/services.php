@@ -13,7 +13,7 @@ return static function( ContainerConfigurator $container ) : void {
 
     $container->services()
 
-            // Current Request Service
+            // Current Request ServiceContainer
         ->set( CurrentRequest::class )
         ->args( [service( 'request_stack' ), service( 'http_kernel' )] )
 

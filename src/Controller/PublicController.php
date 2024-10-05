@@ -15,17 +15,16 @@ final class PublicController extends Controller
             'This is an example template.',
         );
 
-        $this->response->template( 'welcome.latte' );
+        $this->response->template = 'welcome.latte';
     }
 
     public function index( ?string $route, Document $document ) : Response
     {
         $document(
             'Index says welcome',
+            keywords: ['we', 'like', 'keywords'],
         );
-        $this->response->template( 'welcome.latte' );
-
-        return $this->response->html( 'Hello there' );
+        return $this->response->document();
     }
 
     public function blog( ?string $route, CurrentRequest $request ) : Response

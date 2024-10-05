@@ -9,6 +9,10 @@ parameters:
 			path: *.php
 
 		-
+			message: '#Property .+::\$serviceContainer is never read, only written.#'
+			path: *.php
+
+		-
 			message: "#Readonly property .+ is assigned outside of the constructor.#"
 			path: *.php
 
