@@ -27,6 +27,10 @@
     "ext-mbstring": "*",
     "northrook/core": "dev-main",
     "northrook/clerk": "dev-main",
+    "northrook/latte-bundle": "dev-main",
+    "northrook/html": "dev-main",
+    "northrook/assets": "dev-main",
+    "northrook/ui": "dev-main",
     "symfony/http-kernel": "^7.1",
     "symfony/dependency-injection": "^7.1",
     "symfony/security-csrf": "^7.1",
@@ -36,11 +40,8 @@
     "symfony/profiler-pack": "^1.0",
     "symfony/debug-bundle": "7.1.*",
     "symfony/monolog-bundle": "^3.10",
-    "northrook/html": "dev-main",
-    "northrook/assets": "dev-main",
-    "northrook/latte-bundle": "dev-main",
-    "northrook/ui": "dev-main",
-    "symfony/security-bundle": "^7.1"
+    "symfony/security-bundle": "^7.1",
+    "northrook/stylesheets": "dev-main"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",

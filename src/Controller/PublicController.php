@@ -13,6 +13,8 @@ final class PublicController extends Controller
         $document(
             'Welcome - Public!',
             'This is an example template.',
+        )->asset(
+            'core',
         );
 
         $this->response->template = 'welcome.latte';

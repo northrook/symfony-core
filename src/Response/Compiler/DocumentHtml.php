@@ -30,7 +30,7 @@ final class DocumentHtml
 
     public function __construct(
         protected readonly Document     $document,
-        private readonly ServiceLocator $serviceContainer,
+        private readonly ServiceLocator $serviceLocator,
     ) {}
 
     /**

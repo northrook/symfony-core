@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Core\DependencyInjection\Compiler;
 
 use Core\Console\Output;
+use Core\Service\AssetManager\Manifest;
 use Core\Settings;
+use Northrook\CSS\Stylesheet;
 use Support\{Str};
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -20,6 +22,7 @@ final readonly class DiscoveryPass implements CompilerPassInterface
     public function process( ContainerBuilder $container ) : void
     {
         $this->parameterBag = $container->getParameterBag();
+        $manifestDefinition = $container->getDefinition( Manifest::class );
         $settingsDefinition = $container->getDefinition( Settings::class );
 
         $settings = $this->parseParameters();
@@ -29,7 +32,27 @@ final readonly class DiscoveryPass implements CompilerPassInterface
 
         $settingsDefinition->addMethodCall( 'setDefault', [$settings] );
 
+        $this->generateCoreStyles();
+
+        $manifestDefinition->addMethodCall( 'register', [
+                'core', $this->parameterBag->get( 'asset.core.stylesheet' )
+        ] );
+
         Output::info( 'Set default Settings' );
+    }
+
+    private function generateCoreStyles() : void
+    {
+        $css = new Stylesheet(
+            $this->parameterBag->get( 'asset.core.stylesheet' ),
+            \glob( $this->parameterBag->get( 'dir.assets' ).'/styles/*.css' ),
+        );
+
+        $css->addReset()
+            ->addBaseline()
+            ->addDynamicRules();
+
+        $css->save( force: true );
     }
 
     private function parseParameters() : array
