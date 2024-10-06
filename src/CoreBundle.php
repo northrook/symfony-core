@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Core;
 
-use Core\DependencyInjection\Compiler\{ApplicationCompilerPass, DiscoveryPass};
+use Core\DependencyInjection\Compiler\{ApplicationPass, AssetManifestPass, SettingsPass};
 use Override;
 use Support\Normalize;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
@@ -59,13 +59,32 @@ final class CoreBundle extends AbstractBundle
     {
         parent::build( $container );
 
-        if ( ! isCLI() ) {
-            return;
-        }
+        // if ( ! isCLI() ) {
+        //     return;
+        // }
 
-        $container
-            ->addCompilerPass( new ApplicationCompilerPass(), PassConfig::TYPE_OPTIMIZE )
-            ->addCompilerPass( new DiscoveryPass(), PassConfig::TYPE_OPTIMIZE );
+        dump( __FUNCTION__);
+
+        // Generate application config files and update kernel and public index files
+        $container->addCompilerPass(
+            pass     : new ApplicationPass(),
+            type     : PassConfig::TYPE_OPTIMIZE,
+            priority : 100,
+        );
+
+        // Settings
+        $container->addCompilerPass(
+                pass     : new SettingsPass( $container->getParameterBag() ),
+                type     : PassConfig::TYPE_OPTIMIZE,
+                priority : 90
+        );
+
+        // Assign default asset parameters, preload the %asset.manifest% file
+        $container->addCompilerPass(
+            pass     : new AssetManifestPass( $container->getParameterBag() ),
+            type     : PassConfig::TYPE_OPTIMIZE,
+            priority : 75,
+        );
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare( strict_types = 1 );
 
 namespace Core\Service\AssetManager;
 
@@ -8,6 +8,7 @@ use Core\DependencyInjection\Component\CacheAdapter;
 use Northrook\ArrayStore;
 use Northrook\Resource\Path;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 final class Manifest
 {
@@ -16,8 +17,9 @@ final class Manifest
     private readonly ArrayStore $manifest;
 
     public function __construct(
-        public readonly string              $path,
-        protected readonly AdapterInterface $cacheAdapter,
+            public readonly string                   $path,
+            protected readonly ParameterBagInterface $parameterBag,
+            protected readonly ?AdapterInterface     $cacheAdapter,
     ) {}
 
     public function asset( string $name ) : Asset
@@ -30,8 +32,8 @@ final class Manifest
     }
 
     /**
-     * @param string $label        Unique name to identify and retrieve the Asset
-     * @param string ...$assetPath Path to the asset file
+     * @param string  $label         Unique name to identify and retrieve the Asset
+     * @param string  ...$assetPath  Path to the asset file
      *
      * @return $this
      */
@@ -52,7 +54,7 @@ final class Manifest
         return $this->manifest ??= new ArrayStore( $this->path );
     }
 
-    private function assetName( string|Path $asset ) : string
+    private function assetName( string | Path $asset ) : string
     {
         $basename = $asset instanceof Path ? $asset->basename : $asset;
 

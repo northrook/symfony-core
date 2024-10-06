@@ -14,15 +14,13 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Override;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-final readonly class DiscoveryPass implements CompilerPassInterface
+final readonly class SettingsPass implements CompilerPassInterface
 {
-    private ParameterBagInterface $parameterBag;
+    public function __construct( private ParameterBagInterface $parameterBag ) {}
 
     #[Override]
     public function process( ContainerBuilder $container ) : void
     {
-        $this->parameterBag = $container->getParameterBag();
-        $manifestDefinition = $container->getDefinition( Manifest::class );
         $settingsDefinition = $container->getDefinition( Settings::class );
 
         $settings = $this->parseParameters();
@@ -31,10 +29,6 @@ final readonly class DiscoveryPass implements CompilerPassInterface
         // : Assets loaded from here will be considered as 'core' and cannot be _REMOVED_ only _DISABLED_.
 
         $settingsDefinition->addMethodCall( 'setDefault', [$settings] );
-
-        $this->generateCoreStyles();
-
-        dump( $manifestDefinition );
 
         // $manifestDefinition->addMethodCall( 'register', [
         //     'core', $this->parameterBag->get( 'asset.core.stylesheet' ),
@@ -50,31 +44,6 @@ final readonly class DiscoveryPass implements CompilerPassInterface
         Output::info( 'Set default Settings' );
     }
 
-    private function coreStylesheetAsset() : Asset
-    {
-        // register as core.assetID (the generated hash)
-        // each asset will have the data attribute data-asset='core', denoted as the 'group type'
-        // each asset will have the id='assetID_hash' as a unique identifier
-        // When the AssetManager is asked to fetch 'core' or 'ui:button', it will fetch all in tht group.
-
-        $asset = new Asset( 'core' );
-        $asset->addSource( \glob( $this->parameterBag->get( 'dir.assets' ).'/styles/*.css' ) );
-        return $asset;
-    }
-
-    private function generateCoreStyles() : void
-    {
-        $css = new Stylesheet(
-            $this->parameterBag->get( 'asset.core.stylesheet' ),
-            \glob( $this->parameterBag->get( 'dir.assets' ).'/styles/*.css' ),
-        );
-
-        $css->addReset()
-            ->addBaseline()
-            ->addDynamicRules();
-
-        $css->save( force: true );
-    }
 
     private function parseParameters() : array
     {

@@ -13,7 +13,7 @@ use Symfony\Component\Yaml\Yaml;
 use UnexpectedValueException;
 use Override;
 
-final readonly class ApplicationCompilerPass implements CompilerPassInterface
+final readonly class ApplicationPass implements CompilerPassInterface
 {
     private string $projectDirectory;
 

@@ -33,6 +33,7 @@ return static function( ContainerConfigurator $container ) : void {
         ->set( Manifest::class )
         ->args( [
             '%asset.manifest%',
+            service( 'parameter_bag' ),
             service( 'cache.assets' ),
         ] )
 
