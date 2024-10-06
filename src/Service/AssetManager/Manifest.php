@@ -16,7 +16,6 @@ final class Manifest
     private readonly ArrayStore $manifest;
 
     public function __construct(
-        public readonly string              $name,
         public readonly string              $path,
         protected readonly AdapterInterface $cacheAdapter,
     ) {}
@@ -31,24 +30,32 @@ final class Manifest
     }
 
     /**
-     * @param string $name Unique name to identify and retrieve the Asset
-     * @param string $path Path to the asset file
+     * @param string $label        Unique name to identify and retrieve the Asset
+     * @param string ...$assetPath Path to the asset file
      *
      * @return $this
      */
-    public function register( string $name, string $path ) : Manifest
+    public function register( string $label, string ...$assetPath ) : Manifest
     {
-        $asset = new Path( $path );
-        $this->manifest()->set( "inventory.{$name}.{$asset->extension}", $asset );
+        foreach ( $assetPath as $path ) {
+            $asset = new Path( $path );
+            $type  = $asset->extension;
+            $name  = $this->assetName( $asset->basename );
+            $this->manifest()->set( "inventory.{$label}.{$type}.{$name}", $asset->path );
+        }
+
         return $this;
     }
 
     private function manifest() : ArrayStore
     {
-        return $this->manifest ??= new ArrayStore(
-            $this->name,
-            $this->path,
-            // autosave: false,
-        );
+        return $this->manifest ??= new ArrayStore( $this->path );
+    }
+
+    private function assetName( string|Path $asset ) : string
+    {
+        $basename = $asset instanceof Path ? $asset->basename : $asset;
+
+        return \str_replace( '.', ':', \strrchr( $basename, '.', true ) );
     }
 }

@@ -15,6 +15,7 @@ use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 return static function( ContainerConfigurator $container ) : void {
 
     foreach ( [
+        'asset.manifest'         => '%dir.var%/assets/asset-manifest.array.php',
         'asset.core.stylesheet'  => '%dir.assets.storage%/style/stylesheet.css',
         'asset.admin.stylesheet' => '%dir.assets.storage%/style/admin.css',
     ] as $name => $path ) {
@@ -31,10 +32,12 @@ return static function( ContainerConfigurator $container ) : void {
         //
         ->set( Manifest::class )
         ->args( [
-            'asset.manifest',   // name
-            '%dir.var%/assets', // directory
+            '%asset.manifest%',
             service( 'cache.assets' ),
-        ] )
+        ] )->call(
+            'register',
+            ['core', \glob( '%dir.assets%/styles/*.css' )],
+        )
 
         //
         ->set( StylesheetGenerator::class )
