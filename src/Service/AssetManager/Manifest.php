@@ -1,6 +1,6 @@
 <?php
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Core\Service\AssetManager;
 
@@ -17,9 +17,9 @@ final class Manifest
     private readonly ArrayStore $manifest;
 
     public function __construct(
-            public readonly string                   $path,
-            protected readonly ParameterBagInterface $parameterBag,
-            protected readonly ?AdapterInterface     $cacheAdapter,
+        public readonly string                   $path,
+        protected readonly ParameterBagInterface $parameterBag,
+        protected readonly ?AdapterInterface     $cacheAdapter,
     ) {}
 
     public function asset( string $name ) : Asset
@@ -32,18 +32,18 @@ final class Manifest
     }
 
     /**
-     * @param string  $label         Unique name to identify and retrieve the Asset
-     * @param string  ...$assetPath  Path to the asset file
+     * @param string $label     Unique name to identify and retrieve the Asset
+     * @param string ...$source Path to the source file
      *
      * @return $this
      */
-    public function register( string $label, string ...$assetPath ) : Manifest
+    public function addSourcePath( string $label, string ...$source ) : Manifest
     {
-        foreach ( $assetPath as $path ) {
-            $asset = new Path( $path );
-            $type  = $asset->extension;
-            $name  = $this->assetName( $asset->basename );
-            $this->manifest()->set( "inventory.{$label}.{$type}.{$name}", $asset->path );
+        foreach ( $source as $path ) {
+            $source = new Path( $path );
+            $type   = $source->extension;
+            $name   = $this->assetName( $source->basename );
+            $this->manifest()->set( "inventory.{$label}.{$type}.{$name}", $source->path );
         }
 
         return $this;
@@ -54,7 +54,7 @@ final class Manifest
         return $this->manifest ??= new ArrayStore( $this->path );
     }
 
-    private function assetName( string | Path $asset ) : string
+    private function assetName( string|Path $asset ) : string
     {
         $basename = $asset instanceof Path ? $asset->basename : $asset;
 

@@ -4,6 +4,7 @@ namespace Core\Controller;
 
 use Core\Response\{Controller, Document, Parameters};
 use Core\Service\CurrentRequest;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 final class PublicController extends Controller
@@ -20,8 +21,9 @@ final class PublicController extends Controller
         $this->response->template = 'welcome.latte';
     }
 
-    public function index( ?string $route, Document $document ) : Response
+    public function index( ?string $route, Document $document, ParameterBagInterface $parameterBag ) : Response
     {
+        dump( $parameterBag->all() );
         $document(
             'Index says welcome',
             keywords: ['we', 'like', 'keywords'],

@@ -18,7 +18,7 @@ final class Settings
         string $storageDirectory,
     ) {
         $this->instantiationCheck();
-        $this->settings  = new ArrayStore( $this::class, $storageDirectory );
+        $this->settings  = new ArrayStore( $storageDirectory, $this::class );
         $this::$instance = $this;
     }
 

@@ -21,49 +21,35 @@ final readonly class AssetManifestPass implements CompilerPassInterface
     {
         $this->initializeManifestService( $container->getDefinition( Manifest::class ) );
 
-        $this->parameterBag->set( 'asset.inventory.core.css', \glob( $this->parameterBag->get( 'dir.assets' ).'/styles/*.css' ) );
+        $this->initializeManifestInventory();
 
-        dump( $this );
+        // $this->parameterBag->set( 'asset.inventory.core.css' );
+
+    }
+
+    private function initializeManifestInventory() : void
+    {
+        $appAssets  = $this->parameterBag->get( 'dir.assets' );
+        $coreAssets = $this->parameterBag->get( 'dir.core.assets' );
+
+        $this->manifest->addSourcePath( 'core', ...\glob( "{$appAssets}\styles\*.css" ) );
+        $this->manifest->addSourcePath( 'core', ...\glob( "{$appAssets}\scripts\*.js" ) );
+        $this->manifest->addSourcePath( 'admin', ...\glob( "{$appAssets}\styles\admin\*.css" ) );
     }
 
     /**
      * Initialize the {@see Manifest} service for use in this compiler pass.
      *
-     * @param Definition  $manifestDefinition
+     * @param Definition $manifestDefinition
      *
      * @return void
      */
     private function initializeManifestService( Definition $manifestDefinition ) : void
     {
         $this->manifest ??= new ( $manifestDefinition->getClass() )(
-            $manifestDefinition->getArgument( 0 ), // $path
-            $this->parameterBag, // $parameterBag
-            null // $cacheAdapter
+                $manifestDefinition->getArgument( 0 ), // $path
+                $this->parameterBag, // $parameterBag
+                null, // $cacheAdapter
         );
     }
-
-    // private function coreStylesheetAsset() : Asset
-    // {
-    //     // register as core.assetID (the generated hash)
-    //     // each asset will have the data attribute data-asset='core', denoted as the 'group type'
-    //     // each asset will have the id='assetID_hash' as a unique identifier
-    //     // When the AssetManager is asked to fetch 'core' or 'ui:button', it will fetch all in tht group.
-    //
-    //     $asset = new Asset( 'core' );
-    //     $asset->addSource( \glob( $this->parameterBag->get( 'dir.assets' ).'/styles/*.css' ) );
-    //     return $asset;
-    // }
-    // private function generateCoreStyles() : void
-    // {
-    //     $css = new Stylesheet(
-    //             $this->parameterBag->get( 'asset.core.stylesheet' ),
-    //             \glob( $this->parameterBag->get( 'dir.assets' ).'/styles/*.css' ),
-    //     );
-    //
-    //     $css->addReset()
-    //         ->addBaseline()
-    //         ->addDynamicRules();
-    //
-    //     $css->save( force: true );
-    // }
 }

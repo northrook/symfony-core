@@ -59,9 +59,9 @@ final class CoreBundle extends AbstractBundle
     {
         parent::build( $container );
 
-        // if ( ! isCLI() ) {
-        //     return;
-        // }
+        if ( !isCLI() ) {
+            return;
+        }
 
         dump( __FUNCTION__);
 
