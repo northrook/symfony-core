@@ -29,9 +29,9 @@ return static function( ContainerConfigurator $container ) : void {
 
     $container->services()
 
-            // Template cache
+        // Template cache
         ->set( 'cache.response', PhpFilesAdapter::class )
-        ->args( ['response', 0, '%kernel.cache_dir%/response'] )
+        ->args( ['response', 0, '%dir.cache%/response'] )
         ->tag( 'cache.pool' )
 
             // Router

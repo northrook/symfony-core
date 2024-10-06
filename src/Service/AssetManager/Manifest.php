@@ -58,6 +58,7 @@ final class Manifest
     {
         $basename = $asset instanceof Path ? $asset->basename : $asset;
 
-        return \str_replace( '.', ':', \strrchr( $basename, '.', true ) );
+        return \strrchr( $basename, '.', true ) ;
+        // return \str_replace( '.', ':', \strrchr( $basename, '.', true ) );
     }
 }

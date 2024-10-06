@@ -59,31 +59,26 @@ final class CoreBundle extends AbstractBundle
     {
         parent::build( $container );
 
-        if ( !isCLI() ) {
+        if ( ! isCLI() ) {
             return;
         }
 
-        dump( __FUNCTION__);
-
         // Generate application config files and update kernel and public index files
         $container->addCompilerPass(
-            pass     : new ApplicationPass(),
-            type     : PassConfig::TYPE_OPTIMIZE,
-            priority : 100,
+            pass : new ApplicationPass(),
+            type : PassConfig::TYPE_OPTIMIZE,
         );
 
         // Settings
         $container->addCompilerPass(
-                pass     : new SettingsPass( $container->getParameterBag() ),
-                type     : PassConfig::TYPE_OPTIMIZE,
-                priority : 90
+            pass : new SettingsPass( $container->getParameterBag() ),
+            type : PassConfig::TYPE_OPTIMIZE,
         );
 
         // Assign default asset parameters, preload the %asset.manifest% file
         $container->addCompilerPass(
-            pass     : new AssetManifestPass( $container->getParameterBag() ),
-            type     : PassConfig::TYPE_OPTIMIZE,
-            priority : 75,
+            pass : new AssetManifestPass( $container->getParameterBag() ),
+            type : PassConfig::TYPE_OPTIMIZE,
         );
     }
 
@@ -107,22 +102,33 @@ final class CoreBundle extends AbstractBundle
 
     private function setCoreParameters( ContainerBuilder $builder ) : void
     {
-        $directoryParameters = [
-            'dir.root'           => '%kernel.project_dir%',
-            'dir.var'            => '%dir.root%/var',
-            'dir.assets'         => '%dir.root%/assets',
-            'dir.assets.storage' => '%dir.var%/assets',
-            'dir.templates'      => '%dir.root%/templates',
+        $parameters = [
+            'dir.root' => '%kernel.project_dir%',
+            'dir.var'  => '%dir.root%/var',
             'dir.public'         => '%dir.root%/public',
-            'dir.public.assets'  => '%dir.root%/public/assets',
-            'dir.core'           => \dirname( __DIR__ ),
-            'dir.core.assets'    => '%dir.core%/assets',
+            'dir.core' => \dirname( __DIR__ ),
+
+            // Assets
+            'dir.assets'          => '%dir.root%/assets',
+            'dir.public.assets'   => '%dir.root%/public/assets',
+            'dir.assets.storage'  => '%dir.root%/var/assets',
+            'path.asset_manifest' => '%dir.root%/var/assets/manifest.array.php',
+            'dir.core.assets'     => '%dir.core%/assets',
+
+            // Templates
+            'dir.templates'      => '%dir.root%/templates',
             'dir.core.templates' => '%dir.core%/templates',
-            'dir.cache'          => '%dir.var%/cache',
-            'dir.cache.latte'    => '%dir.cache%/latte',
+
+            // Cache
+            'dir.cache'       => '%kernel.cache_dir%',
+            'dir.cache.latte' => '%kernel.cache_dir%/latte',
+
+            // Settings DataStore
+            'path.settings_store' => '%dir.var%/settings.array.php',
         ];
 
-        foreach ( $directoryParameters as $name => $value ) {
+
+        foreach ( $parameters as $name => $value ) {
             $builder->setParameter( $name, Normalize::path( $value ) );
         }
     }

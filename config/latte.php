@@ -17,8 +17,9 @@ use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 use const Cache\AUTO;
 
 return static function( ContainerConfigurator $container ) : void {
+
     $container->parameters()->set(
-        'config.latte',
+        'settings.latte',
         [
             'autoRefresh' => false,
             'cacheTTL'    => AUTO,
@@ -29,17 +30,17 @@ return static function( ContainerConfigurator $container ) : void {
 
             // Template cache
         ->set( 'cache.latte', PhpFilesAdapter::class )
-        ->args( ['latte', 0, '%kernel.cache_dir%/latte'] )
+        ->args( ['latte', 0, '%dir.cache.latte%'] )
         ->tag( 'cache.pool' )
 
             // The Latte Environment and Renderer
         ->set( Latte::class )
         ->args(
             [
-                param( 'dir.root' ),
-                param( 'dir.cache.latte' ),
-                param( 'kernel.default_locale' ),
-                param( 'kernel.debug' ),
+                '%dir.root%',
+                '%dir.cache.latte%',
+                '%kernel.default_locale%',
+                '%kernel.debug%',
             ],
         )
         ->call( 'addGlobalVariable', ['get', service( Parameters::class )] )

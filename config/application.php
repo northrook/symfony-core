@@ -36,6 +36,6 @@ return static function( ContainerConfigurator $container ) : void {
 
             //
         ->set( Settings::class )
-        ->args( ['%kernel.build_dir%'] )
+        ->args( ['%path.settings_store%'] )
         ->public();
 };
