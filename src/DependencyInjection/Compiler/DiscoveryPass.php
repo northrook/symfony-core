@@ -22,7 +22,7 @@ final readonly class DiscoveryPass implements CompilerPassInterface
     public function process( ContainerBuilder $container ) : void
     {
         $this->parameterBag = $container->getParameterBag();
-        // $manifestDefinition = $container->getDefinition( Manifest::class );
+        $manifestDefinition = $container->getDefinition( Manifest::class );
         $settingsDefinition = $container->getDefinition( Settings::class );
 
         $settings = $this->parseParameters();
@@ -33,6 +33,8 @@ final readonly class DiscoveryPass implements CompilerPassInterface
         $settingsDefinition->addMethodCall( 'setDefault', [$settings] );
 
         $this->generateCoreStyles();
+
+        dump( $manifestDefinition );
 
         // $manifestDefinition->addMethodCall( 'register', [
         //     'core', $this->parameterBag->get( 'asset.core.stylesheet' ),

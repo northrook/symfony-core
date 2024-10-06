@@ -34,10 +34,7 @@ return static function( ContainerConfigurator $container ) : void {
         ->args( [
             '%asset.manifest%',
             service( 'cache.assets' ),
-        ] )->call(
-            'register',
-            ['core', \glob( '%dir.assets%/styles/*.css' )],
-        )
+        ] )
 
         //
         ->set( StylesheetGenerator::class )
