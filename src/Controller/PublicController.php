@@ -3,9 +3,11 @@
 namespace Core\Controller;
 
 use Core\Response\{Controller, Document, Parameters};
+use Core\Service\AssetManager\Asset\Font;
 use Core\Service\CurrentRequest;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
+use const Support\AUTO;
 
 final class PublicController extends Controller
 {
@@ -14,9 +16,10 @@ final class PublicController extends Controller
         $document(
             'Welcome - Public!',
             'This is an example template.',
-        )->asset(
-            'core',
-        );
+        )
+            ->assets( 'core', 'admin', ['password' => ['inline' => false, 'preload' => AUTO]], new Font( ['src' => '#'], 'inter' ) )
+            ->assets( ['core' => ['inline' => true]] )
+            ->assets( ['core' => ['inline' => true]] );
 
         $this->response->template = 'welcome.latte';
     }

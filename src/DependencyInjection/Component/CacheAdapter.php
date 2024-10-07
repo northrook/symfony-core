@@ -6,9 +6,10 @@ use Northrook\Logger\Log;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\CacheItem;
+use Symfony\Contracts\Cache\CacheInterface;
 
 /**
- * @property AdapterInterface $cacheAdapter;
+ * @property AdapterInterface|CacheInterface $cacheAdapter;
  */
 trait CacheAdapter
 {

@@ -24,16 +24,21 @@ final class Manifest
         protected readonly ?AdapterInterface     $cacheAdapter,
     ) {}
 
-    public function getGroup( string $label ) {}
+    /**
+     * @param string  $label
+     * @param ?string $type
+     *
+     * @return Asset[]
+     */
+    public function getAsset( string $label, ?string $type = null ) : array
+    {
+        $label = "asset.{$label}.{$type}";
+        if ( $type ) {
+            $label .= ".{$this->assetType( $type )}";
+        }
 
-    // public function asset( string $name ) : Asset
-    // {
-    //     $asset = $this->manifest()->get( "asset.{$name}" ) ?? new Asset( $name );
-    //
-    //     $this->manifest()->add( "asset.{$name}", $asset );
-    //
-    //     return $asset;
-    // }
+        return $this->manifest()->get( $label, [] );
+    }
 
     /**
      * @template AssetObject
@@ -49,21 +54,11 @@ final class Manifest
         $type = $this->assetType( $as );
         $source ??= $this->manifest()->get( "inventory.{$label}.{$type}:" ) ;
 
-        $asset = new ( $as )((array) $source, $label );
+        $asset = new ( $as )( (array) $source, $label );
 
         $this->manifest()->set( "asset.{$label}.{$type}", $asset );
 
         return $asset;
-    }
-
-    public function getAsset( string $label, ?string $type = null ) : Asset
-    {
-        $label = "asset.{$label}.{$type}";
-        if ( $type ) {
-            $label .= ".{$this->assetType( $type )}";
-        }
-
-        return $this->manifest()->get( $label );
     }
 
     /**

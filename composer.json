@@ -29,7 +29,6 @@
     "northrook/clerk": "dev-main",
     "northrook/latte-bundle": "dev-main",
     "northrook/html": "dev-main",
-    "northrook/assets": "dev-main",
     "northrook/ui": "dev-main",
     "symfony/http-kernel": "^7.1",
     "symfony/dependency-injection": "^7.1",

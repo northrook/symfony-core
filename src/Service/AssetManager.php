@@ -2,15 +2,16 @@
 
 namespace Core\Service;
 
-use Core\DependencyInjection\Component\{CacheAdapter, UrlGenerator};
+use Symfony\Component\Cache\CacheItem;
+use Core\DependencyInjection\Component\{UrlGenerator};
 use Support\{ClassMethods, Str};
+use Core\Service\AssetManager\Asset\Asset;
 use Core\Service\AssetManager\Manifest;
 use InvalidArgumentException;
-use Northrook\Assets\{Script, Style};
 use Northrook\Logger\Log;
 use Northrook\Resource\Path;
-use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Cache\CacheInterface;
 use const Support\{AUTO, EMPTY_STRING};
 
 /**
@@ -19,7 +20,7 @@ use const Support\{AUTO, EMPTY_STRING};
  */
 final class AssetManager
 {
-    use ClassMethods, UrlGenerator, CacheAdapter;
+    use ClassMethods, UrlGenerator;
 
     public const string ASSETS_HEADER = 'HX-Assets';
 
@@ -42,7 +43,7 @@ final class AssetManager
 
     public function __construct(
         private readonly CurrentRequest          $request,
-        protected readonly AdapterInterface      $cacheAdapter,
+        protected readonly CacheInterface        $cacheAdapter,
         protected readonly UrlGeneratorInterface $urlGenerator,
         private readonly Manifest                $manifest,
     ) {
@@ -58,6 +59,11 @@ final class AssetManager
             return;
         }
         $this->setDeployedAssets();
+
+        dump(
+            $this::class.' enabled: '.\json_encode( $this->enabled ),
+            'Deployed assets: '.( $this->deployed ? \implode( ', ', $this->deployed ) : 'none' ),
+        );
     }
 
     /*
@@ -94,15 +100,15 @@ final class AssetManager
      */
     public function registerAsset( string $label, string|Path ...$source ) : self
     {
-        foreach ( (array) $source as $source ) {
-            $path = $source instanceof Path ? $source : new Path( $source );
-
-            $this->manifest[$label][] = match ( $path->mimeType ) {
-                'text/css'        => new Style( $path, $label ),
-                'text/javascript' => new Script( $path, $label ),
-                default           => throw new InvalidArgumentException(),
-            };
-        }
+        // foreach ( (array) $source as $source ) {
+        //     $path = $source instanceof Path ? $source : new Path( $source );
+        //
+        //     $this->manifest[$label][] = match ( $path->mimeType ) {
+        //         'text/css'        => new Style( $path, $label ),
+        //         'text/javascript' => new Script( $path, $label ),
+        //         default           => throw new InvalidArgumentException(),
+        //     };
+        // }
 
         return $this;
     }
@@ -110,31 +116,47 @@ final class AssetManager
     /**
      * Returns an Asset or Asset Group.
      *
-     * @param string $label
+     * @param array|Asset|string $asset
      *
      * @return array<string, array<int,string>>
      */
-    public function getAsset( string $label ) : ?array
+    public function getAsset( string|array|Asset $asset ) : array
     {
+        $label = match ( true ) {
+            \is_string( $asset )    => $asset,
+            \is_array( $asset )     => \array_key_first( $asset ),
+            $asset instanceof Asset => $asset->label,
+        };
 
         if ( $this->isDeployed( $label ) ) {
-            Log::notice( 'Asset {assetId} already deployed, {action}.', [
-                'assetId' => $label,
-                'action'  => 'skipped',
-            ] );
+            Log::notice(
+                'Asset {assetId} already deployed, {action}.',
+                [
+                    'assetId' => $label,
+                    'action'  => 'skipped',
+                    'asset'   => $asset,
+                ],
+            );
             return [];
         }
-
-        if ( ! $this->isRegistered( $label ) ) {
-
-            Log::notice( 'Asset {assetId} already deployed, {action}.', [
-                'assetId' => $label,
-                'action'  => 'skipped',
-            ] );
+        // static function ( CacheItem $item )
+        // {
+        //
+        // }
+        try {
+            return $this->cacheAdapter->get( $label, [$this, $this->resolveAsset( $asset )] );
+        }
+        catch ( \Psr\Cache\InvalidArgumentException $exception ) {
+            Log::exception( $exception );
             return [];
         }
+    }
 
-        return $this->getRegisteredAsset( $label );
+    private function resolveAsset( ...$args ) : array
+    {
+        dump( $args );
+
+        return ['asset.style.core' => __METHOD__];
     }
 
     private function isDeployed( string $assetId ) : bool
@@ -142,31 +164,16 @@ final class AssetManager
         return \in_array( $assetId, $this->deployed, true );
     }
 
-    private function isRegistered( string $assetId ) : bool
-    {
-        return $this->cacheHasItem( $assetId );
-    }
-
-    /**
-     * @param string $assetId
-     *
-     * @return array
-     */
-    private function getRegisteredAsset( string $assetId ) : array
-    {
-        return $this->cacheGetValue( $assetId, [] );
-    }
-
     private function setDeployedAssets() : void
     {
-        $this->deployed = Str::explode( $this->request->headerBag( get: $this::ASSETS_HEADER ) ?? EMPTY_STRING );
+        $this->deployed = Str::explode( $this->request->headerBag( get : $this::ASSETS_HEADER ) ?? EMPTY_STRING );
     }
 
     private function shouldProcessRequest() : bool
     {
         // Check for an ASSETS_HEADER when handling Hypermedia Requests
         if ( $this->request->isHtmx ) {
-            return $this->enabled = $this->request->headerBag( has: $this::ASSETS_HEADER );
+            return $this->enabled = $this->request->headerBag( has : $this::ASSETS_HEADER );
         }
 
         // If this is an ordinary request, enable
