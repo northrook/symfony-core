@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Core\Response;
 
-use JetBrains\PhpStorm\Pure;
 use Core\Controller\PublicController;
+use Northrook\Clerk;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -27,6 +27,8 @@ final class RouteHandler
 
     public function matchControllerMethod( ControllerEvent $event ) : void
     {
+        Clerk::event( RouteHandler::class, 'controller' );
+
         // Bail if the controller doesn't pass validation
         if ( false === $this->getValidController( $event ) ) {
             return;
@@ -98,9 +100,8 @@ final class RouteHandler
     /**
      * @param ControllerEvent $event
      *
-     * @return false|object
+     * @return bool
      */
-    #[Pure( true )]
     private function getValidController( ControllerEvent $event ) : bool
     {
         // Only parse main requests

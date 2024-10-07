@@ -123,7 +123,6 @@ final class ResponseHandler
     private function response( string $string, int $status = OK_200, array $headers = [] ) : Response
     {
         $response = new Response( $string, $status, $headers );
-        Clerk::event( $this::class.'::asset' )->stop();
         Clerk::stopGroup( 'controller' );
         return $response;
     }

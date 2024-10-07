@@ -3,6 +3,7 @@
 namespace Core\Response;
 
 use Core\Service\CurrentRequest;
+use Northrook\Clerk;
 
 /**
  * ## Auto-routing controller.
@@ -15,6 +16,8 @@ abstract class Controller
         protected readonly CurrentRequest  $request,
         protected readonly ResponseHandler $response,
     ) {
+        Clerk::stop( RouteHandler::class );
+        Clerk::event( Controller::class, 'controller' );
         $this->setDefault( $document, $parameters );
     }
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Core\Response;
 
-use Northrook\{ArrayAccessor, Exception\E_Value, Logger\Log, Resource\Path, Exception\Trigger};
+use Northrook\{ArrayAccessor, Clerk, Exception\E_Value, Logger\Log, Resource\Path, Exception\Trigger};
 use Core\Service\AssetManager;
 use Core\Service\AssetManager\Asset\Asset;
 use Northrook\HTML\Element;
@@ -154,6 +154,7 @@ final class Document extends ArrayAccessor
 
     public function assets( string|array|Asset ...$enqueue ) : self
     {
+        Clerk::event( __METHOD__, 'controller' );
         // Needs to loop over each asset
         // if string, get from Manifest
         // if array, key as string, values as args
@@ -163,7 +164,7 @@ final class Document extends ArrayAccessor
         foreach ( (array) $enqueue as $asset ) {
 
             if ( \is_array( $asset ) && \count( $asset ) !== 1 ) {
-                E_Value::error( 'Invalid {method} asset argument; only one key may be passed when using the [{label} => {args}] format.', ['method' => __METHOD__], halt: true);
+                E_Value::error( 'Invalid {method} asset argument; only one key may be passed when using the [{label} => {args}] format.', ['method' => __METHOD__], halt: true );
             }
 
             $assets = $this->assetManager->getAsset( $asset );

@@ -47,7 +47,7 @@ abstract class Asset
      */
     final public function getPath( ?string $version = AUTO ) : string
     {
-        return $this->relativeFilePath().'?v='.$version ?? $this->assetID;
+        return $this->relativeFilePath().'?v='.( $version ?? $this->assetID );
     }
 
     /**
@@ -85,7 +85,8 @@ abstract class Asset
 
     final protected function relativeFilePath() : string
     {
-        return "/assets/{$this->type}/{$this->label}.css";
+        $filetype = \strrchr( \end( $this->source ), '.' );
+        return "/assets/{$this->type}/{$this->label}{$filetype}";
     }
 
     protected function assetType() : string

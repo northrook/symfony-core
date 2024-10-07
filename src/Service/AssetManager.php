@@ -2,6 +2,7 @@
 
 namespace Core\Service;
 
+use Northrook\Clerk;
 use Symfony\Component\Cache\CacheItem;
 use Core\DependencyInjection\Component\{UrlGenerator};
 use Support\{ClassMethods, Str};
@@ -158,6 +159,7 @@ final class AssetManager
                         $asset instanceof Asset => [$asset->type => $asset],
                         default                 => $this->manifest->getAsset( $label ),
                     };
+                    Clerk::event( $registeredAsset::class, 'controller' );
 
                     $args   = \is_array( $asset ) ? \end( $asset ) : [];
                     $assets = [];
@@ -166,6 +168,7 @@ final class AssetManager
                         $assets["asset.{$asset->type}.{$asset->assetID}"] = $asset->getElement();
                     }
 
+                    Clerk::stop( $registeredAsset::class );
                     return $assets;
                 },
             );
