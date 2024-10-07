@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Core\Response;
 
-use Northrook\{ArrayAccessor, Clerk, Exception\E_Value, Logger\Log, Resource\Path, Exception\Trigger};
+use Northrook\{ArrayAccessor, Clerk, Logger\Log, Resource\Path, Exception\Trigger};
 use Core\Service\AssetManager;
-use Core\Service\AssetManager\Asset\Asset;
 use Northrook\HTML\Element;
 use Support\Normalize;
 use function Support\toString;
@@ -152,28 +151,30 @@ final class Document extends ArrayAccessor
         return $this;
     }
 
-    public function assets( string|array|Asset ...$enqueue ) : self
+    public function asset( string $label, string $class ) : Document
     {
-        Clerk::event( __METHOD__, 'controller' );
-        // Needs to loop over each asset
-        // if string, get from Manifest
-        // if array, key as string, values as args
-        // if Asset, register, generate, and use if valid
-
-        // dump( $enqueue );
-        foreach ( (array) $enqueue as $asset ) {
-
-            if ( \is_array( $asset ) && \count( $asset ) !== 1 ) {
-                E_Value::error( 'Invalid {method} asset argument; only one key may be passed when using the [{label} => {args}] format.', ['method' => __METHOD__], halt: true );
-            }
-
-            $assets = $this->assetManager->getAsset( $asset );
-            // dump( $assets );
-            $this->set( $assets );
-        }
-
+        $profiler = Clerk::event( __METHOD__."->{$label} as {$class}" );
+        $assets   = $this->assetManager->getAsset( $label,$class );
+        dump( $assets );
+        $this->set( $assets );
+        $profiler->stop();
         return $this;
     }
+
+    // public function assets( string ...$enqueue ) : self
+    // {
+    //
+    //     // dump( $enqueue );
+    //     foreach ( (array) $enqueue as $asset ) {
+    //         $profiler = Clerk::event( __METHOD__."->{$asset}" );
+    //         $assets   = $this->assetManager->getAsset( $asset );
+    //         dump( $assets );
+    //         $this->set( $assets );
+    //         $profiler->stop();
+    //     }
+    //
+    //     return $this;
+    // }
 
     /**
      * @param string      $href

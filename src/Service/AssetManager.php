@@ -4,9 +4,10 @@ namespace Core\Service;
 
 use Northrook\Clerk;
 use Symfony\Component\Cache\CacheItem;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Core\DependencyInjection\Component\{UrlGenerator};
 use Support\{ClassMethods, Str};
-use Core\Service\AssetManager\Asset\Asset;
+use Core\Service\AssetManager\Asset\{Asset, Script, Style};
 use Core\Service\AssetManager\Manifest;
 use InvalidArgumentException;
 use Northrook\Logger\Log;
@@ -48,9 +49,9 @@ final class AssetManager
         private readonly CurrentRequest          $request,
         protected readonly CacheInterface        $cacheAdapter,
         protected readonly UrlGeneratorInterface $urlGenerator,
+        protected readonly ParameterBagInterface $parameterBag,
         private readonly Manifest                $manifest,
     ) {
-
         // Check for an ASSETS_HEADER when handling Hypermedia Requests
         // If this is an ordinary request, enable
         $this->enabled = ( $this->request->isHtmx ) ? $this->request->headerBag( has : $this::ASSETS_HEADER ) : true;
@@ -125,17 +126,26 @@ final class AssetManager
     /**
      * Returns an Asset or Asset Group.
      *
-     * @param array|Asset|string $asset
+     * @param string       $asset label.type:inline
+     * @param class-string $class
      *
-     * @return array<string, array<int,string>>
+     * @return array<string, string>
      */
-    public function getAsset( string|array|Asset $asset ) : array
+    public function getAsset( string $asset, string $class ) : array
     {
-        $label = match ( true ) {
-            \is_string( $asset )    => $asset,
-            \is_array( $asset )     => \array_key_first( $asset ),
-            $asset instanceof Asset => $asset->label,
-        };
+        $label = \strstr( $asset, '.', true );
+
+        if ( ! $this->manifest->hasAsset( $asset ) ) {
+            Log::notice(
+                'Asset {assetId} not registered, {action}.',
+                [
+                    'assetId' => $label,
+                    'action'  => 'aborting',
+                    'asset'   => $asset,
+                ],
+            );
+            return [];
+        }
 
         if ( $this->isDeployed( $label ) ) {
             Log::notice(
@@ -148,28 +158,33 @@ final class AssetManager
             );
             return [];
         }
+
         try {
             return $this->cacheAdapter->get(
                 $label,
-                function( CacheItem $item ) use ( $label, $asset ) {
+                function( CacheItem $item ) use ( $label, $asset, $class ) {
+                    $profiler = Clerk::event( $item::class."-> {$label}" );
                     $item->expiresAfter( 1 );
                     // $item->expiresAfter( $this->cachePersistence );
 
-                    $registeredAsset = match ( true ) {
-                        $asset instanceof Asset => [$asset->type => $asset],
-                        default                 => $this->manifest->getAsset( $label ),
-                    };
-                    Clerk::event( $registeredAsset::class, 'controller' );
+                    $registeredAsset = $this->manifest->getSource( $asset );
 
-                    $args   = \is_array( $asset ) ? \end( $asset ) : [];
-                    $assets = [];
+                    /**
+                     * @var Asset $asset
+                     */
+                    $asset = new ( $class )( $registeredAsset, $label, $this->parameterBag->get( 'dir.public' ) );
 
-                    foreach ( $registeredAsset as $label => $asset ) {
-                        $assets["asset.{$asset->type}.{$asset->assetID}"] = $asset->getElement();
-                    }
+                    dump( $asset );
 
-                    Clerk::stop( $registeredAsset::class );
-                    return $assets;
+                    // $args   = \is_array( $asset ) ? \end( $asset ) : [];
+                    // $assets = [];
+
+                    // foreach ( $registeredAsset as $label => $asset ) {
+                    //     $assets["asset.{$asset->type}.{$asset->assetID}"] = $asset->getElement();
+                    // }
+
+                    $profiler->stop();
+                    return [];
                 },
             );
         }

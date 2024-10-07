@@ -26,10 +26,10 @@ final readonly class AssetManifestPass implements CompilerPassInterface
 
         // $this->parameterBag->set( 'asset.inventory.core.css' );
 
-        $this->manifest->registerAsset( 'core', Style::class )
-            ->compile();
-        $this->manifest->registerAsset( 'core', Script::class )
-            ->compile();
+        // $this->manifest->registerAsset( 'core', Style::class )
+        //     ->compile();
+        // $this->manifest->registerAsset( 'core', Script::class )
+        //     ->compile();
 
         // $this->manifest->update();
     }

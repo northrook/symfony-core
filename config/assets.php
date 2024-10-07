@@ -28,9 +28,9 @@ return static function( ContainerConfigurator $container ) : void {
             service( 'cache.assets' ),
         ] )
 
-        //
-        ->set( StylesheetGenerator::class )
-        ->tag( 'controller.service_arguments' )
+        // //
+        // ->set( StylesheetGenerator::class )
+        // ->tag( 'controller.service_arguments' )
 
         // AssetManager
         ->set( AssetManager::class )
@@ -38,6 +38,7 @@ return static function( ContainerConfigurator $container ) : void {
             service( CurrentRequest::class ),
             service( 'cache.assets' ),
             service( 'router' ),
+            service( 'parameter_bag' ),
             service( Manifest::class ),
         ] );
 };

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Core\Service\AssetManager;
 
 use Core\DependencyInjection\Component\CacheAdapter;
-use Core\Service\AssetManager\Asset\{Asset, Font, Script, Style};
+use Core\Service\AssetManager\Asset\{Asset, Script, Style};
 use Northrook\ArrayStore;
 use Northrook\Exception\E_Value;
 use Northrook\Resource\Path;
@@ -25,19 +25,31 @@ final class Manifest
     ) {}
 
     /**
-     * @param string  $label
-     * @param ?string $type
+     * @template AssetObject
      *
-     * @return Asset[]
+     * @param string                    $label
+     * @param class-string<AssetObject> $class
+     *
+     * @return AssetObject
      */
-    public function getAsset( string $label, ?string $type = null ) : array
+    public function getAsset( string $label, string $class ) : mixed
     {
-        $label = "asset.{$label}.{$type}";
-        if ( $type ) {
-            $label .= ".{$this->assetType( $type )}";
-        }
+        // $label = "asset.{$label}.{$class}";
+        // if ( $class ) {
+        //     $label .= ".{$this->assetType( $class )}";
+        // }
 
         return $this->manifest()->get( $label, [] );
+    }
+
+    public function hasAsset( string $key ) : bool
+    {
+        return $this->manifest()->has( "inventory.{$key}" );
+    }
+
+    public function getSource( string $key ) : ?array
+    {
+        return $this->manifest()->get( "inventory.{$key}", null );
     }
 
     /**
@@ -94,7 +106,6 @@ final class Manifest
         return match ( $classString ) {
             Style::class  => 'css',
             Script::class => 'js',
-            Font::class   => 'font',
             default       => E_Value::error(
                 'The provided {asClass} is not a valid asset type.',
                 ['asClass' => $classString],
