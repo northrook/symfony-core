@@ -3,6 +3,7 @@
 namespace Core\Controller;
 
 use Core\Response\{Controller, Document, Parameters};
+use Core\Service\AssetManager\Asset\{Script, Style};
 use Core\Service\CurrentRequest;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,8 +15,9 @@ final class PublicController extends Controller
         $document(
             'Welcome - Public!',
             'This is an example template.',
-        )
-            ->assets( 'core.style', 'core.script' );
+        );
+            // ->asset( 'core', Style::class ) // just use the 'dir.assets/core/*.css' style glob pattern
+            // ->asset( 'core', Script::class );
 
         $this->response->template = 'welcome.latte';
     }

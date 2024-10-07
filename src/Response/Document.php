@@ -30,7 +30,7 @@ final class Document extends ArrayAccessor
     /** @var bool Determines how robot tags will be set */
     public bool $isPublic = false;
 
-    public function __construct( protected readonly AssetManager $assetManager ) {}
+    public function __construct( public readonly AssetManager $assetManager ) {}
 
     private function isLocked() : bool
     {

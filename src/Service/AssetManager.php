@@ -50,7 +50,7 @@ final class AssetManager
         protected readonly CacheInterface        $cacheAdapter,
         protected readonly UrlGeneratorInterface $urlGenerator,
         protected readonly ParameterBagInterface $parameterBag,
-        private readonly Manifest                $manifest,
+        public readonly Manifest                $manifest,
     ) {
         // Check for an ASSETS_HEADER when handling Hypermedia Requests
         // If this is an ordinary request, enable
