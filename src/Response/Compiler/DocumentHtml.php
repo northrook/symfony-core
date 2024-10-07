@@ -143,6 +143,7 @@ final class DocumentHtml
             ->meta( 'document' )
             ->meta( 'robots' )
             ->meta( 'theme' )
+            ->assets( 'font' )
             ->assets( 'script' )
             ->assets( 'style' )
             ->assets( 'link' );

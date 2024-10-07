@@ -23,7 +23,6 @@ abstract class Asset implements Stringable
         Clerk::event( $this::class, 'document' );
         $this->type    = $this->assetType();
         $this->assetID = hashKey( $this );
-        dump( 'Generating asset ID: '.$this->assetID.' from object:', $this );
     }
 
     /**
@@ -33,6 +32,7 @@ abstract class Asset implements Stringable
      */
     final public function getHtml( array $args = [] ) : string
     {
+        dump( $this );
         Clerk::event( $this::class )->stop();
         return $this->__toString();
     }

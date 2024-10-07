@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Core\DependencyInjection\Compiler;
 
+use Core\Service\AssetManager\Asset\{Script, Style};
 use Core\Service\AssetManager\Manifest;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\{ContainerBuilder, Definition};
@@ -25,6 +26,10 @@ final readonly class AssetManifestPass implements CompilerPassInterface
 
         // $this->parameterBag->set( 'asset.inventory.core.css' );
 
+        $this->manifest->registerAsset( 'core', Style::class )
+            ->compile();
+        $this->manifest->registerAsset( 'core', Script::class )
+            ->compile();
     }
 
     private function initializeManifestInventory() : void
@@ -47,9 +52,9 @@ final readonly class AssetManifestPass implements CompilerPassInterface
     private function initializeManifestService( Definition $manifestDefinition ) : void
     {
         $this->manifest ??= new ( $manifestDefinition->getClass() )(
-                $manifestDefinition->getArgument( 0 ), // $path
-                $this->parameterBag, // $parameterBag
-                null, // $cacheAdapter
+            $manifestDefinition->getArgument( 0 ), // $path
+            $this->parameterBag, // $parameterBag
+            null, // $cacheAdapter
         );
     }
 }

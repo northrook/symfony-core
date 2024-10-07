@@ -38,6 +38,8 @@ final class AssetManager
     /** @var ?bool Default inline setting for {@see Style} and {@see Script} assets */
     public ?bool $inline = AUTO;
 
+    public ?int $cachePersistence = \Time\MINUTE;
+
     /** @var bool Disables minification */
     public bool $debug = false;
 
@@ -47,7 +49,12 @@ final class AssetManager
         protected readonly UrlGeneratorInterface $urlGenerator,
         private readonly Manifest                $manifest,
     ) {
-        if ( false === $this->shouldProcessRequest() ) {
+
+        // Check for an ASSETS_HEADER when handling Hypermedia Requests
+        // If this is an ordinary request, enable
+        $this->enabled = ( $this->request->isHtmx ) ? $this->request->headerBag( has : $this::ASSETS_HEADER ) : true;
+
+        if ( false === $this->enabled ) {
             Log::notice(
                 'The {class} is disabled, no {header} found.',
                 [
@@ -58,7 +65,8 @@ final class AssetManager
             );
             return;
         }
-        $this->setDeployedAssets();
+
+        $this->deployed = Str::explode( $this->request->headerBag( get : $this::ASSETS_HEADER ) ?? EMPTY_STRING );
 
         dump(
             $this::class.' enabled: '.\json_encode( $this->enabled ),
@@ -139,12 +147,28 @@ final class AssetManager
             );
             return [];
         }
-        // static function ( CacheItem $item )
-        // {
-        //
-        // }
         try {
-            return $this->cacheAdapter->get( $label, [$this, $this->resolveAsset( $asset )] );
+            return $this->cacheAdapter->get(
+                $label,
+                function( CacheItem $item ) use ( $label, $asset ) {
+                    $item->expiresAfter( 1 );
+                    // $item->expiresAfter( $this->cachePersistence );
+
+                    $registeredAsset = match ( true ) {
+                        $asset instanceof Asset => [$asset->type => $asset],
+                        default                 => $this->manifest->getAsset( $label ),
+                    };
+
+                    $args   = \is_array( $asset ) ? \end( $asset ) : [];
+                    $assets = [];
+
+                    foreach ( $registeredAsset as $label => $asset ) {
+                        $assets["asset.{$asset->type}.{$asset->assetID}"] = $asset->getHtml( $args );
+                    }
+
+                    return $assets;
+                },
+            );
         }
         catch ( \Psr\Cache\InvalidArgumentException $exception ) {
             Log::exception( $exception );
@@ -152,31 +176,8 @@ final class AssetManager
         }
     }
 
-    private function resolveAsset( ...$args ) : array
-    {
-        dump( $args );
-
-        return ['asset.style.core' => __METHOD__];
-    }
-
     private function isDeployed( string $assetId ) : bool
     {
         return \in_array( $assetId, $this->deployed, true );
-    }
-
-    private function setDeployedAssets() : void
-    {
-        $this->deployed = Str::explode( $this->request->headerBag( get : $this::ASSETS_HEADER ) ?? EMPTY_STRING );
-    }
-
-    private function shouldProcessRequest() : bool
-    {
-        // Check for an ASSETS_HEADER when handling Hypermedia Requests
-        if ( $this->request->isHtmx ) {
-            return $this->enabled = $this->request->headerBag( has : $this::ASSETS_HEADER );
-        }
-
-        // If this is an ordinary request, enable
-        return $this->enabled = true; // @phpstan-ignore-line
     }
 }

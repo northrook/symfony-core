@@ -167,7 +167,7 @@ final class Document extends ArrayAccessor
             }
 
             $assets = $this->assetManager->getAsset( $asset );
-            dump( $assets );
+            // dump( $assets );
             $this->set( $assets );
         }
 

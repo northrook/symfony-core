@@ -26,7 +26,7 @@ final class PublicController extends Controller
 
     public function index( ?string $route, Document $document, ParameterBagInterface $parameterBag ) : Response
     {
-        dump( $parameterBag->all() );
+        dump( $document->all() );
         $document(
             'Index says welcome',
             keywords: ['we', 'like', 'keywords'],
