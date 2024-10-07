@@ -52,9 +52,9 @@ final class Manifest
     public function registerAsset( string $label, string $as, null|string|array $source = null ) : mixed
     {
         $type = $this->assetType( $as );
-        $source ??= $this->manifest()->get( "inventory.{$label}.{$type}:" ) ;
+        $source ??= $this->manifest()->get( "inventory.{$label}.{$type}:" );
 
-        $asset = new ( $as )( (array) $source, $label );
+        $asset = new ( $as )( (array) $source, $label, $this->parameterBag->get( 'dir.public' ) );
 
         $this->manifest()->set( "asset.{$label}.{$type}", $asset );
 
@@ -79,6 +79,11 @@ final class Manifest
         return $this;
     }
 
+    public function update() : void
+    {
+        $this->manifest->save();
+    }
+
     private function manifest() : ArrayStore
     {
         return $this->manifest ??= new ArrayStore( $this->path );
@@ -90,7 +95,11 @@ final class Manifest
             Style::class  => 'css',
             Script::class => 'js',
             Font::class   => 'font',
-            default       => E_Value::error( 'The provided {asClass} is not a valid asset type.', ['asClass' => $classString], halt: true ),
+            default       => E_Value::error(
+                'The provided {asClass} is not a valid asset type.',
+                ['asClass' => $classString],
+                halt : true,
+            ),
         };
     }
 
@@ -98,7 +107,7 @@ final class Manifest
     {
         $basename = $asset instanceof Path ? $asset->basename : $asset;
 
-        return \strrchr( $basename, '.', true ) ;
+        return \strrchr( $basename, '.', true );
         // return \str_replace( '.', ':', \strrchr( $basename, '.', true ) );
     }
 }

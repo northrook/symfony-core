@@ -30,6 +30,8 @@ final readonly class AssetManifestPass implements CompilerPassInterface
             ->compile();
         $this->manifest->registerAsset( 'core', Script::class )
             ->compile();
+
+        // $this->manifest->update();
     }
 
     private function initializeManifestInventory() : void
@@ -53,7 +55,7 @@ final readonly class AssetManifestPass implements CompilerPassInterface
     {
         $this->manifest ??= new ( $manifestDefinition->getClass() )(
             $manifestDefinition->getArgument( 0 ), // $path
-            $this->parameterBag, // $parameterBag
+            $this->parameterBag,                   // $parameterBag
             null, // $cacheAdapter
         );
     }

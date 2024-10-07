@@ -5,7 +5,7 @@ namespace Core\Service\AssetManager\Asset;
 use Northrook\Filesystem\File;
 use Northrook\HTML\Element;
 
-class Style extends Asset
+class Link extends Asset
 {
     public bool $inline = false;
 

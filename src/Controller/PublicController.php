@@ -17,7 +17,7 @@ final class PublicController extends Controller
             'Welcome - Public!',
             'This is an example template.',
         )
-            ->assets( 'core', 'admin', ['password' => ['inline' => false, 'preload' => AUTO]], new Font( ['src' => '#'], 'inter' ) )
+            ->assets( 'core', 'admin', ['password' => ['inline' => false, 'preload' => AUTO]] )
             ->assets( ['core' => ['inline' => true]] )
             ->assets( ['core' => ['inline' => true]] );
 

@@ -163,7 +163,7 @@ final class AssetManager
                     $assets = [];
 
                     foreach ( $registeredAsset as $label => $asset ) {
-                        $assets["asset.{$asset->type}.{$asset->assetID}"] = $asset->getHtml( $args );
+                        $assets["asset.{$asset->type}.{$asset->assetID}"] = $asset->getElement();
                     }
 
                     return $assets;

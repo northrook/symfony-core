@@ -6,9 +6,9 @@ use Northrook\Clerk;
 use Northrook\Resource\Path;
 use Support\ClassMethods;
 use function String\hashKey;
-use Stringable;
+use const Support\AUTO;
 
-abstract class Asset implements Stringable
+abstract class Asset
 {
     use ClassMethods;
 
@@ -17,24 +17,37 @@ abstract class Asset implements Stringable
     public readonly string $assetID;   // manual or using hashKey
 
     public function __construct(
-        protected array        $source,
-        public readonly string $label,
+        protected array           $source,
+        public readonly string    $label,
+        protected readonly string $publicDirectory,
     ) {
         Clerk::event( $this::class, 'document' );
         $this->type    = $this->assetType();
         $this->assetID = hashKey( $this );
     }
 
+    abstract protected function build() : void;
+
+    abstract public function getStatic() : string;
+
+    abstract public function getElement() : string;
+
+    abstract public function getContent() ;
+
     /**
-     * @param array $args
+     * Points to the relative location of the asset.
+     *
+     * ```
+     * ~root/public/
+     *            ./assets/type/filename.ext?v=HASH
+     * ```
      *
      * @return string
+     * @param  ?string $version
      */
-    final public function getHtml( array $args = [] ) : string
+    final public function getPath( ?string $version = AUTO ) : string
     {
-        dump( $this );
-        Clerk::event( $this::class )->stop();
-        return $this->__toString();
+        return $this->relativeFilePath().'?v='.$version ?? $this->assetID;
     }
 
     /**
@@ -48,8 +61,6 @@ abstract class Asset implements Stringable
 
         return $this;
     }
-
-    abstract protected function build() : void;
 
     private function parseSources( ?array $sources = null ) : array
     {
@@ -65,6 +76,16 @@ abstract class Asset implements Stringable
             }
         }
         return $array;
+    }
+
+    final protected function publicFilePath() : string
+    {
+        return $this->publicDirectory.$this->relativeFilePath();
+    }
+
+    final protected function relativeFilePath() : string
+    {
+        return "/assets/{$this->type}/{$this->label}.css";
     }
 
     protected function assetType() : string
