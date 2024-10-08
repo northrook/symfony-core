@@ -15,9 +15,12 @@ use Symfony\Component\Stopwatch\Stopwatch;
 return static function( ContainerConfigurator $container ) : void {
     $container->services()
         ->set( Clerk::class )
-        ->args( [service( Stopwatch::class )] )
+        ->args( [
+            service( Stopwatch::class ),
+            false, // do not throw on duplicates
+        ] )
 
-            // TelemetryEventSubscriber
+        // TelemetryEventSubscriber
         ->set( Telemetry\TelemetryEventSubscriber::class )
         ->tag( 'kernel.event_subscriber' )
         ->args( [service( Clerk::class )] );

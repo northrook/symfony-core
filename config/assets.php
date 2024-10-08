@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use Core\Service\{AssetManager, AssetManager\Manifest, CurrentRequest, StylesheetGenerator};
+use Core\Service\{AssetManager, CurrentRequest};
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 
 return static function( ContainerConfigurator $container ) : void {
@@ -19,18 +19,6 @@ return static function( ContainerConfigurator $container ) : void {
         ->set( 'cache.assets', PhpFilesAdapter::class )
         ->args( ['assets', 0, '%dir.cache%/assets'] )
         ->tag( 'cache.pool' )
-
-        //
-        ->set( Manifest::class )
-        ->args( [
-            param( 'path.asset_manifest' ),
-            service( 'parameter_bag' ),
-            service( 'cache.assets' ),
-        ] )
-
-        // //
-        // ->set( StylesheetGenerator::class )
-        // ->tag( 'controller.service_arguments' )
 
         // AssetManager
         ->set( AssetManager::class )

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Core\Service;
 
-use Northrook\ArrayStore;
+use Northrook\{ArrayStore, Clerk, Exception\E_Value};
+use Core\Service\AssetManager\Compiler\AssetCompiler;
 use Northrook\Logger\Log;
 use Support\Str;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -26,9 +27,6 @@ final class AssetManager
 
     /** @var bool `HTMX` requests require the {@see AssetManager::ASSETS_HEADER} */
     public readonly bool $enabled;
-
-    /** @var bool Disables minification */
-    public bool $debug = false;
 
     /** @var ?int Expiration setting for the {@see CacheInterface} */
     public ?int $cachePersistence = \Time\MINUTE;
@@ -71,6 +69,52 @@ final class AssetManager
         }
 
         $this->deployed = Str::explode( $this->request->headerBag( get : $this::ASSETS_HEADER ) ?? EMPTY_STRING );
+    }
+
+    /**
+     * This will generate a new Asset under a given label,
+     * saving it to the Manifest.
+     *
+     * The Asset class will generate relevant files in the `./public/assets/{type}` directory.
+     *
+     * @template AssetObject
+     *
+     * @param string                    $label
+     * @param class-string<AssetObject> $class
+     * @param ?string                   $inventoryKey
+     *
+     * @return AssetObject
+     */
+    public function registerAssets( string $label, string $class, ?string $inventoryKey = null ) : mixed
+    {
+        $profiler = Clerk::event( __METHOD__."->{$label} as {$class}" );
+
+        if ( \str_contains( $label, '.' ) && ! $inventoryKey ) {
+            E_Value::error(
+                'Asset label {label} contains the nesting character {delineator}, but an {inventoryKey} has not been provided.',
+                ['label' => $label, 'delineator' => '.', 'inventoryKey' => '$inventoryKey'],
+            );
+        }
+
+        $inventoryKey ??= \strtolower( $label.'.'.classBasename( $class ) );
+        $sources          = (array) $this->getInventory()->get( "{$inventoryKey}:" );
+        $storageDirectory = $this->parameterBag->get( 'dir.public.assets' );
+
+        /** @var AssetCompiler $compiler */
+        $compiler = new ( $class )( $sources, $label, $storageDirectory );
+
+        dump( $label, $inventoryKey, $class, $sources, $compiler );
+
+        $manifest[$label] = $compiler->asset;
+
+        dump( $manifest );
+        // $source = $this->getInventory()->set(
+        //     $label,
+        //     $class,
+        // );
+
+        $profiler->stop();
+        return null;
     }
 
     public function getInventory() : ArrayStore

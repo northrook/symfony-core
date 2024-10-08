@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Core\DependencyInjection\Compiler;
 
 use Core\Console\Output;
-use Core\Service\AssetManager\{Asset, Manifest};
+use Core\Service\AssetManager\{Compiler, Manifest};
 use Core\Settings;
 use Northrook\CSS\Stylesheet;
 use Support\{Str};

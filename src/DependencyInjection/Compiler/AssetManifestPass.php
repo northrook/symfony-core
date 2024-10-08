@@ -4,34 +4,27 @@ declare(strict_types=1);
 
 namespace Core\DependencyInjection\Compiler;
 
-use Core\Service\AssetManager\Asset\{Script, Style};
-use Core\Service\AssetManager\Manifest;
-use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
-use Symfony\Component\DependencyInjection\{ContainerBuilder, Definition};
 use Override;
+use Northrook\ArrayStore;
+use Northrook\Exception\CompileException;
+use Northrook\Resource\Path;
+use Symfony\Component\DependencyInjection\{ContainerBuilder};
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 final readonly class AssetManifestPass implements CompilerPassInterface
 {
-    private Manifest $manifest;
+    private ArrayStore $inventory;
 
     public function __construct( private ParameterBagInterface $parameterBag ) {}
 
     #[Override]
     public function process( ContainerBuilder $container ) : void
     {
-        $this->initializeManifestService( $container->getDefinition( Manifest::class ) );
+        $this->inventory = new ArrayStore( $this->parameterBag->get( 'path.asset_inventory' ) );
 
+        $this->inventory->clear();
         $this->initializeManifestInventory();
-
-        // $this->parameterBag->set( 'asset.inventory.core.css' );
-
-        // $this->manifest->registerAsset( 'core', Style::class )
-        //     ->compile();
-        // $this->manifest->registerAsset( 'core', Script::class )
-        //     ->compile();
-
-        // $this->manifest->update();
     }
 
     private function initializeManifestInventory() : void
@@ -39,24 +32,27 @@ final readonly class AssetManifestPass implements CompilerPassInterface
         $appAssets  = $this->parameterBag->get( 'dir.assets' );
         $coreAssets = $this->parameterBag->get( 'dir.core.assets' );
 
-        $this->manifest->addSourcePath( 'core', ...\glob( "{$appAssets}\styles\*.css" ) );
-        $this->manifest->addSourcePath( 'core', ...\glob( "{$appAssets}\scripts\*.js" ) );
-        $this->manifest->addSourcePath( 'admin', ...\glob( "{$appAssets}\styles\admin\*.css" ) );
+        $this->getAssetGroup( 'core', 'style', \glob( "{$appAssets}\styles\*.css" ) );
+        $this->getAssetGroup( 'core', 'script', \glob( "{$appAssets}\scripts\*.js" ) );
+        $this->getAssetGroup( 'admin', 'style', \glob( "{$appAssets}\styles\admin\*.css" ) );
     }
 
-    /**
-     * Initialize the {@see Manifest} service for use in this compiler pass.
-     *
-     * @param Definition $manifestDefinition
-     *
-     * @return void
-     */
-    private function initializeManifestService( Definition $manifestDefinition ) : void
+    private function getAssetGroup( string $label, string $type, array $glob ) : void
     {
-        $this->manifest ??= new ( $manifestDefinition->getClass() )(
-            $manifestDefinition->getArgument( 0 ), // $path
-            $this->parameterBag,                   // $parameterBag
-            null, // $cacheAdapter
-        );
+        $inventory = [];
+
+        foreach ( $glob as $path ) {
+            $asset = new Path( $path );
+
+            if ( ! $asset->isReadable ) {
+                throw new CompileException( "The asset at '{$asset->path}' is not readable.'" );
+            }
+
+            $basename = \strrchr( $asset->basename, '.', true );
+
+            $inventory["{$label}.{$type}.{$basename}"] = $asset->path;
+        }
+
+        $this->inventory->set( $inventory );
     }
 }

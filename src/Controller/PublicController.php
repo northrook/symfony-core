@@ -3,7 +3,7 @@
 namespace Core\Controller;
 
 use Core\Response\{Controller, Document, Parameters};
-use Core\Service\AssetManager\Asset\{Script, Style};
+use Core\Service\AssetManager\Compiler\{Script, Style};
 use Core\Service\CurrentRequest;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
