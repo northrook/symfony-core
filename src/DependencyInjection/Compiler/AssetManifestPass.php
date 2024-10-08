@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Core\DependencyInjection\Compiler;
 
+use Core\Service\AssetManager;
+use Core\Service\AssetManager\Compiler\{Style,Script};
 use Override;
 use Northrook\ArrayStore;
 use Northrook\Exception\CompileException;
@@ -16,15 +18,20 @@ final readonly class AssetManifestPass implements CompilerPassInterface
 {
     private ArrayStore $inventory;
 
+    private AssetManager $assetManager;
+
     public function __construct( private ParameterBagInterface $parameterBag ) {}
 
     #[Override]
     public function process( ContainerBuilder $container ) : void
     {
-        $this->inventory = new ArrayStore( $this->parameterBag->get( 'path.asset_inventory' ) );
+        $this->inventory    = new ArrayStore( $this->parameterBag->get( 'path.asset_inventory' ) );
+        $this->assetManager = $this->initializeAssetManager( $container );
 
         $this->inventory->clear();
         $this->initializeManifestInventory();
+
+        $this->registerCoreAssets();
     }
 
     private function initializeManifestInventory() : void
@@ -35,6 +42,14 @@ final readonly class AssetManifestPass implements CompilerPassInterface
         $this->getAssetGroup( 'core', 'style', \glob( "{$appAssets}\styles\*.css" ) );
         $this->getAssetGroup( 'core', 'script', \glob( "{$appAssets}\scripts\*.js" ) );
         $this->getAssetGroup( 'admin', 'style', \glob( "{$appAssets}\styles\admin\*.css" ) );
+
+        $this->inventory->save();
+    }
+
+    private function registerCoreAssets() : void
+    {
+        $this->assetManager->registerAssets( 'core.style', Style::class );
+        $this->assetManager->registerAssets( 'core.script', Script::class );
     }
 
     private function getAssetGroup( string $label, string $type, array $glob ) : void
@@ -54,5 +69,25 @@ final readonly class AssetManifestPass implements CompilerPassInterface
         }
 
         $this->inventory->set( $inventory );
+    }
+
+    /**
+     * Initialize the {@see Manifest} service for use in this compiler pass.
+     *
+     * @param ContainerBuilder $container
+     *
+     * @return AssetManager
+     */
+    private function initializeAssetManager( ContainerBuilder $container ) : AssetManager
+    {
+        $assetManager = $container->getDefinition( AssetManager::class );
+
+        return new ( $assetManager->getClass() )(
+                null,
+                null,
+                $this->parameterBag,
+                $this->parameterBag->get( 'path.asset_inventory' ),
+                $this->parameterBag->get( 'path.asset_manifest' ),
+        );
     }
 }

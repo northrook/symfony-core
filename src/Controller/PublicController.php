@@ -13,21 +13,25 @@ final class PublicController extends Controller
     protected function setDefault( Document $document, Parameters $parameters ) : void
     {
         $document(
-            'Welcome - Public!',
-            'This is an example template.',
+                'Welcome - Public!',
+                'This is an example template.',
+        )->assets(
+                'core',
+        // 'core.style',
         );
-            // ->asset( 'core', Style::class ) // just use the 'dir.assets/core/*.css' style glob pattern
-            // ->asset( 'core', Script::class );
+        // ->asset( 'core', Style::class ) // just use the 'dir.assets/core/*.css' style glob pattern
+        // ->asset( 'core', Script::class );
 
         $this->response->template = 'welcome.latte';
     }
 
     public function index( ?string $route, Document $document, ParameterBagInterface $parameterBag ) : Response
     {
-        dd( $document->assetManager->registerAssets( 'core', Style::class, ) );
+        // dd( $document->all());
+        // dd( $document->assetManager->registerAssets( 'core.style', Style::class ) );
         $document(
-            'Index says welcome',
-            keywords: ['we', 'like', 'keywords'],
+                          'Index says welcome',
+                keywords: ['we', 'like', 'keywords'],
         );
         return $this->response->document();
     }
@@ -37,7 +41,7 @@ final class PublicController extends Controller
         dump( $request );
         $message = __METHOD__.' rendering route: '.$route ;
         return new Response(
-            <<<HTML
+                <<<HTML
                 <!DOCTYPE html>
                 <html lang="en">
                 <head>

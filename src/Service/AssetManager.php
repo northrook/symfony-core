@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Core\Service;
 
 use Northrook\{ArrayStore, Clerk, Exception\E_Value};
+use Core\Service\AssetManager\Asset;
 use Core\Service\AssetManager\Compiler\AssetCompiler;
+use InvalidArgumentException;
 use Northrook\Logger\Log;
 use Support\Str;
+use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use function Support\classBasename;
@@ -41,20 +44,20 @@ final class AssetManager
     public readonly array $deployed;
 
     /**
-     * @param CurrentRequest        $request       // for determining deployed assets
-     * @param CacheInterface        $cacheAdapter  // for caching fully generated asset HTML
+     * @param ?CurrentRequest       $request       // for determining deployed assets
+     * @param ?CacheInterface       $cacheAdapter  // for caching fully generated asset HTML
      * @param ParameterBagInterface $parameterBag  // [pathfinder?]
      * @param string                $inventoryPath
      * @param string                $manifestPath
      */
     public function __construct(
-        private readonly CurrentRequest        $request,
-        private readonly CacheInterface        $cacheAdapter,
+        private readonly ?CurrentRequest       $request,
+        private readonly ?CacheInterface       $cacheAdapter,
         private readonly ParameterBagInterface $parameterBag,
         private readonly string                $inventoryPath,
         private readonly string                $manifestPath,
     ) {
-        $this->enabled = ( $this->request->isHtmx ) ? $this->request->headerBag( has : $this::ASSETS_HEADER ) : true;
+        $this->enabled = ( $this->request?->isHtmx ) ? $this->request?->headerBag( has : $this::ASSETS_HEADER ) : true;
 
         if ( false === $this->enabled ) {
             Log::notice(
@@ -62,13 +65,72 @@ final class AssetManager
                 [
                     'class'     => classBasename( $this::class ),
                     'header'    => 'HX-Assets',
-                    'headerBag' => $this->request->headerBag()->all(),
+                    'headerBag' => $this->request?->headerBag()->all(),
                 ],
             );
             return;
         }
 
-        $this->deployed = Str::explode( $this->request->headerBag( get : $this::ASSETS_HEADER ) ?? EMPTY_STRING );
+        $this->deployed = Str::explode( $this->request?->headerBag( get : $this::ASSETS_HEADER ) ?? EMPTY_STRING );
+    }
+
+    /**
+     * @param string $label
+     *
+     * @return Asset[]
+     */
+    public function getAsset( string $label ) : array
+    {
+        $assets = $this->getManifest()->get( $label );
+
+        if ( $assets instanceof Asset ) {
+            return [$assets->id => $assets];
+        }
+
+        if ( \is_array( $assets ) ) {
+            return $this->maybeNested( $assets );
+        }
+
+        throw new InvalidArgumentException();
+    }
+
+    public function resolveAssets( string $label ) : array
+    {
+        $assets      = [];
+        [$key, $mod] = Str::bisect( $label, ':' );
+
+        foreach ( $this->getAsset( $key ) as $asset ) {
+            $html = $this->cacheAdapter->get(
+                "{$asset->id}{$mod}",
+                function( CacheItem $item ) use ( $asset, $mod ) {
+                    $item->expiresAfter( 1 );
+
+                    if ( 'inline' === $mod ) {
+                        return ( $asset->compilerClass )::inline( $asset );
+                    }
+                    return ( $asset->compilerClass )::link( $asset );
+                },
+            );
+            $assets["asset.{$asset->type}.{$asset->id}"] = $html;
+        }
+
+        return $assets;
+    }
+
+    private function maybeNested( array $assets ) : array
+    {
+        $array = [];
+
+        foreach ( $assets as $asset ) {
+            if ( \is_array( $asset ) ) {
+                $array = [...$array, ...$this->maybeNested( $asset )];
+            }
+            else {
+                $array[$asset->id] = $asset;
+            }
+
+        }
+        return $array;
     }
 
     /**
@@ -89,32 +151,29 @@ final class AssetManager
     {
         $profiler = Clerk::event( __METHOD__."->{$label} as {$class}" );
 
-        if ( \str_contains( $label, '.' ) && ! $inventoryKey ) {
-            E_Value::error(
-                'Asset label {label} contains the nesting character {delineator}, but an {inventoryKey} has not been provided.',
-                ['label' => $label, 'delineator' => '.', 'inventoryKey' => '$inventoryKey'],
-            );
-        }
+        // if ( \str_contains( $label, '.' ) && ! $inventoryKey ) {
+        //     E_Value::error(
+        //         'Asset label {label} contains the nesting character {delineator}, but an {inventoryKey} has not been provided.',
+        //         ['label' => $label, 'delineator' => '.', 'inventoryKey' => '$inventoryKey'],
+        //     );
+        // }
 
-        $inventoryKey ??= \strtolower( $label.'.'.classBasename( $class ) );
+        $inventoryKey ??= Str::end( $label, \strtolower( '.'.classBasename( $class ) ) );
         $sources          = (array) $this->getInventory()->get( "{$inventoryKey}:" );
         $storageDirectory = $this->parameterBag->get( 'dir.root' );
 
-        /** @var AssetCompiler $compiler */
-        $compiler = new ( $class )( $sources, $label, $storageDirectory );
+        /** @var AssetCompiler $compiled */
+        $compiled = new ( $class )( $sources, $label, $storageDirectory );
 
         // dump( $label, $inventoryKey, $class, $sources, $compiler );
 
-        $manifest[$label] = $compiler->asset;
+        $type  = $compiled->type;
+        $label = Str::end( $label, ".{$type}" );
 
-        dump( $manifest );
-        // $source = $this->getInventory()->set(
-        //     $label,
-        //     $class,
-        // );
+        $this->getManifest()->set( $label, $compiled->asset );
 
         $profiler->stop();
-        return null;
+        return $compiled;
     }
 
     public function getInventory() : ArrayStore
