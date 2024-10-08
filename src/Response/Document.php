@@ -6,6 +6,9 @@ namespace Core\Response;
 
 use Northrook\{ArrayAccessor, Clerk, Logger\Log, Resource\Path, Exception\Trigger};
 use Core\Service\AssetManager;
+use Core\Service\AssetManager\Asset\Link;
+use Core\Service\AssetManager\Asset\Script;
+use Core\Service\AssetManager\Asset\Style;
 use Northrook\HTML\Element;
 use Support\Normalize;
 use function Support\toString;
@@ -153,11 +156,11 @@ final class Document extends ArrayAccessor
 
     public function asset( string $label, string $class ) : Document
     {
-        $profiler = Clerk::event( __METHOD__."->{$label} as {$class}" );
-        $assets   = $this->assetManager->getAsset( $label,$class );
-        dump( $assets );
-        $this->set( $assets );
-        $profiler->stop();
+        // $profiler = Clerk::event( __METHOD__."->{$label} as {$class}" );
+        // $assets   = $this->assetManager->getAsset( $label,$class );
+        // dump( $assets );
+        // $this->set( $assets );
+        // $profiler->stop();
         return $this;
     }
 
@@ -187,9 +190,9 @@ final class Document extends ArrayAccessor
      */
     public function link( string $href, array $attributes = [], ?string $assetID = null ) : Document
     {
-        $assetID ??= $attributes['id'] ?? Normalize::key( $href );
-
-        $this->set( "asset.link.{$assetID}", new Link( $href, $assetID, $attributes ) );
+        // $assetID ??= $attributes['id'] ?? Normalize::key( $href );
+        //
+        // $this->set( "asset.link.{$assetID}", new Link( $href, $assetID, $attributes ) );
 
         return $this;
     }
@@ -211,10 +214,10 @@ final class Document extends ArrayAccessor
         ?int              $persistence = EPHEMERAL,
     ) : Document {
 
-        $asset = new Style( $path, $id );
-        $key   = "asset.style.{$id}";
-        $html  = $inline ? $asset->getInlineHtml( $minify ) : $asset->getHtml( $minify );
-        $this->set( $key, $html );
+        // $asset = new Style( $path, $id );
+        // $key   = "asset.style.{$id}";
+        // $html  = $inline ? $asset->getInlineHtml( $minify ) : $asset->getHtml( $minify );
+        // $this->set( $key, $html );
         return $this;
     }
 
@@ -234,10 +237,10 @@ final class Document extends ArrayAccessor
         bool              $minify = true,
         ?int              $persistence = EPHEMERAL,
     ) : Document {
-        $asset = new Script( $path, $id );
-        $key   = "asset.script.{$id}";
-        $html  = $inline ? $asset->getInlineHtml( $minify ) : $asset->getHtml( $minify );
-        $this->set( $key, $html );
+        // $asset = new Script( $path, $id );
+        // $key   = "asset.script.{$id}";
+        // $html  = $inline ? $asset->getInlineHtml( $minify ) : $asset->getHtml( $minify );
+        // $this->set( $key, $html );
 
         return $this;
     }

@@ -37,8 +37,8 @@ return static function( ContainerConfigurator $container ) : void {
         ->args( [
             service( CurrentRequest::class ),
             service( 'cache.assets' ),
-            service( 'router' ),
             service( 'parameter_bag' ),
-            service( Manifest::class ),
+            param( 'path.asset_inventory' ),
+            param( 'path.asset_manifest' ),
         ] );
 };

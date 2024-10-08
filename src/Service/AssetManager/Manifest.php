@@ -96,7 +96,7 @@ final class Manifest
         $this->manifest->save();
     }
 
-    private function manifest() : ArrayStore
+    public function manifest() : ArrayStore
     {
         return $this->manifest ??= new ArrayStore( $this->path );
     }

@@ -103,17 +103,18 @@ final class CoreBundle extends AbstractBundle
     private function setCoreParameters( ContainerBuilder $builder ) : void
     {
         $parameters = [
-            'dir.root' => '%kernel.project_dir%',
-            'dir.var'  => '%dir.root%/var',
-            'dir.public'         => '%dir.root%/public',
-            'dir.core' => \dirname( __DIR__ ),
+            'dir.root'   => '%kernel.project_dir%',
+            'dir.var'    => '%dir.root%/var',
+            'dir.public' => '%dir.root%/public',
+            'dir.core'   => \dirname( __DIR__ ),
 
             // Assets
-            'dir.assets'          => '%dir.root%/assets',
-            'dir.public.assets'   => '%dir.root%/public/assets',
-            'dir.assets.storage'  => '%dir.root%/var/assets',
-            'path.asset_manifest' => '%dir.root%/var/assets/manifest.array.php',
-            'dir.core.assets'     => '%dir.core%/assets',
+            'dir.assets'           => '%dir.root%/assets',
+            'dir.public.assets'    => '%dir.root%/public/assets',
+            'dir.assets.storage'   => '%dir.root%/var/assets',
+            'path.asset_inventory' => '%dir.root%/var/assets/inventory.array.php',
+            'path.asset_manifest'  => '%dir.root%/var/assets/manifest.array.php',
+            'dir.core.assets'      => '%dir.core%/assets',
 
             // Templates
             'dir.templates'      => '%dir.root%/templates',
@@ -126,7 +127,6 @@ final class CoreBundle extends AbstractBundle
             // Settings DataStore
             'path.settings_store' => '%dir.var%/settings.array.php',
         ];
-
 
         foreach ( $parameters as $name => $value ) {
             $builder->setParameter( $name, Normalize::path( $value ) );
