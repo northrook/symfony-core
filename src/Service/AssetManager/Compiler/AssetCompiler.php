@@ -6,7 +6,7 @@ use Core\Service\AssetManager\Asset;
 use Northrook\Clerk;
 use Northrook\Filesystem\File;
 use Northrook\Resource\Path;
-use Support\ClassMethods;
+use Support\{ClassMethods, Normalize};
 use function String\hashKey;
 
 abstract class AssetCompiler
@@ -24,7 +24,7 @@ abstract class AssetCompiler
     public function __construct(
         array                     $sources,
         public readonly string    $label,
-        protected readonly string $publicDirectory,
+        protected readonly string $rootDirectory,
     ) {
         Clerk::event( $this::class, 'document' );
         $this->type    = $this->assetType();
@@ -46,20 +46,25 @@ abstract class AssetCompiler
 
     abstract protected function compile() : string;
 
+    final protected function publicFilePath() : string
+    {
+        return Normalize::path( "{$this->rootDirectory}/public/assets/{$this->type}/{$this->label}.{$this->assetExtension()}" );
+    }
+
+    final protected function relativeFilePath() : string
+    {
+        return Normalize::path( "/assets/{$this->type}/{$this->label}.{$this->assetExtension()}" );
+    }
+
     protected function assetType() : string
     {
         return \strtolower( $this->classBasename() );
     }
 
-    final protected function publicFilePath() : string
+    protected function assetExtension() : string
     {
-        return $this->publicDirectory.$this->relativeFilePath();
-    }
-
-    final protected function relativeFilePath() : string
-    {
-        $filetype = \strrchr( \array_key_first( $this->sources ), '.', true );
-        return "/{$this->type}/{$this->label}{$filetype}";
+        static $extension;
+        return $extension ??= \trim( \strrchr( \array_key_first( $this->sources ), '.' ), '.' );
     }
 
     // TODO : If any provided source is a URL, fetch the external resource and cache it

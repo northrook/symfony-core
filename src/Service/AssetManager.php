@@ -98,12 +98,12 @@ final class AssetManager
 
         $inventoryKey ??= \strtolower( $label.'.'.classBasename( $class ) );
         $sources          = (array) $this->getInventory()->get( "{$inventoryKey}:" );
-        $storageDirectory = $this->parameterBag->get( 'dir.public.assets' );
+        $storageDirectory = $this->parameterBag->get( 'dir.root' );
 
         /** @var AssetCompiler $compiler */
         $compiler = new ( $class )( $sources, $label, $storageDirectory );
 
-        dump( $label, $inventoryKey, $class, $sources, $compiler );
+        // dump( $label, $inventoryKey, $class, $sources, $compiler );
 
         $manifest[$label] = $compiler->asset;
 

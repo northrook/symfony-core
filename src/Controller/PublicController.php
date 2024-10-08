@@ -24,7 +24,7 @@ final class PublicController extends Controller
 
     public function index( ?string $route, Document $document, ParameterBagInterface $parameterBag ) : Response
     {
-        dump( $document->all() );
+        dd( $document->assetManager->registerAssets( 'core', Style::class, ) );
         $document(
             'Index says welcome',
             keywords: ['we', 'like', 'keywords'],
