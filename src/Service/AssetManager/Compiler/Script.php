@@ -2,15 +2,14 @@
 
 namespace Core\Service\AssetManager\Compiler;
 
+use Northrook\Minify\JavaScriptMinifier;
+
+
 class Script extends AssetCompiler
 {
     protected function compile() : string
     {
-        $generator = new \MatthiasMullie\Minify\JS();
-
-        foreach ( $this->sources as $path ) {
-            $generator->add( $path );
-        }
+        $generator = new JavaScriptMinifier( $this->sources );
 
         // Eventually minify using Uglify v3
         return $generator->minify();

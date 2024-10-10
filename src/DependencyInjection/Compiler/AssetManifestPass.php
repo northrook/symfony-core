@@ -40,8 +40,8 @@ final readonly class AssetManifestPass implements CompilerPassInterface
         $coreAssets = $this->parameterBag->get( 'dir.core.assets' );
 
         $this->getAssetGroup( 'baseline', 'style', \glob( $coreAssets.'\styles\reset.css' ) );
-        $this->getAssetGroup( 'baseline', 'style', \glob( $coreAssets.'\styles\baseline.css' ) );
-        $this->getAssetGroup( 'baseline', 'style', \glob( $coreAssets.'\styles\rules.css' ) );
+        $this->getAssetGroup( 'baseline', 'style', \glob( $coreAssets.'\styles\core.css' ) );
+        $this->getAssetGroup( 'baseline', 'style', \glob( $coreAssets.'\styles\core.*.css' ) );
 
         $this->getAssetGroup( 'core', 'style', \glob( "{$appAssets}\styles\*.css" ) );
         $this->getAssetGroup( 'core', 'script', \glob( "{$appAssets}\scripts\*.js" ) );

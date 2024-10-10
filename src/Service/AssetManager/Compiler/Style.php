@@ -2,18 +2,13 @@
 
 namespace Core\Service\AssetManager\Compiler;
 
-use Northrook\Filesystem\File;
-use Northrook\HTML\Element;
+use Northrook\Minify\StylesheetMinifier;
 
 class Style extends AssetCompiler
 {
     protected function compile() : string
     {
-        $generator = new \MatthiasMullie\Minify\CSS();
-
-        foreach ( $this->sources as $path ) {
-            $generator->add( $path );
-        }
+        $generator = new StylesheetMinifier( $this->sources );
 
         return $generator->minify();
     }

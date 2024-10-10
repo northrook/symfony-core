@@ -29,6 +29,7 @@
     "northrook/clerk": "dev-main",
     "northrook/latte-bundle": "dev-main",
     "northrook/html": "dev-main",
+    "northrook/minify": "dev-main",
     "northrook/ui": "dev-main",
     "symfony/http-kernel": "^7.1",
     "symfony/dependency-injection": "^7.1",
@@ -39,15 +40,13 @@
     "symfony/profiler-pack": "^1.0",
     "symfony/debug-bundle": "7.1.*",
     "symfony/monolog-bundle": "^3.10",
-    "symfony/security-bundle": "^7.1",
-    "northrook/stylesheets": "dev-main"
+    "symfony/security-bundle": "^7.1"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
     "phpstan/phpstan": "@stable",
     "northrook/php-cs": "dev-main",
     "jetbrains/phpstorm-attributes": "^1.1",
-    "matthiasmullie/minify": "^1.3",
     "northrook/dev-env": "dev-main"
   },
   "replace": {
