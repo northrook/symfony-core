@@ -21,9 +21,9 @@ use const Cache\EPHEMERAL;
 final class Document extends ArrayAccessor
 {
     private const array META_GROUPS = [
-            'html'     => ['id', 'status'],
-            'document' => ['title', 'description', 'author', 'keywords'],
-            'theme'    => ['color', 'scheme', 'name'],
+        'html'     => ['id', 'status'],
+        'document' => ['title', 'description', 'author', 'keywords'],
+        'theme'    => ['color', 'scheme', 'name'],
     ];
 
     protected bool $locked = false;
@@ -40,8 +40,8 @@ final class Document extends ArrayAccessor
         }
 
         Log::warning(
-                'The {class} is locked. No further changes can be made at this time.',
-                ['class' => $this::class, 'document' => $this, 'reason' => 'Locked by the ResponseHandler.'],
+            'The {class} is locked. No further changes can be made at this time.',
+            ['class' => $this::class, 'document' => $this, 'reason' => 'Locked by the ResponseHandler.'],
         );
 
         return true;
@@ -64,12 +64,12 @@ final class Document extends ArrayAccessor
     }
 
     public function __invoke(
-            ?string           $title = null,
-            ?string           $description = null,
-            null|string|array $keywords = null,
-            ?string           $author = null,
-            ?string           $id = null,
-            ?string           $status = null,
+        ?string           $title = null,
+        ?string           $description = null,
+        null|string|array $keywords = null,
+        ?string           $author = null,
+        ?string           $id = null,
+        ?string           $status = null,
     ) : Document {
 
         $set = \array_filter( \get_defined_vars() );
@@ -130,8 +130,8 @@ final class Document extends ArrayAccessor
         foreach ( $rule as $content ) {
             if ( ! \is_string( $content ) ) {
                 Trigger::valueError(
-                        message : 'Invalid robots rule for {bot}, a string is required, but {type} was provided.',
-                        context : ['bot' => $bot, 'type' => \gettype( $content )],
+                    message : 'Invalid robots rule for {bot}, a string is required, but {type} was provided.',
+                    context : ['bot' => $bot, 'type' => \gettype( $content )],
                 );
 
                 continue;
@@ -168,24 +168,13 @@ final class Document extends ArrayAccessor
     {
         Clerk::event( __METHOD__ );
 
-        $assets =[];
         foreach ( (array) $enqueue as $label ) {
             $profiler = Clerk::event( __METHOD__."->{$label}" );
-
-            $assets= $this->assetManager->resolveAssets( $label );
-
-            // [$key, $mod ] = \Support\Str::bisect( $label, ':' );
-            //
-            // foreach ($this->assetManager->getAsset( $key ) as $asset ) {
-            //     $this->set( "asset.{$asset->type}.{$asset->id}", $html);
-            // }
-
-            // $this->set( $assets );
+            $this->set( $this->assetManager->resolveAssets( $label ) );
             $profiler->stop();
         }
 
         Clerk::stop( __METHOD__ );
-        dump( $assets );
         return $this;
     }
 
@@ -217,11 +206,11 @@ final class Document extends ArrayAccessor
      * @return $this
      */
     public function style(
-            string            $id,
-            string|array|Path $path,
-            bool              $inline = false,
-            bool              $minify = true,
-            ?int              $persistence = EPHEMERAL,
+        string            $id,
+        string|array|Path $path,
+        bool              $inline = false,
+        bool              $minify = true,
+        ?int              $persistence = EPHEMERAL,
     ) : Document {
 
         // $asset = new Style( $path, $id );
@@ -242,11 +231,11 @@ final class Document extends ArrayAccessor
      * @return $this
      */
     public function script(
-            string            $id,
-            string|array|Path $path,
-            bool              $inline = false,
-            bool              $minify = true,
-            ?int              $persistence = EPHEMERAL,
+        string            $id,
+        string|array|Path $path,
+        bool              $inline = false,
+        bool              $minify = true,
+        ?int              $persistence = EPHEMERAL,
     ) : Document {
         // $asset = new Script( $path, $id );
         // $key   = "asset.script.{$id}";
@@ -257,18 +246,18 @@ final class Document extends ArrayAccessor
     }
 
     public function theme(
-            string  $color,
-            string  $scheme = 'dark light',
-            ?string $name = 'system',
+        string  $color,
+        string  $scheme = 'dark light',
+        ?string $name = 'system',
     ) : Document {
 
         // Needs to generate theme.scheme.color,
         // this is to allow for different colors based on light/dark
 
         foreach ( [
-                'color'  => $color,
-                'scheme' => $scheme,
-                'name'   => $name,
+            'color'  => $color,
+            'scheme' => $scheme,
+            'name'   => $name,
         ] as $metaName => $content ) {
             $this->meta( "theme.{$metaName}", $content );
         }

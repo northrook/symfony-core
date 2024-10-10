@@ -1,0 +1,42 @@
+/**
+
+   This Stylesheet will contain all [CORE] rules and variables.
+
+   These are intended to be overwritten by the Application,
+   or serve as as defaults/fallbacks.
+
+   Used for both [Admin] and [Public] stylesheets.
+
+ */
+
+:root {
+  /* Offset, usually from the viewport */
+  --offset-top      : 1rem;
+  --offset-left     : 1rem;
+  --offset-right    : 1rem;
+  --offset-bottom   : 1rem;
+
+  /* Spacing between items */
+  --gap             : 1rem;
+
+  /* The size of something */
+  --size            : 1em;
+
+  /* Size groups */
+  --tiny            : .125rem;
+  --extra-small     : .25rem;
+  --small           : .5rem;
+  --medium          : 1rem;
+  --large           : 1.5rem;
+  --section-gap     : 2rem;
+
+  --font-regular    : 400;
+  --font-bold       : 600;
+  --font-size       : 1rem;
+  --font-size-small : .875rem;
+  ---h1-size        : min(max(1.8rem, 6vw), 3.05rem);
+  ---h2-size        : min(max(1.6rem, 6vw), 2rem);
+  ---h3-size        : min(max(1.25rem, 6vw), 1.8rem);
+  ---h4-size        : min(max(1.1rem, 6vw), 1.5rem);
+  --line-height     : 1.5rem;
+}

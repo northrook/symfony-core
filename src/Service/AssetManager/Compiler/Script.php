@@ -12,6 +12,7 @@ class Script extends AssetCompiler
             $generator->add( $path );
         }
 
+        // Eventually minify using Uglify v3
         return $generator->minify();
     }
 }

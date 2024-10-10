@@ -39,6 +39,10 @@ final readonly class AssetManifestPass implements CompilerPassInterface
         $appAssets  = $this->parameterBag->get( 'dir.assets' );
         $coreAssets = $this->parameterBag->get( 'dir.core.assets' );
 
+        $this->getAssetGroup( 'baseline', 'style', \glob( $coreAssets.'\styles\reset.css' ) );
+        $this->getAssetGroup( 'baseline', 'style', \glob( $coreAssets.'\styles\baseline.css' ) );
+        $this->getAssetGroup( 'baseline', 'style', \glob( $coreAssets.'\styles\rules.css' ) );
+
         $this->getAssetGroup( 'core', 'style', \glob( "{$appAssets}\styles\*.css" ) );
         $this->getAssetGroup( 'core', 'script', \glob( "{$appAssets}\scripts\*.js" ) );
         $this->getAssetGroup( 'admin', 'style', \glob( "{$appAssets}\styles\admin\*.css" ) );
@@ -83,11 +87,11 @@ final readonly class AssetManifestPass implements CompilerPassInterface
         $assetManager = $container->getDefinition( AssetManager::class );
 
         return new ( $assetManager->getClass() )(
-                null,
-                null,
-                $this->parameterBag,
-                $this->parameterBag->get( 'path.asset_inventory' ),
-                $this->parameterBag->get( 'path.asset_manifest' ),
+            null,
+            null,
+            $this->parameterBag,
+            $this->parameterBag->get( 'path.asset_inventory' ),
+            $this->parameterBag->get( 'path.asset_manifest' ),
         );
     }
 }

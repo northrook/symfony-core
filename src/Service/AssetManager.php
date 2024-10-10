@@ -16,6 +16,32 @@ use Symfony\Contracts\Cache\CacheInterface;
 use function Support\classBasename;
 use const Support\EMPTY_STRING;
 
+
+/*
+
+ * Each __FILE__::source is saved as a Path object to the database
+
+ * Each Asset::class has a $sources array[assetID => Path::class]
+
+ * Each Asset::class is the end result, and will merge the array if able
+
+Assets will be registered here from each Bundle,
+and should have options to merge, minify, and inline.
+
+They need to be exposable to the UI somehow,
+so an admin can easily add, edit, disable, or remove at will.
+
+Core assets will not be removable.
+
+The registered Asset should be saved somewhere semi-permanent, ideally to the database.
+
+The __resulting__ asset data (html,css,etc) will be cached at runtime for a given time.
+
+The getAsset method should first check the provided $cacheAdapter, if that returns empty,
+recompile with the stored settings.
+
+ */
+
 /**
  * @internal
  * @author Martin Nielsen <mn@northrook.com>
@@ -51,22 +77,22 @@ final class AssetManager
      * @param string                $manifestPath
      */
     public function __construct(
-        private readonly ?CurrentRequest       $request,
-        private readonly ?CacheInterface       $cacheAdapter,
-        private readonly ParameterBagInterface $parameterBag,
-        private readonly string                $inventoryPath,
-        private readonly string                $manifestPath,
+            private readonly ?CurrentRequest       $request,
+            private readonly ?CacheInterface       $cacheAdapter,
+            private readonly ParameterBagInterface $parameterBag,
+            private readonly string                $inventoryPath,
+            private readonly string                $manifestPath,
     ) {
         $this->enabled = ( $this->request?->isHtmx ) ? $this->request?->headerBag( has : $this::ASSETS_HEADER ) : true;
 
         if ( false === $this->enabled ) {
             Log::notice(
-                'The {class} is disabled, no {header} found.',
-                [
-                    'class'     => classBasename( $this::class ),
-                    'header'    => 'HX-Assets',
-                    'headerBag' => $this->request?->headerBag()->all(),
-                ],
+                    'The {class} is disabled, no {header} found.',
+                    [
+                            'class'     => classBasename( $this::class ),
+                            'header'    => 'HX-Assets',
+                            'headerBag' => $this->request?->headerBag()->all(),
+                    ],
             );
             return;
         }
@@ -100,17 +126,18 @@ final class AssetManager
         [$key, $mod] = Str::bisect( $label, ':' );
 
         foreach ( $this->getAsset( $key ) as $asset ) {
-            $html = $this->cacheAdapter->get(
-                "{$asset->id}{$mod}",
-                function( CacheItem $item ) use ( $asset, $mod ) {
-                    $item->expiresAfter( 1 );
-
-                    if ( 'inline' === $mod ) {
-                        return ( $asset->compilerClass )::inline( $asset );
-                    }
-                    return ( $asset->compilerClass )::link( $asset );
-                },
-            );
+            // $html = $this->cacheAdapter->get(
+            //     "{$asset->id}{$mod}",
+            //     function( CacheItem $item ) use ( $asset, $mod ) {
+            //         $item->expiresAfter( 5 );
+            //
+            //         if ( 'inline' === $mod ) {
+            //             return ( $asset::class )::inline( $asset );
+            //         }
+            //         return ( $asset::class )::link( $asset );
+            //     },
+            // );
+            $html = 'inline' === $mod  ? ( $asset::class )::inline( $asset ) :( $asset::class )::link( $asset );
             $assets["asset.{$asset->type}.{$asset->id}"] = $html;
         }
 

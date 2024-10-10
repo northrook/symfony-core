@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Core\Service\AssetManager\Compiler;
 
 use Core\Service\AssetManager\Asset;
@@ -9,6 +11,10 @@ use Northrook\Resource\Path;
 use Support\{ClassMethods, Normalize};
 use function String\hashKey;
 
+/**
+ * @internal
+ * @author Martin Nielsen <mn@northrook.com>
+ */
 abstract class AssetCompiler
 {
     use ClassMethods;
@@ -46,16 +52,6 @@ abstract class AssetCompiler
 
     abstract protected function compile() : string;
 
-    final protected function publicFilePath() : string
-    {
-        return Normalize::path( "{$this->rootDirectory}/public/assets/{$this->type}/{$this->label}.{$this->assetExtension()}" );
-    }
-
-    final protected function relativeFilePath() : string
-    {
-        return Normalize::path( "/assets/{$this->type}/{$this->label}.{$this->assetExtension()}" );
-    }
-
     protected function assetType() : string
     {
         return \strtolower( $this->classBasename() );
@@ -65,6 +61,16 @@ abstract class AssetCompiler
     {
         static $extension;
         return $extension ??= \trim( \strrchr( \array_key_first( $this->sources ), '.' ), '.' );
+    }
+
+    final protected function publicFilePath() : string
+    {
+        return Normalize::path( "{$this->rootDirectory}/public/assets/{$this->type}/{$this->label}.{$this->assetExtension()}" );
+    }
+
+    final protected function relativeFilePath() : string
+    {
+        return Normalize::path( "/assets/{$this->type}/{$this->label}.{$this->assetExtension()}" );
     }
 
     // TODO : If any provided source is a URL, fetch the external resource and cache it
