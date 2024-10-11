@@ -16,7 +16,6 @@ use Symfony\Contracts\Cache\CacheInterface;
 use function Support\classBasename;
 use const Support\EMPTY_STRING;
 
-
 /*
 
  * Each __FILE__::source is saved as a Path object to the database
@@ -77,22 +76,22 @@ final class AssetManager
      * @param string                $manifestPath
      */
     public function __construct(
-            private readonly ?CurrentRequest       $request,
-            private readonly ?CacheInterface       $cacheAdapter,
-            private readonly ParameterBagInterface $parameterBag,
-            private readonly string                $inventoryPath,
-            private readonly string                $manifestPath,
+        private readonly ?CurrentRequest       $request,
+        private readonly ?CacheInterface       $cacheAdapter,
+        private readonly ParameterBagInterface $parameterBag,
+        private readonly string                $inventoryPath,
+        private readonly string                $manifestPath,
     ) {
         $this->enabled = ( $this->request?->isHtmx ) ? $this->request?->headerBag( has : $this::ASSETS_HEADER ) : true;
 
         if ( false === $this->enabled ) {
             Log::notice(
-                    'The {class} is disabled, no {header} found.',
-                    [
-                            'class'     => classBasename( $this::class ),
-                            'header'    => 'HX-Assets',
-                            'headerBag' => $this->request?->headerBag()->all(),
-                    ],
+                'The {class} is disabled, no {header} found.',
+                [
+                    'class'     => classBasename( $this::class ),
+                    'header'    => 'HX-Assets',
+                    'headerBag' => $this->request?->headerBag()->all(),
+                ],
             );
             return;
         }
@@ -137,7 +136,7 @@ final class AssetManager
             //         return ( $asset::class )::link( $asset );
             //     },
             // );
-            $html = 'inline' === $mod  ? ( $asset::class )::inline( $asset ) :( $asset::class )::link( $asset );
+            $html                                        = 'inline' === $mod ? ( $asset::class )::inline( $asset ) : ( $asset::class )::link( $asset );
             $assets["asset.{$asset->type}.{$asset->id}"] = $html;
         }
 
@@ -161,32 +160,33 @@ final class AssetManager
     }
 
     /**
-     * This will generate a new Asset under a given label,
-     * saving it to the Manifest.
+     * This will compile and register a new Asset under a given label, saving it to the Manifest.
      *
-     * The Asset class will generate relevant files in the `./public/assets/{type}` directory.
+     * - Parse, compile, and merge assets from the inventory by $label or $key.
+     * - Minify and optimize resulting data.
+     * - Save relevant compiled files in the `./public/assets/{type}` directory.
      *
      * @template AssetObject
      *
-     * @param string                    $label
-     * @param class-string<AssetObject> $class
-     * @param ?string                   $inventoryKey
+     * @param string                     $label
+     * @param class-string<AssetObject>  $class
+     * @param string                    ...$key
      *
      * @return AssetObject
      */
-    public function registerAssets( string $label, string $class, ?string $inventoryKey = null ) : mixed
+    public function compileAsset( string $label, string $class, string ...$key ) : mixed
     {
         $profiler = Clerk::event( __METHOD__."->{$label} as {$class}" );
 
-        // if ( \str_contains( $label, '.' ) && ! $inventoryKey ) {
-        //     E_Value::error(
-        //         'Asset label {label} contains the nesting character {delineator}, but an {inventoryKey} has not been provided.',
-        //         ['label' => $label, 'delineator' => '.', 'inventoryKey' => '$inventoryKey'],
-        //     );
-        // }
+        $inventory ??= [Str::end( $label, \strtolower( '.'.classBasename( $class ) ) )];
 
-        $inventoryKey ??= Str::end( $label, \strtolower( '.'.classBasename( $class ) ) );
-        $sources          = (array) $this->getInventory()->get( "{$inventoryKey}:" );
+        $sources = [];
+
+        foreach ( $inventory as $asset ) {
+            $sources = [...$sources, ...(array) $this->getInventory()->get( "{$asset}:" )];
+        }
+        //
+        // dump( $inventory, $sources);
         $storageDirectory = $this->parameterBag->get( 'dir.root' );
 
         /** @var AssetCompiler $compiled */

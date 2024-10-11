@@ -2,7 +2,7 @@
 
 namespace Core\Service\AssetManager\Compiler;
 
-use Northrook\Minify\StylesheetMinifier;
+use Northrook\StylesheetMinifier;
 
 class Style extends AssetCompiler
 {

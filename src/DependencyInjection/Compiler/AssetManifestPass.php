@@ -52,8 +52,8 @@ final readonly class AssetManifestPass implements CompilerPassInterface
 
     private function registerCoreAssets() : void
     {
-        $this->assetManager->registerAssets( 'core.style', Style::class );
-        $this->assetManager->registerAssets( 'core.script', Script::class );
+        $this->assetManager->compileAsset( 'core.style', Style::class, 'baseline', 'core.style' );
+        $this->assetManager->compileAsset( 'core.script', Script::class );
     }
 
     private function getAssetGroup( string $label, string $type, array $glob ) : void

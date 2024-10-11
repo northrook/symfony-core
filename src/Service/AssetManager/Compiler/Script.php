@@ -2,7 +2,7 @@
 
 namespace Core\Service\AssetManager\Compiler;
 
-use Northrook\Minify\JavaScriptMinifier;
+use Northrook\JavaScriptMinifier;
 
 
 class Script extends AssetCompiler
