@@ -50,7 +50,7 @@ final readonly class Asset
         if ( Style::class === $asset->compilerClass ) {
             $attributes['rel']  = 'stylesheet';
             $attributes['href'] = $asset->getPath();
-            return (string) new Element( 'style', $attributes );
+            return (string) new Element( 'link', $attributes );
         }
 
         throw new InvalidArgumentException();
