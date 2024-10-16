@@ -6,7 +6,7 @@ namespace Core\Response\Compiler;
 
 use Core\DependencyInjection\ServiceContainer;
 use Core\Response\{Document};
-use Core\Service\CurrentRequest;
+use Core\Service\{Request};
 use Core\Settings;
 use Core\View\Message;
 use InvalidArgumentException;
@@ -77,7 +77,7 @@ final class DocumentHtml
      */
     private function flashBagHandler() : string
     {
-        $flashes       = $this->serviceLocator( CurrentRequest::class )->flashBag()->all();
+        $flashes       = $this->serviceLocator( Request::class )->flashBag()->all();
         $notifications = EMPTY_STRING;
 
         foreach ( $flashes as $type => $flash ) {

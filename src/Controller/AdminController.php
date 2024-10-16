@@ -3,7 +3,7 @@
 namespace Core\Controller;
 
 use Core\Response\{Controller, Document, Parameters};
-use Core\Service\CurrentRequest;
+use Core\Service\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 final class AdminController extends Controller
@@ -27,7 +27,7 @@ final class AdminController extends Controller
         return $this->response->template( $route );
     }
 
-    public function blog( ?string $route, CurrentRequest $request ) : Response
+    public function blog( ?string $route, Request $request ) : Response
     {
         dump( $request );
         $message = __METHOD__.' rendering route: '.$route;

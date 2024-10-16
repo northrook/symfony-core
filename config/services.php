@@ -8,16 +8,17 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use Core\Service\{CurrentRequest, ToastService};
+use Core\Service\{Pathfinder, ThemeManager, ToastService};
+
 return static function( ContainerConfigurator $container ) : void {
 
     $container->services()
 
-            // Current Request ServiceContainer
-        ->set( CurrentRequest::class )
-        ->args( [service( 'request_stack' ), service( 'http_kernel' )] )
+        // Current Request ServiceContainer
+        ->set( ThemeManager::class )
+        ->args( [service( Pathfinder::class )] )
 
-            // Toasts
+        // Toasts
         ->public()
         ->set( ToastService::class )->args( [service( 'request_stack' )] );
 };

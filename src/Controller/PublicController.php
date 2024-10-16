@@ -4,7 +4,7 @@ namespace Core\Controller;
 
 use Core\Response\{Controller, Document, Parameters};
 use Core\Service\AssetManager\Compiler\{Script, Style};
-use Core\Service\CurrentRequest;
+use Core\Service\Request;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -13,11 +13,11 @@ final class PublicController extends Controller
     protected function setDefault( Document $document, Parameters $parameters ) : void
     {
         $document(
-                'Welcome - Public!',
-                'This is an example template.',
+            'Welcome - Public!',
+            'This is an example template.',
         )->assets(
-                'core',
-        // 'core.style',
+            'core',
+            // 'core.style',
         );
         // ->asset( 'core', Style::class ) // just use the 'dir.assets/core/*.css' style glob pattern
         // ->asset( 'core', Script::class );
@@ -30,18 +30,18 @@ final class PublicController extends Controller
         // dd( $document->all());
         // dd( $document->assetManager->registerAssets( 'core.style', Style::class ) );
         $document(
-                          'Index says welcome',
-                keywords: ['we', 'like', 'keywords'],
+            'Index says welcome',
+            keywords: ['we', 'like', 'keywords'],
         );
         return $this->response->document();
     }
 
-    public function blog( ?string $route, CurrentRequest $request ) : Response
+    public function blog( ?string $route, Request $request ) : Response
     {
         dump( $request );
         $message = __METHOD__.' rendering route: '.$route ;
         return new Response(
-                <<<HTML
+            <<<HTML
                 <!DOCTYPE html>
                 <html lang="en">
                 <head>

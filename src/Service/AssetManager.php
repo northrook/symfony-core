@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Core\Service;
 
-use Northrook\{ArrayStore, Clerk, Exception\E_Value};
+use Northrook\{ArrayStore, Clerk};
 use Core\Service\AssetManager\Asset;
 use Core\Service\AssetManager\Compiler\AssetCompiler;
 use InvalidArgumentException;
@@ -69,14 +69,14 @@ final class AssetManager
     public readonly array $deployed;
 
     /**
-     * @param ?CurrentRequest       $request       // for determining deployed assets
+     * @param ?Request              $request       // for determining deployed assets
      * @param ?CacheInterface       $cacheAdapter  // for caching fully generated asset HTML
      * @param ParameterBagInterface $parameterBag  // [pathfinder?]
      * @param string                $inventoryPath
      * @param string                $manifestPath
      */
     public function __construct(
-        private readonly ?CurrentRequest       $request,
+        private readonly ?Request              $request,
         private readonly ?CacheInterface       $cacheAdapter,
         private readonly ParameterBagInterface $parameterBag,
         private readonly string                $inventoryPath,
@@ -136,7 +136,11 @@ final class AssetManager
             //         return ( $asset::class )::link( $asset );
             //     },
             // );
-            $html                                        = 'inline' === $mod ? ( $asset::class )::inline( $asset ) : ( $asset::class )::link( $asset );
+
+            /** @type  Asset $assetClass */
+            $assetClass = $asset::class;
+            $html       = 'inline' === $mod ? $assetClass::inline( $asset ) : $assetClass::link( $asset );
+
             $assets["asset.{$asset->type}.{$asset->id}"] = $html;
         }
 
@@ -168,8 +172,8 @@ final class AssetManager
      *
      * @template AssetObject
      *
-     * @param string                     $label
-     * @param class-string<AssetObject>  $class
+     * @param string                    $label
+     * @param class-string<AssetObject> $class
      * @param string                    ...$key
      *
      * @return AssetObject

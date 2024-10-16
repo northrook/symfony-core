@@ -9,8 +9,9 @@ declare(strict_types=1);
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Core\Controller\{AdminController, PublicController};
-use Core\Service\{AssetManager, CurrentRequest};
+use Core\Service\{AssetManager, Headers, Request};
 use Core\Response\{Compiler\DocumentHtml, Document, Parameters, ResponseHandler, RouteHandler};
+use Core\Event\ResponseEventHandler;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 
@@ -23,7 +24,7 @@ return static function( ContainerConfigurator $container ) : void {
     $controllerArguments = [
         service( Document::class ),
         service( Parameters::class ),
-        service( CurrentRequest::class ),
+        service( Request::class ),
         service( ResponseHandler::class ),
     ];
 
@@ -33,6 +34,17 @@ return static function( ContainerConfigurator $container ) : void {
         ->set( 'cache.response', PhpFilesAdapter::class )
         ->args( ['response', 0, '%dir.cache%/response'] )
         ->tag( 'cache.pool' )
+
+            // Router
+        ->set( ResponseEventHandler::class )
+        ->args( [service( 'router' ), Headers::class] )
+        ->tag(
+            'kernel.event_listener',
+            [
+                'method'   => 'matchControllerMethod',
+                'priority' => 100,
+            ],
+        )->tag( 'kernel.event_listener', ['method' => 'mergeResponseHeaders'])
 
             // Router
         ->set( RouteHandler::class )

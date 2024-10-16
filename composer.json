@@ -40,7 +40,8 @@
     "symfony/profiler-pack": "^1.0",
     "symfony/debug-bundle": "7.1.*",
     "symfony/monolog-bundle": "^3.10",
-    "symfony/security-bundle": "^7.1"
+    "symfony/security-bundle": "^7.1",
+    "northrook/core-services": "dev-main"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",

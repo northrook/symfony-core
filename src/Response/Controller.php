@@ -2,7 +2,7 @@
 
 namespace Core\Response;
 
-use Core\Service\CurrentRequest;
+use Core\Service\{Request};
 use Northrook\Clerk;
 
 /**
@@ -13,7 +13,7 @@ abstract class Controller
     final public function __construct(
         Document                           $document,
         Parameters                         $parameters,
-        protected readonly CurrentRequest  $request,
+        protected readonly Request         $request,
         protected readonly ResponseHandler $response,
     ) {
         Clerk::stop( RouteHandler::class );
