@@ -41,7 +41,7 @@ final class Document extends ArrayAccessor
 
         Log::warning(
             'The {class} is locked. No further changes can be made at this time.',
-            ['class' => $this::class, 'document' => $this, 'reason' => 'Locked by the ResponseHandler.'],
+            ['class' => $this::class, 'document' => $this, 'reason' => 'Locked by the RequestResponseHandler.'],
         );
 
         return true;

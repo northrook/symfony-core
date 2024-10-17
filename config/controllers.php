@@ -10,8 +10,8 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Core\Controller\{AdminController, PublicController};
 use Core\Service\{AssetManager, Headers, Request};
-use Core\Response\{Compiler\DocumentHtml, Document, Parameters, ResponseHandler, RouteHandler};
-use Core\Event\ResponseEventHandler;
+use Core\Response\{Compiler\DocumentHtml, Document, Parameters, ResponseHandler};
+use Core\Event\RequestResponseHandler;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 
@@ -36,25 +36,20 @@ return static function( ContainerConfigurator $container ) : void {
         ->tag( 'cache.pool' )
 
             // Router
-        ->set( ResponseEventHandler::class )
-        ->args( [service( 'router' ), Headers::class] )
+        ->set( RequestResponseHandler::class )
+        ->args( [
+            service( 'router' ),
+            service( Headers::class ),
+        ] )
+        // : ControllerEvent
         ->tag(
             'kernel.event_listener',
-            [
-                'method'   => 'matchControllerMethod',
-                'priority' => 100,
-            ],
-        )->tag( 'kernel.event_listener', ['method' => 'mergeResponseHeaders'])
-
-            // Router
-        ->set( RouteHandler::class )
-        ->args( [service( 'router' )] )
+            ['method' => 'matchControllerMethod', 'priority' => 100],
+        )
+        // : ResponseEvent
         ->tag(
             'kernel.event_listener',
-            [
-                'method'   => 'matchControllerMethod',
-                'priority' => 100,
-            ],
+            ['method' => 'mergeResponseHeaders'],
         )
 
             // Controller Document autowire

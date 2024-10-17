@@ -16,7 +16,7 @@ abstract class Controller
         protected readonly Request         $request,
         protected readonly ResponseHandler $response,
     ) {
-        Clerk::stop( RouteHandler::class );
+        // Clerk::stop( RouteHandler::class );
         Clerk::event( Controller::class, 'controller' );
         $this->setDefault( $document, $parameters );
     }
