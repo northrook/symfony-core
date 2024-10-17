@@ -3,9 +3,8 @@
 namespace Core\Controller;
 
 use Core\Response\{Controller, Document, Parameters};
+use Core\Service\{Headers, Request};
 use Core\Service\AssetManager\Compiler\{Script, Style};
-use Core\Service\Request;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 final class PublicController extends Controller
@@ -25,10 +24,9 @@ final class PublicController extends Controller
         $this->response->template = 'welcome.latte';
     }
 
-    public function index( ?string $route, Document $document, ParameterBagInterface $parameterBag ) : Response
+    public function index( ?string $route, Document $document, Headers $headers ) : Response
     {
-        // dd( $document->all());
-        // dd( $document->assetManager->registerAssets( 'core.style', Style::class ) );
+        $headers( 'route-type', 'dynamic' );
         $document(
             'Index says welcome',
             keywords: ['we', 'like', 'keywords'],
@@ -36,25 +34,15 @@ final class PublicController extends Controller
         return $this->response->document();
     }
 
-    public function blog( ?string $route, Request $request ) : Response
+    public function blog( ?string $route, Document $document, Request $request ) : Response
     {
-        dump( $request );
-        $message = __METHOD__.' rendering route: '.$route ;
-        return new Response(
-            <<<HTML
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Document</title>
-                </head> 
-                <body>
-                {$message}
-                </body> 
-                </html> 
-                    
-                HTML,
+        $document(
+            'Demo blog post',
+            'Assortment of typical blog content for validating the design system.',
         );
+
+        $this->response->template = 'demo.latte';
+
+        return $this->response->document();
     }
 }

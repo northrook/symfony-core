@@ -3,11 +3,20 @@
 namespace Core\Event;
 
 use Symfony\Component\HttpKernel\Event\{ControllerEvent, ResponseEvent};
-use Core\Controller\PublicController;
+use Core\Controller\{AdminController, PublicController};
 use Core\Service\Headers;
 use Northrook\Clerk;
 use Symfony\Component\Routing\RouterInterface;
 
+/**
+ * Dynamically handles the Request => Response cycle for the {@see PublicController} and {@see AdminController}.
+ *
+ * - Dynamic route assignment
+ * - Response header parsing
+ *
+ * @internal
+ * @author Martin Nielsen <mn@northrook.com>
+ */
 final class RequestResponseHandler
 {
     public const string PROFILER_GROUP = 'gateway';
@@ -16,9 +25,8 @@ final class RequestResponseHandler
     // ControllerEvent sets this, ResponseHeaders trusts this
     public const array CONTROLLERS = [
         PublicController::class,
+        AdminController::class,
     ];
-
-    private bool $handleRequest = false;
 
     /** @var array{0:object, 1:string} */
     private array $controller;
@@ -37,16 +45,19 @@ final class RequestResponseHandler
 
         // Bail if the controller doesn't pass validation
         if ( ! $this->shouldParseEvent( $event ) ) {
+            $profiler->stop();
             return;
         }
 
         // Check if the $controller has a valid $method
         if ( ! $this->getRouteMethod( $event ) ) {
+            $profiler->stop();
             return;
         }
 
         // Bail if the request has no _controller attribute set
         if ( ! $this->getControllerAttributes( $event ) ) {
+            $profiler->stop();
             return;
         }
 
@@ -63,16 +74,19 @@ final class RequestResponseHandler
     {
         $profiler = Clerk::event( __METHOD__, $this::PROFILER_GROUP );
 
-        if ( ! $this->handleRequest ) {
+        // Bail if the controller doesn't pass validation
+        if ( ! $this->shouldParseEvent( $event ) ) {
+            $profiler->stop();
             return;
         }
 
         dump(
-            $this,
-            $event,
+            // $this,
+            // $event,
             $event->getRequest()->headers->all(),
             $this->headers->response->all(),
         );
+        $profiler->stop();
     }
 
     private function getControllerAttributes( ControllerEvent $event ) : bool
@@ -108,31 +122,54 @@ final class RequestResponseHandler
     }
 
     /**
-     * @param ControllerEvent $event
+     * @param ControllerEvent|ResponseEvent $event
      *
      * @return bool
      */
-    private function shouldParseEvent( ControllerEvent $event ) : bool
+    private function shouldParseEvent( ControllerEvent|ResponseEvent $event ) : bool
     {
+        $profiler = Clerk::event( __METHOD__, $event::class );
+
         // Only parse main requests
         if ( ! $event->isMainRequest() ) {
-            return $this->handleRequest ??= false;
+            $profiler->stop();
+            return false;
+        }
+
+        if ( $event instanceof ResponseEvent ) {
+            // return true;
+            $controller = $event->getRequest()->attributes->get( '_controller' );
+
+            if ( ! $controller ) {
+                $profiler->stop();
+                return false;
+            }
+
+            if ( \is_array( $controller ) ) {
+                $controller = $controller[0];
+            }
+
+            $profiler->stop();
+            return \is_string( $controller ) && \str_starts_with( $controller, 'core' );
         }
 
         $controller = $event->getController();
 
         if ( ! \is_array( $controller ) || ! \is_object( $controller[0] ) ) {
-            return $this->handleRequest ??= false;
+            $profiler->stop();
+            return false;
         }
 
         if ( ! \in_array( $controller[0]::class, $this::CONTROLLERS ) ) {
-            return $this->handleRequest ??= false;
+            $profiler->stop();
+            return false;
         }
 
         $this->controller = $controller;
 
         unset( $controller );
 
-        return $this->handleRequest ??= true;
+        $profiler->stop();
+        return true;
     }
 }

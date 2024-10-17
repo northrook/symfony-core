@@ -1,0 +1,196 @@
+{* https://developer.mozilla.org/en-US/docs/Web/HTML/Element/article *}
+<div class="page-share vertical sticky">
+    <div class="social-networks">
+        <a href="#" target="_blank" class="facebook network -unlink"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="#" target="_blank" class="pinterest network -unlink"><i class="fa-brands fa-pinterest"></i></a>
+        <a href="#" target="_blank" class="twitter network -unlink"><i class="fa-brands fa-x-twitter"></i></a>
+    </div>
+</div>
+<nav class="breadcrumbs">
+    <ui:breadcrumbs class="demo-crumbs" />
+</nav>
+<main id="main" class="site-main page-offset-bottom">
+    <article id="post-17953" class="blog-post" status="published">
+        <header class="hero">
+            <h1>
+                Demo Article
+            </h1>
+        </header>
+        <section>
+            <h2 class="wp-block-heading">Using a Query</h2>
+            <p>
+                A <a href="#" target="_blank" rel="noreferrer noopener">CSS</a>
+                <dfn>pseudo-class</dfn> is a keyword added to a selector that specifies a special>
+                state of the selected element(s). For example,
+                <a href="#" target="_blank" rel="noreferrer noopener"><code lang="css">:hover</code></a> can be
+                used to change a button’s color when the user’s pointer hovers over it.
+            </p>
+            <p>
+                From the business, until be once yet pouring got it
+                <a href="#" data-type="URL" target="_blank" rel="noreferrer noopener">
+                    duckthemed phase</a> in the creative concepts must involved. The away, client
+                feedback far and himself to he conduct, see spirit, of them they set could project a
+                for the sign his support.
+            </p>
+            <figure class="wp-block-image size-full">
+                <img decoding="async" src="https://picsum.photos/600/420" class="wp-image-20557">
+            </figure>
+            <p>
+                Other pseudo-elements and pseudo-class selectors, <code lang="css">:not()</code> can be chained
+                with other pseudo-classes and pseudo-elements. For example, the following will add a
+                “New!” word to list items that do not have a <code lang="css">.old</code> class name, using the
+                <a href="#" target="_blank" rel="noreferrer noopener"><code lang="css">::after</code></a>.
+            </p>
+        </section>
+        <section>
+            <h2 class="wp-block-heading">
+                Trivia &amp; Notes
+            </h2>
+            <p>
+                The <code lang="css">:not()</code> selector is chainable with more <code>:not()</code>
+                selectors. For example, <a href="#" target="_blank"
+                                           rel="noreferrer noopener">the following</a> will match
+                all <code>article</code>s except the one with an ID <code lang="css">#featured</code>, and then
+                will filter out the articles with a class name <code lang="css">.tutorial</code>:
+            </p>
+            <code:block lang="css">
+                article:not(#featured):not(.tutorial) {
+                /* style the articles that match */
+                }
+            </code:block>
+            <p>Just like other pseudo-elements and pseudo-class selectors, <code>:not()</code> can
+                be chained with other pseudo-classes and pseudo-elements. For example, the following
+                will add a “New!” word to list items that do not have a <code>.old</code> class
+                name, using the
+                <a href="#" target="_blank" rel="noreferrer noopener"><code>::after</code></a>
+                pseudo-element:
+            </p>
+            <code:block lang="css">
+                li:not(.old)::after {
+                content: "New!";
+                color: deepPink;
+                }
+            </code:block>
+            <p>
+                You can see a live demo in the Live Demo section below.
+            </p>
+        </section>
+        <section>
+            <h2 class="wp-block-heading">On the Specificity of Selectors</h2>
+            <p>
+                The specificity of the <code>:not()</code> pseudo-class is the specificity of its
+                argument. The <code>:not()</code> pseudo-class does not add to the selector
+                specificity, unlike other pseudo-classes.
+            </p>
+            <p>
+                The <a href="#" target="_blank" rel="noreferrer noopener">simple selector</a> that
+                <code>:not()</code> takes as an argument can be any of the following:
+            </p>
+            <ul class="wp-block-list">
+                <li>Type selector (e.g <code>p</code>, <code>span</code>, etc.)</li>
+                <li>Class selector (e.g <code>.element</code>, <code>.sidebar</code>, etc.)</li>
+                <li>ID selector (e.g <code>#header</code>)</li>
+                <li>Pseudo-class selector (e.g
+                    <code><a href="#" target="_blank" rel="noreferrer noopener">:first-child</a></code>,
+                    <code><a href="#" target="_blank" rel="noreferrer noopener">:last-of-type</a></code>)
+                </li>
+            </ul>
+        </section>
+        <section>
+            <h2 class="wp-block-heading">Reference</h2>
+            <p>
+                The argument passed to <code>:not()</code> can <em>not</em>, however, be a
+                pseudo-<strong>element</strong> selector (such as
+                <a href="#" target="_blank" rel="noreferrer noopener"><code>::before</code></a>
+                and
+                <a href="#" target="_blank" rel="noreferrer noopener"><code>::after</code></a>,
+                among others) or another
+                negation pseudo-class selector.
+            </p>
+            <blockquote class="wp-block-quote is-layout-flow wp-block-quote-is-layout-flow">
+                <p>
+                    Getting practice furnished the where pouring the of emphasis as return encourage
+                    a then that times, the doing would in object we young been in the in the to
+                    their line helplessly or name to in of, and all and to more my way and
+                    opinion.
+                </p>
+                <p></p>
+            </blockquote>
+            <figure class="wp-block-table">
+                <table>
+                    <tbody>
+                    <tr>
+                        <td><strong>Employee</strong></td>
+                        <td><strong>Salary</strong></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><a href="#" target="_blank"
+                               rel="noreferrer noopener">Martin</a></td>
+                        <td>$1</td>
+                        <td>Because that’s all Steve Job’ needed for a salary.</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#" target="_blank"
+                               rel="noreferrer noopener">John</a></td>
+                        <td>$100K</td>
+                        <td>For all the blogging he does.</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#" data-type="URL"
+                               data-id="#" target="_blank"
+                               rel="noreferrer noopener">Robert</a></td>
+                        <td>$100M</td>
+                        <td>Pictures are worth a thousand words, right? So Tom x 1,000.</td>
+                    </tr>
+                    <tr>
+                        <td><a href="#" target="_blank"
+                               rel="noreferrer noopener">Jane</a></td>
+                        <td>$100B</td>
+                        <td>With hair like that?! Enough said…</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </figure>
+            <h3 class="wp-block-heading">Useful Fallbacks</h3>
+            <p>It’s extension live for much place. Road, are, the which, and handout tones. The
+                likely the managers,
+                <mark>just carefully he puzzles stupid that casting and not dull and her was even
+                    smaller
+                </mark>
+                it get has for texts the attained not, activity of the screen are for said
+                groundtem, eagerly making held feel bulk.
+            </p>
+            <p>
+                Just like other pseudo-elements and pseudo-class selectors, <code>:not()</code> can
+                be chained with other pseudo-classes and pseudo-elements. For example, the following
+                will add a “New!” word to list items that do not have a <code>.old</code> class
+                name, using the
+                <a href="#" target="_blank" rel="noreferrer noopener"><code>::after</code></a>
+                pseudo-element:
+            </p>
+            <pre class="wp-block-preformatted">
+                                    element:not(.old)::after {
+                                        content: "New!";
+                                        color: deepPink;
+                                    }
+                                </pre>
+            <p>
+                You can see a live demo in the
+                <a href="#" target="_blank" rel="noreferrer noopener">Live Demo</a> section below.
+            </p>
+        </section>
+        <footer>
+            <div class="entry-footer">
+                <div class="tagcloud">
+                    <span class="tags-caption">Tagged with: </span>
+                    <a href="#" rel="tag">Blog</a>
+                    <a href="#" rel="tag">Creative</a>
+                    <a href="#" rel="tag">Portfolio</a>
+                    <a href="#" rel="tag">Theme</a>
+                    <a href="#" rel="tag">WordPress</a>
+                </div>
+            </div>
+        </footer>
+    </article>
+</main>

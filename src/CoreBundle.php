@@ -44,8 +44,6 @@ final class CoreBundle extends AbstractBundle
             $this->container->getParameter( 'kernel.environment' ),
             $this->container->getParameter( 'kernel.debug' ),
         );
-
-        $this->container?->get( Settings::class );
     }
 
     #[Override]
