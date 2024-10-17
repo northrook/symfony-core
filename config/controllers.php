@@ -35,7 +35,7 @@ return static function( ContainerConfigurator $container ) : void {
         ->args( ['response', 0, '%dir.cache%/response'] )
         ->tag( 'cache.pool' )
 
-            // Router
+        // Gateway - Request => Response
         ->set( RequestResponseHandler::class )
         ->args( [
             service( 'router' ),
@@ -44,12 +44,17 @@ return static function( ContainerConfigurator $container ) : void {
         // : ControllerEvent
         ->tag(
             'kernel.event_listener',
-            ['method' => 'matchControllerMethod', 'priority' => 100],
+            ['method' => 'matchControllerMethod', 'priority' => 128],
         )
         // : ResponseEvent
         ->tag(
             'kernel.event_listener',
-            ['method' => 'mergeResponseHeaders'],
+            ['method' => 'mergeResponseHeaders', 'priority' => 1_024],
+        )
+        // : TerminateEvent
+        ->tag(
+            'kernel.event_listener',
+            ['method' => 'sendResponse', 'priority' => -256],
         )
 
             // Controller Document autowire

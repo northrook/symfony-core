@@ -2,7 +2,7 @@
 
 namespace Core\Event;
 
-use Symfony\Component\HttpKernel\Event\{ControllerEvent, ResponseEvent};
+use Symfony\Component\HttpKernel\Event\{ControllerEvent, ResponseEvent, TerminateEvent};
 use Core\Controller\{AdminController, PublicController};
 use Core\Service\Headers;
 use Northrook\Clerk;
@@ -72,21 +72,21 @@ final class RequestResponseHandler
 
     public function mergeResponseHeaders( ResponseEvent $event ) : void
     {
-        $profiler = Clerk::event( __METHOD__, $this::PROFILER_GROUP );
+        // Always remove the identifying header
+        \header_remove( 'X-Powered-By' );
 
         // Bail if the controller doesn't pass validation
         if ( ! $this->shouldParseEvent( $event ) ) {
-            $profiler->stop();
             return;
         }
 
-        dump(
-            // $this,
-            // $event,
-            $event->getRequest()->headers->all(),
-            $this->headers->response->all(),
-        );
-        $profiler->stop();
+        // Merge headers
+        $event->getResponse()->headers->add( $this->headers->response->all() );
+    }
+
+    public function sendResponse( TerminateEvent $event ) : void
+    {
+        dump( $event->getResponse()->headers->all() );
     }
 
     private function getControllerAttributes( ControllerEvent $event ) : bool
