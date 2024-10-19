@@ -1,11 +1,15 @@
 parameters:
-	level: 6
+	level: 9
 	paths:
 		- src
-
+	reportUnmatchedIgnoredErrors: false
 	ignoreErrors:
 		-
-			message: '#Access to an undefined static property .+::\$service#'
+			message: '#Access to an undefined static property .+::\$.+#'
+			path: *.php
+
+		-
+			message: '#Access to an uninitialized readonly property .+::\$.+#'
 			path: *.php
 
 		-

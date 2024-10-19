@@ -86,7 +86,7 @@ final class RequestResponseHandler
 
     public function sendResponse( TerminateEvent $event ) : void
     {
-        dump( $event->getResponse()->headers->all() );
+        // dump( $event->getResponse()->headers->all() );
     }
 
     private function getControllerAttributes( ControllerEvent $event ) : bool

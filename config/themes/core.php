@@ -7,59 +7,53 @@
 return [
     'document' => [
         // Expect a horizontal gutter of 1rem or 2ch (test which covers most cases)
+        // max-width is purely for restricting the content, it will not overflow
         'gutter'             => '2ch',    // left|right padding for elements
-        'minimum-width'      => '320px',  // converted to rem
-        'full-width'         => '1200px', //
+        'min-width'          => '20rem',  // 320px
+        'max-width'          => '75rem', // 1200px
         'scroll-padding-top' => '--offset-top', // maybe +--gap?
-        'offset-top'         => '--s:m',
-        'offset-left'        => '--s:m',
-        'offset-right'       => '--s:m',
-        'offset-bottom'      => '--s:m',
+        'offset-top'         => '--size:m',
+        'offset-left'        => '--size:m',
+        'offset-right'       => '--size:m',
+        'offset-bottom'      => '--size:m',
     ],
-    'box' => [// margin, padding, gap, spacing
-        'gap'   => '--s:m',
-        'gap-h' => '--s:m',
-        'gap-v' => '--s:m',
+    'typography' => [
+            'font-family'     => 'Inter',
+            'line-height'     => '1.6em',
+            'line-spacing'    => '--size:small', // spacing between inline elements
+            'line-length'  => '64ch', // limits inline text elements, like p and h#
+            // Create .h#, .small/small, etc
+            // use respective --size-{type}
+            // .h# may override --line-height and --spacing or --gap
     ],
-    'color' => [
+    'palette' => [
+        // string: hue/hsl/hex seed, or array: [string=>string<color>]
         // `baseline` palette is *required*
         // `primary` palette will be generated unless defined
         // `system` palette will be generated unless defined, *must* contain: shadow, info, notice, success, warning, danger
-        'palette' => [ // string: hue/hsl/hex seed, or array: [string=>string<color>]
-            'baseline' => [
-                'name'        => 'Baseline', // [optional] ucFirst of key if undefined
-                'description' => null,       // [optional] used in the editor
-                'var'         => 'baseline', // [optional] based on key if undefined
-                [
+        'baseline' => [
+            'name'        => 'Baseline', // [optional] ucFirst of key if undefined
+            'description' => null,       // [optional] used in the editor
+            'var'         => 'baseline', // [optional] based on key if undefined
+            [
 
-                ],
-            ],
-            // 'baseline' => 222, // seed
-            'primary' => [222, 50, 50], // seed
-            // System is a little unique, as it _cannot_ be prefixed using a `var` value
-            'system' => [
-                'name'        => null, // [optional] ucFirst of key if undefined
-                'description' => 'Provides status colours for messages and visual feedback.',
-                [
-                    'shadow'  => 'baseline-600',
-                    'info'    => '#579dff',
-                    'notice'  => '#9f8fef',
-                    'success' => '#4bce97',
-                    'warning' => '#f5cd47',
-                    'danger'  => '#f87268',
-                ],
             ],
         ],
-
-    ],
-    'typography' => [
-        'font-family'     => 'Arial, Helvetica, sans-serif',
-        'line-height'     => '1.6em',
-        'line-spacing'    => '1em', // spacing between elements
-        'max-inline-size' => '64ch', // limits inline text elements, like p and h#
-        // Create .h#, .small/small, etc
-        // use respective --size-{type}
-        // .h# may override --line-height and --spacing or --gap
+        // 'baseline' => 222, // seed
+        'primary' => [222, 50, 50], // seed
+        // System is a little unique, as it _cannot_ be prefixed using a `var` value
+        'system' => [
+            'name'        => null, // [optional] ucFirst of key if undefined
+            'description' => 'Provides status colours for messages and visual feedback.',
+            [
+                'shadow'  => 'baseline-600',
+                'info'    => '#579dff',
+                'notice'  => '#9f8fef',
+                'success' => '#4bce97',
+                'warning' => '#f5cd47',
+                'danger'  => '#f87268',
+            ],
+        ],
     ],
 
     // :: Sizing
@@ -80,5 +74,15 @@ return [
         'h2' => ['1.6rem', '2rem'],
         'h3' => ['1.25rem', '1.8rem'],
         'h4' => ['1.1rem', '1.5rem'],
+    ],
+    //
+    // .class
+    'box' => [
+            'card'   => [],
+            'box'    => [],
+            'button' => [],
+            'tag'    => [],
+            'meta'   => [],
+            'media'  => [],
     ],
 ];

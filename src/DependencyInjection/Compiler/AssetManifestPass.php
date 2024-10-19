@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Core\DependencyInjection\Compiler;
 
-use Core\Service\AssetManager;
+use Core\Service\{AssetManager, Pathfinder, ThemeManager};
 use Core\Service\AssetManager\Compiler\{Style,Script};
 use Override;
 use Northrook\ArrayStore;
@@ -19,6 +19,7 @@ final readonly class AssetManifestPass implements CompilerPassInterface
     private ArrayStore $inventory;
 
     private AssetManager $assetManager;
+    private ThemeManager $themeManager;
 
     public function __construct( private ParameterBagInterface $parameterBag ) {}
 
@@ -27,6 +28,7 @@ final readonly class AssetManifestPass implements CompilerPassInterface
     {
         $this->inventory    = new ArrayStore( $this->parameterBag->get( 'path.asset_inventory' ) );
         $this->assetManager = $this->initializeAssetManager( $container );
+        $this->themeManager = $this->initializeThemeManager( $container );
 
         $this->inventory->clear();
         $this->initializeManifestInventory();
@@ -92,6 +94,28 @@ final readonly class AssetManifestPass implements CompilerPassInterface
             $this->parameterBag,
             $this->parameterBag->get( 'path.asset_inventory' ),
             $this->parameterBag->get( 'path.asset_manifest' ),
+        );
+    }
+
+    /**
+     * Initialize the {@see Manifest} service for use in this compiler pass.
+     *
+     * @param ContainerBuilder $container
+     *
+     * @return ThemeManager
+     */
+    private function initializeThemeManager( ContainerBuilder $container ) : ThemeManager
+    {
+        $assetManager = $container->getDefinition( ThemeManager::class );
+        $pathfinder   = $container->getDefinition( Pathfinder::class );
+
+        dump($pathfinder);
+
+        return new ( $assetManager->getClass() )(
+            new Pathfinder(
+                $this->parameterBag,
+                $this->parameterBag->get( 'kernel.cache_dir' ).'/pathfinder.cache.php',
+            ),
         );
     }
 }
