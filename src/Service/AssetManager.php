@@ -174,15 +174,18 @@ final class AssetManager
      *
      * @param string                    $label
      * @param class-string<AssetObject> $class
-     * @param string                    ...$key
+     * @param string                    ...$inventory
      *
      * @return AssetObject
      */
-    public function compileAsset( string $label, string $class, string ...$key ) : mixed
+    public function compileAsset( string $label, string $class, string ...$inventory ) : mixed
     {
         $profiler = Clerk::event( __METHOD__."->{$label} as {$class}" );
 
-        $inventory ??= [Str::end( $label, \strtolower( '.'.classBasename( $class ) ) )];
+        if ( empty( $inventory ) ) {
+            $inventory = [Str::end( $label, \strtolower( '.'.classBasename( $class ) ) )];
+        }
+        // dump( $inventory );
 
         $sources = [];
 
@@ -190,13 +193,10 @@ final class AssetManager
             $sources = [...$sources, ...(array) $this->getInventory()->get( "{$asset}:" )];
         }
         //
-        // dump( $inventory, $sources);
         $storageDirectory = $this->parameterBag->get( 'dir.root' );
 
         /** @var AssetCompiler $compiled */
         $compiled = new ( $class )( $sources, $label, $storageDirectory );
-
-        // dump( $label, $inventoryKey, $class, $sources, $compiler );
 
         $type  = $compiled->type;
         $label = Str::end( $label, ".{$type}" );

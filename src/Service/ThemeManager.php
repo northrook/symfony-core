@@ -2,11 +2,9 @@
 
 namespace Core\Service;
 
-use Core\Service\ThemeManager\Typography;
 use Northrook\Exception\E_Value;
 use Support\{Str};
 use Symfony\Component\Yaml\Yaml;
-use Tempest\Highlight\Theme;
 use InvalidArgumentException;
 use function Support\toString;
 
@@ -15,15 +13,15 @@ final class ThemeManager
     public const array CONFIG = [
         // :root
         'document' => [
-            'offset-top'         => '--size:m',
-            'offset-left'        => '--size:m',
-            'offset-right'       => '--size:m',
-            'offset-bottom'      => '--size:m',
+            'offset_top'         => '--size-medium',
+            'offset-left'        => '--size-medium',
+            'offset-right'       => '--size-medium',
+            'offset-bottom'      => '--size-medium',
             'scroll-padding-top' => '--offset-top', // maybe +--gap?
             'gutter'             => '2ch',    // left|right padding for elements
-            'gap'                => '--size:m',
-            'gap-h'              => '--size:m',
-            'gap-v'              => '--size:m',
+            'gap'                => '--size-medium',
+            'gap-h'              => '--size-medium',
+            'gap-v'              => '--size-medium',
             'min-width'          => '20rem',  // 320px
             'max-width'          => '75rem', // 1200px
         ],
@@ -33,6 +31,15 @@ final class ThemeManager
             'line-height'  => '1.6em',
             'line-spacing' => '1em', // spacing between elements
             'line-length'  => '64ch', // limits inline text elements, like p and h#
+
+            // typography
+            'body'  => '1rem',    // default body text size
+            'small' => '.875rem', // small and .small classes
+            // min-max :: use typography -> max-inline-size as a middle, from minimum till site width
+            'h1' => ['1.8rem', '3.05rem'], // min-max
+            'h2' => ['1.6rem', '2rem'],
+            'h3' => ['1.25rem', '1.8rem'],
+            'h4' => ['1.1rem', '1.5rem'],
         ],
         // :root
         'palette' => [
@@ -52,13 +59,31 @@ final class ThemeManager
             ],
         ],
         // :root
-        'sizes' => [],
+        'sizes' => [
+
+            // agnostic
+            'none'   => '0',
+            'point'  => '.125rem', // 2px
+            'tiny'   => '.25rem',  // 4px
+            'small'  => '.5rem',   // 8px
+            'medium' => '1rem',    // 16px
+            'large'  => '1.5rem',  // 24px
+            // typography
+            // 'text-body'  => '1rem',    // default body text size
+            // 'text-small' => '.875rem', // small and .small classes
+            // 'text-h1'    => ['1.8rem', '3.05rem'], // min-max
+            // 'text-h2'    => ['1.6rem', '2rem'],
+            // 'text-h3'    => ['1.25rem', '1.8rem'],
+            // 'text-h4'    => ['1.1rem', '1.5rem'],
+        ],
         //
         // .class
         // should have .card, .box, .button, .tag, .meta, .media(image/video/etc), ..
         'box' => [
         ],
     ];
+
+    private readonly string $theme;
 
     /** @var array<string, string> */
     private array $status = [];
@@ -74,6 +99,12 @@ final class ThemeManager
 
     public function __construct( private readonly Pathfinder $pathfinder ) {}
 
+    public function generateTheme() : ThemeManager\Theme
+    {
+        $this->generateVariables();
+        return new ThemeManager\Theme( $this->theme, $this->generated );
+    }
+
     /**
      * Provide an array in the Core Themes format.
      *
@@ -85,12 +116,14 @@ final class ThemeManager
      */
     public function useTheme( string|array $theme ) : self
     {
+        $this->theme = \ucfirst( \is_string( $theme ) ? \strrchr( \basename( $theme ), '.', true ) : $theme['name'] ?? $this::class );
+
         $this->config = \is_string( $theme ) ? $this->themeFromConfig( $theme ) : $theme;
 
         return $this;
     }
 
-    public function generateVariables() : string
+    public function generateVariables() : self
     {
         if ( empty( $this->config ) ) {
             $this->status[__METHOD__] = 'Using default theme configuration.';
@@ -113,67 +146,7 @@ final class ThemeManager
             ];
         }
 
-        $root = [];
-
-        dump( $this->generated );
-
-        foreach ( $this->generated as $var => $value ) {
-            if ( \str_starts_with( $value, '--' ) ) {
-                if ( ! \array_key_exists( $value, $this->generated ) ) {
-                    E_Value::warning(
-                        'The variable {var} referenced an unknown variable {value}.',
-                        ['var' => $var, 'value' => $value],
-                    );
-                }
-                $value = "var({$value})";
-            }
-            $var   = \str_replace( ':', '\:', $var );
-            $value = \str_replace( ':', '\:', $value );
-
-            $root[$var] = "\t{$var} : {$value};";
-        }
-
-        $css = ":root {\n".\implode( "\n", $root )."\n}";
-
-        return $css;
-    }
-
-    public static function variable( string ...$string ) : string
-    {
-        // dump( \get_defined_vars() );
-        // Convert to lowercase
-        $string = \implode( ':', $string );
-
-        $string = \trim( $string, " \n\r\t\v\0-" );
-
-        // Enforce characters, double-escaped backslash is intentional
-        if ( ! \preg_match( '#^[a-zA-Z0-9_:\\\-]+$#', $string, $matches ) ) {
-            throw new InvalidArgumentException( 'The provided string contains illegal characters. It must only accept ASCII letters, numbers, hyphens, and underscores.');
-        }
-
-        return "--{$string}";
-    }
-
-    public static function value( string $value, string ...$type ) : string
-    {
-        $value = \strtolower( \trim( $value ) );
-
-        if ( \str_starts_with( $value, '--' ) ) {
-            return $value;
-        }
-
-        if ( $type && ! Str::endsWith( $value, $type ) ) {
-            E_Value::error(
-                'The variable value {value} was expected to be one of {type}.',
-                [
-                    'value' => $value,
-                    'type'  => toString( $type, '|' ),
-                ],
-                throw : true,
-            );
-        }
-
-        return $value;
+        return $this;
     }
 
     // ✅
@@ -183,7 +156,7 @@ final class ThemeManager
 
         foreach ( $config as $name => $value ) {
             if ( \is_string( $value ) ) {
-                $document[$this::variable( $name )] = $this::value( $value, 'px', 'rem', 'em', 'ch' );
+                $document[$this->var( $name )] = $this->value( $value, 'px', 'rem', 'em', 'ch' );
 
                 continue;
             }
@@ -206,7 +179,7 @@ final class ThemeManager
 
         foreach ( $config as $name => $value ) {
             if ( \is_string( $value ) ) {
-                $sizes[$this::variable( 'size', $name )] = $this::value( $value, 'px', 'rem', 'em' );
+                $sizes[$this->var( 'size', $name )] = $this->value( $value, 'px', 'rem', 'em' );
 
                 continue;
             }
@@ -217,35 +190,8 @@ final class ThemeManager
              * @link https://websemantics.uk/tools/fluid-responsive-property-calculator/
              */
             if ( \is_array( $value ) ) {
-                if ( \count( $value ) !== 2 ) {
-                    E_Value::error( 'Variable font sizes must only contain a minimum and maximum font size.' );
-                }
 
-                $font = [
-                    'min'  => $this->config['document']['min-width'],
-                    'max'  => $this->config['document']['max-width'],
-                    'from' => \array_shift( $value ),
-                    'to'   => \array_shift( $value ),
-                ];
-
-                foreach ( $font as $key => $property ) {
-                    if ( ! \str_ends_with( $property, 'em' ) ) {
-                        E_Value::error( 'Variable fonts ranges must be {em} or {rem}.', throw : false );
-                    }
-                }
-
-                [$min, $max, $from, $to] = \array_values( $font );
-
-                $unit = \preg_replace( '#.+?([a-z].+)#', '$1', $min );
-                $view = \trim( \floatval( $min ) / 100 .$unit, '0' );
-
-                $mod = 100 * ( \floatval( $to ) - \floatval( $from ) ) / ( \floatval( $max ) - \floatval( $min ) );
-
-                $diff = \rtrim( \ltrim( \number_format( $mod, 4 ), '0' ), '.0' );
-
-                $value = "min(max({$from},calc({$from} + ((1vw - {$view}) * {$diff}))), {$to})";
-
-                $sizes[$this::variable( 'size', $name )] = $value;
+                $sizes[$this->var( 'size', $name )] = $this->variableValue( $value );
 
                 continue;
             }
@@ -261,7 +207,33 @@ final class ThemeManager
      */
     private function parseTypography( array $config ) : array
     {
-        return ( new Typography( $config ) )->getVariables();
+        $typography = [];
+
+        foreach ( $config as $name => $value ) {
+
+            [$variable, $value] = match ( $name ) {
+                'font-family' => [
+                    $this->var( $name ),
+                    $this->fontFamily( $value ),
+                ],
+                'line-height', 'line-spacing' => [
+                    $this->var( $name ),
+                    $this->value( $value, 'rem', 'em', 'px' ),
+                ],
+                'line-length' => [
+                    $this->var( $name ),
+                    $this->value( $value, 'ch', 'rem', 'em' ),
+                ],
+                default => [
+                    $this->var( 'font', $name ),
+                    $this->value( $value, 'rem', 'em', 'px' ),
+                ],
+            };
+
+            $typography[$variable] = $value;
+        }
+
+        return $typography;
     }
 
     private function parsePalette( array $config ) : array
@@ -319,5 +291,96 @@ final class ThemeManager
         }
 
         return $config;
+    }
+
+    // ::: MISC
+
+    protected function var( string ...$string ) : string
+    {
+        // dump( \get_defined_vars() );
+        // Convert to lowercase
+        $string = \implode( '-', $string );
+
+        $string = \trim( $string, " \n\r\t\v\0-" );
+
+        // Enforce characters
+        if ( ! \preg_match( '#^[a-zA-Z0-9_-]+$#', $string, $matches ) ) {
+            throw new InvalidArgumentException( 'The provided string contains illegal characters. It must only accept ASCII letters, numbers, hyphens, and underscores.' );
+        }
+
+        return "--{$string}";
+    }
+
+    protected function value( string|array $value, string ...$type ) : string
+    {
+        if ( \is_array( $value ) ) {
+            return $this->variableValue( $value );
+        }
+
+        $value = \strtolower( \trim( $value ) );
+
+        if ( \str_starts_with( $value, '--' ) ) {
+            return $value;
+        }
+
+        if ( $type && '0' !== $value && ! Str::endsWith( $value, $type ) ) {
+            E_Value::error(
+                'The variable value {value} was expected to be one of {type}.',
+                [
+                    'value' => $value,
+                    'type'  => toString( $type, '|' ),
+                ],
+                throw : true,
+            );
+        }
+
+        return $value;
+    }
+
+    protected function variableValue( array $value ) : string
+    {
+
+        if ( \count( $value ) !== 2 ) {
+            E_Value::error( 'Variable font sizes must only contain a minimum and maximum font size.' );
+        }
+
+        $font = [
+            'min'  => $this->config['document']['min-width'],
+            'max'  => $this->config['document']['max-width'],
+            'from' => \array_shift( $value ),
+            'to'   => \array_shift( $value ),
+        ];
+
+        foreach ( $font as $key => $property ) {
+            if ( ! \str_ends_with( $property, 'em' ) ) {
+                E_Value::error( 'Variable fonts ranges must be {em} or {rem}.', throw : false );
+            }
+        }
+
+        [$min, $max, $from, $to] = \array_values( $font );
+
+        $unit = \preg_replace( '#.+?([a-z].+)#', '$1', $min );
+        $view = \trim( \floatval( $min ) / 100 .$unit, '0' );
+
+        $mod = 100 * ( \floatval( $to ) - \floatval( $from ) ) / ( \floatval( $max ) - \floatval( $min ) );
+
+        $diff = \rtrim( \ltrim( \number_format( $mod, 4 ), '0' ), '.0' );
+
+        return "min(max({$from},calc({$from} + ((1vw - {$view}) * {$diff}))), {$to})";
+    }
+
+    private function fontFamily( mixed $font ) : string
+    {
+        // TODO : Validate against installed/available fonts
+        // TODO : Offer a 'system:sans-serif' | 'system:serif' shorthand
+
+        // Ensure simple fallback
+        $fallback = \trim( \strrchr( $font, ',' ) ?: 'fallback', ", \n\r\t\v\0" );
+
+        if ( ! \in_array( $fallback, ['sans-serif', 'serif', 'monospace', 'cursive', 'fantasy'] ) ) {
+            $font .= ', sans-serif';
+        }
+
+        return $font;
     }
 }

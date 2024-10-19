@@ -72,13 +72,13 @@ final class RequestResponseHandler
 
     public function mergeResponseHeaders( ResponseEvent $event ) : void
     {
-        // Always remove the identifying header
-        \header_remove( 'X-Powered-By' );
-
         // Bail if the controller doesn't pass validation
         if ( ! $this->shouldParseEvent( $event ) ) {
             return;
         }
+
+        // Always remove the identifying header
+        \header_remove( 'X-Powered-By' );
 
         // Merge headers
         $event->getResponse()->headers->add( $this->headers->response->all() );

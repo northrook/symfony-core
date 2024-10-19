@@ -12,19 +12,19 @@ return [
         'min-width'          => '20rem',  // 320px
         'max-width'          => '75rem', // 1200px
         'scroll-padding-top' => '--offset-top', // maybe +--gap?
-        'offset-top'         => '--size:m',
-        'offset-left'        => '--size:m',
-        'offset-right'       => '--size:m',
-        'offset-bottom'      => '--size:m',
+        'offset-top'         => '--size-medium',
+        'offset-left'        => '--size-medium',
+        'offset-right'       => '--size-medium',
+        'offset-bottom'      => '--size-medium',
     ],
     'typography' => [
-            'font-family'     => 'Inter',
-            'line-height'     => '1.6em',
-            'line-spacing'    => '--size:small', // spacing between inline elements
-            'line-length'  => '64ch', // limits inline text elements, like p and h#
-            // Create .h#, .small/small, etc
-            // use respective --size-{type}
-            // .h# may override --line-height and --spacing or --gap
+        'font-family'  => 'Inter',
+        'line-height'  => '1.6em',
+        'line-spacing' => '--size-small', // spacing between inline elements
+        'line-length'  => '64ch', // limits inline text elements, like p and h#
+        // Create .h#, .small/small, etc
+        // use respective --size-{type}
+        // .h# may override --line-height and --spacing or --gap
     ],
     'palette' => [
         // string: hue/hsl/hex seed, or array: [string=>string<color>]
@@ -60,29 +60,21 @@ return [
     // prefixed --size-{key}: {value};
     'sizes' => [
         // agnostic
-        't'  => '.125rem', // 2px
-        'es' => '.25rem',  // 4px
-        's'  => '.5rem',   // 8px
-        'm'  => '1rem',    // 16px
-        'l'  => '1.5rem',  // 24px
-        'xl' => '2rem',    // 32px
-        // typography
-        'body'  => '1rem',    // default body text size
-        'small' => '.875rem', // small and .small classes
-        // min-max :: use typography -> max-inline-size as a middle, from minimum till site width
-        'h1' => ['1.8rem', '3.05rem'], // min-max
-        'h2' => ['1.6rem', '2rem'],
-        'h3' => ['1.25rem', '1.8rem'],
-        'h4' => ['1.1rem', '1.5rem'],
+        'none'   => '0',
+        'point'  => '.125rem', // 2px
+        'tiny'   => '.25rem',  // 4px
+        'small'  => '.5rem',   // 8px
+        'medium' => '1rem',    // 16px
+        'large'  => '1.5rem',  // 24px
     ],
     //
     // .class
     'box' => [
-            'card'   => [],
-            'box'    => [],
-            'button' => [],
-            'tag'    => [],
-            'meta'   => [],
-            'media'  => [],
+        'card'   => [],
+        'box'    => [],
+        'button' => [],
+        'tag'    => [],
+        'meta'   => [],
+        'media'  => [],
     ],
 ];

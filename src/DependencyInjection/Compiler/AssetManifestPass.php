@@ -19,6 +19,7 @@ final readonly class AssetManifestPass implements CompilerPassInterface
     private ArrayStore $inventory;
 
     private AssetManager $assetManager;
+
     private ThemeManager $themeManager;
 
     public function __construct( private ParameterBagInterface $parameterBag ) {}
@@ -40,6 +41,11 @@ final readonly class AssetManifestPass implements CompilerPassInterface
     {
         $appAssets  = $this->parameterBag->get( 'dir.assets' );
         $coreAssets = $this->parameterBag->get( 'dir.core.assets' );
+        $themeStyle = $this->parameterBag->get( 'dir.assets.storage' ).'/theme.css';
+
+        $this->themeManager->generateTheme()->save( $themeStyle );
+
+        $this->getAssetGroup( 'baseline', 'style.theme', $themeStyle );
 
         $this->getAssetGroup( 'baseline', 'style', \glob( $coreAssets.'\styles\reset.css' ) );
         $this->getAssetGroup( 'baseline', 'style', \glob( $coreAssets.'\styles\core.css' ) );
@@ -54,15 +60,19 @@ final readonly class AssetManifestPass implements CompilerPassInterface
 
     private function registerCoreAssets() : void
     {
-        $this->assetManager->compileAsset( 'core.style', Style::class, 'baseline', 'core.style' );
+        $this->assetManager->compileAsset( 'core.style', Style::class, 'baseline.style' );
         $this->assetManager->compileAsset( 'core.script', Script::class );
     }
 
-    private function getAssetGroup( string $label, string $type, array $glob ) : void
+    private function getAssetGroup( string $label, string $type, string|array $source ) : void
     {
+        if ( \is_string( $source ) ) {
+            $source = [$source];
+        }
+
         $inventory = [];
 
-        foreach ( $glob as $path ) {
+        foreach ( $source as $path ) {
             $asset = new Path( $path );
 
             if ( ! $asset->isReadable ) {
@@ -106,16 +116,14 @@ final readonly class AssetManifestPass implements CompilerPassInterface
      */
     private function initializeThemeManager( ContainerBuilder $container ) : ThemeManager
     {
-        $assetManager = $container->getDefinition( ThemeManager::class );
-        $pathfinder   = $container->getDefinition( Pathfinder::class );
+        $assetManager   = $container->getDefinition( ThemeManager::class );
+        $pathfinder     = $container->getDefinition( Pathfinder::class );
+        $pathfinderPath = $pathfinder->getArgument( 1 );
 
-        dump($pathfinder);
+        dump( $pathfinderPath );
 
         return new ( $assetManager->getClass() )(
-            new Pathfinder(
-                $this->parameterBag,
-                $this->parameterBag->get( 'kernel.cache_dir' ).'/pathfinder.cache.php',
-            ),
+            new Pathfinder( $this->parameterBag, $pathfinderPath )
         );
     }
 }
