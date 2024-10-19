@@ -1,0 +1,50 @@
+/*#region font */
+
+:root {
+  --font-family : system-ui;
+  /*--heading-weight      : 500;*/
+  /*--heading-line-height : 1.5em; !* 1.5 min, 5em max *!*/
+  /*--heading-group-gap   : 1.5em;*/
+  }
+
+
+  html {
+    font-family : var(--font-family), system-ui;
+  }
+
+  body {
+    font-size : var(--size-text);
+  }
+  small {
+    font-size : var(--size-text-small);
+  }
+  h1, .h1 {
+    font-size : var(--size-h1);
+  }
+  h2, .h2 {
+    font-size : var(--size-h2);
+  }
+  h3, .h3 {
+    font-size : var(--size-h3);
+  }
+  h4, .h4 {
+    font-size : var(--size-h4);
+  }
+  /*#endregion*/
+
+.flow > * + * {
+  margin-top : var(--size-flow);
+}
+
+p, .heading {
+  overflow-wrap : break-word;
+  text-wrap     : pretty;
+}
+
+.nowrap {
+  white-space : nowrap;
+}
+
+code {
+  tab-size : 4ch;
+}

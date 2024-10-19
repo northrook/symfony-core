@@ -1,0 +1,26 @@
+:has(.fixed,.absolute) {
+  position : fixed;
+  z-index  : 125;
+}
+
+.fixed.top {
+  top : var(--offset-top);
+}
+
+.fixed.bottom {
+  bottom : var(--offset-bottom);
+}
+
+.fixed.left {
+  left : var(--offset-left);
+}
+
+.fixed.right {
+  right : var(--offset-right);
+}
+
+/*?Why?*/
+.bottom {
+  bottom : 0;
+  outline: 2em dot-dot-dash deeppink;
+}

@@ -66,6 +66,7 @@ return [
         'small'  => '.5rem',   // 8px
         'medium' => '1rem',    // 16px
         'large'  => '1.5rem',  // 24px
+        'flow'   => '1em', // using em allows variable spacing based on font size
     ],
     //
     // .class

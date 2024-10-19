@@ -1,0 +1,12 @@
+[role=list] {
+  display        : flex;
+  flex-direction : column;
+}
+
+[role=list].right {
+  align-items : flex-end;
+}
+
+[role=list].reverse {
+  flex-direction : column-reverse;
+}

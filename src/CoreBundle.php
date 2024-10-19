@@ -116,6 +116,9 @@ final class CoreBundle extends AbstractBundle
             'dir.cache'       => '%kernel.cache_dir%',
             'dir.cache.latte' => '%kernel.cache_dir%/latte',
 
+            // Themes
+            'path.theme.core' => '%dir.core%/config/themes/core.php',
+
             // Settings DataStore
             'path.settings_store' => '%dir.var%/settings.array.php',
         ];
