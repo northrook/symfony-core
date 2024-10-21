@@ -2,6 +2,7 @@
 
 namespace Core\Controller;
 
+use Core\Controller\Attribute\Template;
 use Core\Response\{Document, Parameters};
 use Core\DependencyInjection\CoreController;
 use Core\Service\{Headers, Request};
@@ -27,7 +28,10 @@ final class PublicController extends CoreController
     //     $this->response->template = 'welcome.latte';
     // }
 
-    #[Route( '/{route}', 'index' )]
+    #[
+        Route( '/{route}', 'index' ),
+        Template( 'index.latte', 'dashboard.latte' )
+    ]
     public function index( ?string $route, Document $document, Headers $headers ) : Response
     {
         $headers( 'route-type', 'dynamic' );

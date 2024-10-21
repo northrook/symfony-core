@@ -71,10 +71,10 @@ final class CoreBundle extends AbstractBundle
         );
 
         // Assign default asset parameters, preload the %asset.manifest% file
-        $container->addCompilerPass(
-            pass : new AssetManifestPass( $container->getParameterBag() ),
-            type : PassConfig::TYPE_OPTIMIZE,
-        );
+        // $container->addCompilerPass(
+        //     pass : new AssetManifestPass( $container->getParameterBag() ),
+        //     type : PassConfig::TYPE_OPTIMIZE,
+        // );
     }
 
     /**

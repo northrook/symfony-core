@@ -10,7 +10,7 @@ use Attribute;
 class Template
 {
     public function __construct(
-        public string  $html,
-        public ?string $htmx,
+        public string  $document,
+        public ?string $content = null,
     ) {}
 }
