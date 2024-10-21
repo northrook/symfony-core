@@ -14,11 +14,6 @@ return static function( ContainerConfigurator $container ) : void {
 
     $container->services()
 
-        // Current Request ServiceContainer
-        ->set( ThemeManager::class )
-        ->args( [service( Pathfinder::class )] )
-
         // Toasts
-        ->public()
         ->set( ToastService::class )->args( [service( 'request_stack' )] );
 };

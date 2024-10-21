@@ -9,6 +9,7 @@ namespace Core\Service\ThemeManager;
 use Northrook\Exception\E_Value;
 use Northrook\Filesystem\File;
 use Northrook\Resource\Path;
+use Northrook\Trait\PropertyAccessor;
 
 /**
  * @internal
@@ -16,6 +17,8 @@ use Northrook\Resource\Path;
  */
 final readonly class Theme
 {
+    use PropertyAccessor;
+
     public string $css;
 
     public readonly array $root;
@@ -25,6 +28,11 @@ final readonly class Theme
         $this->parseRoot( $styles );
 
         $this->css = $this->compileStylesheet( $styles );
+    }
+
+    public function __get( string $property )
+    {
+        // TODO: Implement __get() method.
     }
 
     public function save( string|Path $path ) : void
@@ -90,4 +98,5 @@ final readonly class Theme
 
         return $css;
     }
+
 }

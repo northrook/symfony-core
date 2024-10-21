@@ -2,17 +2,27 @@
 
 namespace Core\Controller;
 
-use Core\Response\{Controller, Document, Parameters};
+use Core\Response\{Controller, Document, Parameters, ResponseHandler};
+use Core\DependencyInjection\CoreController;
 use Core\Service\Request;
+use Northrook\Clerk;
 use Symfony\Component\HttpFoundation\Response;
 
-final class AdminController extends Controller
+final class AdminController extends CoreController
 {
-    protected function setDefault( Document $document, Parameters $parameters ) : void
-    {
+
+    final public function __construct(
+            Document                           $document,
+            Parameters                         $parameters,
+            protected readonly Request         $request,
+            protected readonly ResponseHandler $response,
+    ) {
+        // Clerk::stop( RouteHandler::class );
+        Clerk::event( $this::class, 'controller' );
+
         $document(
-            'Welcome - Admin!',
-            'This is an example template.',
+                'Welcome - Admin!',
+                'This is an example template.',
         );
 
         $this->response->template = 'welcome.latte';

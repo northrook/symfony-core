@@ -88,8 +88,12 @@ return static function( ContainerConfigurator $container ) : void {
          * Core `Admin` Controller.
          */
         ->set( 'core.controller.admin', AdminController::class )
-        ->args( $controllerArguments )
+        ->call( 'setServiceLocator', [service( 'core.service_locator' )] )
         ->tag( 'controller.service_arguments' )
+        ->tag(
+            'monolog.logger',
+            ['channel' => 'request'],
+        )
         /**
          * Core `Public` Controller.
          */

@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Core\DependencyInjection\ServiceContainer;
 use Core\Service\{Request, ToastService};
 use Northrook\Latte;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -30,5 +31,9 @@ return static function( ContainerConfigurator $container ) : void {
         /** @used-by ServiceContainer */
         ->set( 'core.service_locator' )
         ->tag( 'container.service_locator' )
-        ->args( [$core_services] );
+        ->args( [$core_services] )
+
+        //
+        ->set( ServiceContainer::class )
+        ->args( [service( 'core.service_locator' )] );
 };

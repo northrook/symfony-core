@@ -7,7 +7,6 @@ use Northrook\Exception\{E_Value};
 use Symfony\Component\DependencyInjection\ServiceLocator;
 
 /**
- * @internal
  * @author Martin Nielsen <mn@northrook.com>
  */
 trait ServiceContainer
@@ -37,5 +36,10 @@ trait ServiceContainer
                 true,
             );
         }
+    }
+
+    final public function setServiceLocator( ServiceLocator $serviceLocator ): void
+    {
+        $this->serviceLocator = $serviceLocator;
     }
 }

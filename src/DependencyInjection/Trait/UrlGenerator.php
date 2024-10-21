@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\DependencyInjection\Component;
+namespace Core\DependencyInjection\Trait;
 
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 

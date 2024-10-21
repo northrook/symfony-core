@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\DependencyInjection\Component;
+namespace Core\DependencyInjection\Trait;
 
 use Northrook\Logger\Log;
 use Psr\Cache\InvalidArgumentException;

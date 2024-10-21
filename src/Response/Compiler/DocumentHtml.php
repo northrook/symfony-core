@@ -18,6 +18,7 @@ use Support\Str;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 use function Support\toString;
 use const Support\{EMPTY_STRING, TAB, WHITESPACE};
+
 /**
  * @internal
  * @author Martin Nielsen <mn@northrook.com>

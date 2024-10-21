@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Core\Latte\Extension;
 
-use Core\DependencyInjection\Component\UrlGenerator;
+use Core\DependencyInjection\Trait\UrlGenerator;
 use Latte\Extension;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 

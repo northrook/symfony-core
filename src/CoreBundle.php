@@ -23,6 +23,7 @@ final class CoreBundle extends AbstractBundle
         '../config/latte.php',
         '../config/services.php',
         '../config/telemetry.php',
+        '../config/theme.php',
     ];
 
     #[Override]
@@ -107,6 +108,7 @@ final class CoreBundle extends AbstractBundle
             'path.asset_inventory' => '%dir.root%/var/assets/inventory.array.php',
             'path.asset_manifest'  => '%dir.root%/var/assets/manifest.array.php',
             'dir.core.assets'      => '%dir.core%/assets',
+            'dir.assets.themes'    => '%dir.core%/assets',
 
             // Templates
             'dir.templates'      => '%dir.root%/templates',
