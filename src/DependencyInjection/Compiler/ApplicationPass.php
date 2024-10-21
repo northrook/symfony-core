@@ -87,18 +87,30 @@ final readonly class ApplicationPass implements CompilerPassInterface
     public function coreControllerRoutes() : self
     {
         $routes = [
+            'core.controller' => [
+                'resource' => [
+                    'path'      => '@CoreBundle/src/Controller',
+                    'namespace' => 'Core\Controller',
+                ],
+                'type' => 'attribute',
+                // 'prefix'   => '/',
+            ],
             // 'core.controller.api' => [
             //     'resource' => '@CoreBundle/config/routes/api.php',
             //     'prefix'   => '/api',
             // ],
-            'core.controller.admin' => [
-                'resource' => '@CoreBundle/config/routes/admin.php',
-                'prefix'   => '/admin',
-            ],
-            'core.controller.public' => [
-                'resource' => '@CoreBundle/config/routes/public.php',
-                'prefix'   => '/',
-            ],
+            // 'core.controller.admin' => [
+            //     'resource' => '@CoreBundle/config/routes/admin.php',
+            //     'prefix'   => '/admin',
+            // ],
+            // 'core.controller.admin' => [
+            //     'resource' => '@CoreBundle/config/routes/admin.php',
+            //     'prefix'   => '/admin',
+            // ],
+            // 'core.controller.public' => [
+            //     'resource' => '@CoreBundle/config/routes/public.php',
+            //     'prefix'   => '/',
+            // ],
             // 'core.controller.security' => [
             //     'resource' => '@CoreBundle/config/routes/security.php',
             //     'prefix'   => '/',

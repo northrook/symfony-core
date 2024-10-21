@@ -13,9 +13,6 @@ final class AdminController extends CoreController
 
     final public function __construct(
             Document                           $document,
-            Parameters                         $parameters,
-            protected readonly Request         $request,
-            protected readonly ResponseHandler $response,
     ) {
         // Clerk::stop( RouteHandler::class );
         Clerk::event( $this::class, 'controller' );

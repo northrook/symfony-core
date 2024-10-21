@@ -84,20 +84,12 @@ return static function( ContainerConfigurator $container ) : void {
             service( 'cache.response' ),
             service( DocumentHtml::class ),
         ], )
-        /**
-         * Core `Admin` Controller.
-         */
-        ->set( 'core.controller.admin', AdminController::class )
+            
+            /**
+             * Core `Public` Controller.
+             */
+        ->set( PublicController::class )
         ->call( 'setServiceLocator', [service( 'core.service_locator' )] )
-        ->tag( 'controller.service_arguments' )
-        ->tag(
-            'monolog.logger',
-            ['channel' => 'request'],
-        )
-        /**
-         * Core `Public` Controller.
-         */
-        ->set( 'core.controller.public', PublicController::class )
         ->args( $controllerArguments )
         ->tag( 'controller.service_arguments' );
 };

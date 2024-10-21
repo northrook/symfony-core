@@ -3,7 +3,6 @@
 namespace Core\Response;
 
 /**
- * @internal
  * @author Martin Nielsen <mn@northrook.com>
  */
 final class Parameters
