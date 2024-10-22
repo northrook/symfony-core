@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Core\Response\Compiler;
 
 use Core\DependencyInjection\ServiceContainer;
+use Core\Model\Message;
 use Core\Response\{Document};
 use Core\Service\{Request};
 use Core\Settings;
-use Core\View\Message;
 use InvalidArgumentException;
 use Northrook\HTML\{Element};
 use Northrook\HTML\Element\Attributes;

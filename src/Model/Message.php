@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Core\View;
+namespace Core\Model;
 
-use InvalidArgumentException, Countable;
+use Countable;
+use InvalidArgumentException;
+use Northrook\Logger\Log;
 use Northrook\Time;
 use Northrook\Trait\PropertyAccessor;
-use Northrook\Logger\Log;
 use function String\hashKey;
 
 /**

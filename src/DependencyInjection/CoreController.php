@@ -33,27 +33,24 @@ abstract class CoreController
 
         $content ??= $this->renderLatte();
 
-        if ( $this->request()->isHtml ) {
-            $content = $this->renderDocumentHtml( $content );
-        }
+        $content = $this->responseHtml( $content );
+
 
         return new Response( $content );
     }
 
-    final protected function request() : Request
+
+
+    private function responseHtml( ?string $content = null ) : string
     {
-        return $this->serviceLocator( Request::class );
+        // $document = new View\Document( $this->document(), $content );
+        //
+        // dump( $document );
+
+        return $content;
     }
 
-    final protected function parameters() : Parameters
-    {
-        return $this->serviceLocator( Parameters::class );
-    }
 
-    final protected function document() : Document
-    {
-        return $this->serviceLocator( Document::class );
-    }
 
     /**
      * @return array{document: string, content: ?string}
@@ -62,15 +59,6 @@ abstract class CoreController
     {
         // Only resolve if no cached version is found
         return $this->resolveResponseTemplate();
-    }
-
-    private function renderDocumentHtml( ?string $content = null ) : string
-    {
-        $document = new View\Document();
-
-        dump( $document );
-
-        return __METHOD__;
     }
 
     private function renderLatte() : string
@@ -95,7 +83,8 @@ abstract class CoreController
                          ?? ( new ReflectionClass( $method->class ) )->getAttributes( Template::class )[0] ?? null;
         }
         catch ( ReflectionException $exception ) {
-            return E_Value::error(
+            // TODO : Trigger 404
+            E_Value::error(
                 'The {controller} route does not exist does provide a template.',
                 ['controller' => $caller],
                 throw: false,
@@ -164,5 +153,22 @@ abstract class CoreController
                 continue;
             }
         }
+    }
+
+
+
+    final protected function request() : Request
+    {
+        return $this->serviceLocator( Request::class );
+    }
+
+    final protected function parameters() : Parameters
+    {
+        return $this->serviceLocator( Parameters::class );
+    }
+
+    final protected function document() : Document
+    {
+        return $this->serviceLocator( Document::class );
     }
 }

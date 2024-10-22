@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Core\Service;
 
-use Core\View\Message;
+use Core\Model\Message;
+use InvalidArgumentException;
 use Stringable;
 use Symfony\Component\HttpFoundation as Http;
 use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use function String\hashKey;
-use InvalidArgumentException;
 
 final readonly class ToastService
 {
@@ -46,7 +46,7 @@ final readonly class ToastService
     ) : Message {
         $flashKey = hashKey( [$type, $title] );
 
-        /** @type ?Message $message } */
+        /** @type ?\Core\Model\Message $message } */
         if ( $this->flashBag()->has( $flashKey ) ) {
             $message = $this->getFlashBagMessage( $flashKey );
             $message?->bump( $description );

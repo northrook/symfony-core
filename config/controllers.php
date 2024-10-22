@@ -34,6 +34,10 @@ return static function( ContainerConfigurator $container ) : void {
         ->args( ['response', 0, '%dir.cache%/response'] )
         ->tag( 'cache.pool' )
 
+            // Event
+        ->set( ResponseHandler::class )
+        ->tag( 'kernel.event_subscriber' )
+
         // Gateway - Request => Response
         ->set( RequestResponseHandler::class )
         ->args( [
