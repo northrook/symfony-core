@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use Core\Controller\{AdminController, PublicController};
 use Core\Service\{AssetManager, Headers, Request};
 use Core\Response\{Compiler\DocumentHtml, Document, Parameters, ResponseHandler};
 use Core\Event\RequestResponseHandler;
@@ -83,13 +82,5 @@ return static function( ContainerConfigurator $container ) : void {
             service( Parameters::class ),
             service( 'cache.response' ),
             service( DocumentHtml::class ),
-        ], )
-            
-            /**
-             * Core `Public` Controller.
-             */
-        ->set( PublicController::class )
-        ->call( 'setServiceLocator', [service( 'core.service_locator' )] )
-        ->args( $controllerArguments )
-        ->tag( 'controller.service_arguments' );
+        ] );
 };

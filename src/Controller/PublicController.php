@@ -2,35 +2,31 @@
 
 namespace Core\Controller;
 
-use Core\Controller\Attribute\Template;
-use Core\Response\{Document, Parameters};
 use Core\DependencyInjection\CoreController;
-use Core\Service\{Headers, Request};
-use Core\Service\AssetManager\Compiler\{Script, Style};
+use Core\Response\{Attribute\DocumentResponse, Document, Parameters};
+use Core\Response\Attribute\Template;
+use Core\Service\{Headers};
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route( '/', 'core:public' )]
+#[
+    Route( '/', 'core:public' ),
+    Template( 'welcome.latte' )
+]
 final class PublicController extends CoreController
 {
-    // protected function setDefault( Document $document, Parameters $parameters ) : void
-    // {
-    //     $document(
-    //         'Welcome - Public!',
-    //         'This is an example template.',
-    //     )->assets(
-    //         'core',
-    //         // 'core.style',
-    //     );
-    //     // ->asset( 'core', Style::class ) // just use the 'dir.assets/core/*.css' style glob pattern
-    //     // ->asset( 'core', Script::class );
-    //
-    //     $this->response->template = 'welcome.latte';
-    // }
+    #[DocumentResponse]
+    protected function onDocumentResponse(
+            Document   $document,
+            Parameters $parameters,
+            Headers    $headers,
+    ) : void {
+
+    }
 
     #[
         Route( '/{route}', 'index' ),
-        Template( 'index.latte', 'dashboard.latte' )
+        Template( 'demo.latte' )
     ]
     public function index( ?string $route, Document $document, Headers $headers ) : Response
     {

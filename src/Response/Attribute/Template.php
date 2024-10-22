@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Core\Controller\Attribute;
+namespace Core\Response\Attribute;
 
 use Attribute;
 
 #[Attribute( Attribute::TARGET_CLASS | Attribute::TARGET_METHOD )]
-class Template
+final class Template
 {
     public function __construct(
         public string  $document,

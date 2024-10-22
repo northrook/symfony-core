@@ -18,4 +18,5 @@ return static function( ContainerConfigurator $controller ) : void {
         ->call( 'setServiceLocator', [service( 'core.service_locator' )] )
         ->tag( 'controller.service_arguments' )
         ->tag( 'monolog.logger', ['channel' => 'request'] );
+
 };
