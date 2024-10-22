@@ -11,6 +11,8 @@ use Northrook\Logger\Log;
 use function String\hashKey;
 
 /**
+ * @internal
+ *
  * @property-read string     $key           // Unique key to identify this object internally
  * @property-read  string    $type          // One of 'info', 'success', 'warning', 'error', or 'notice'
  * @property-read  string    $message       // The main message to show the user

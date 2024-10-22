@@ -7,4 +7,4 @@ namespace Core\Response\Attribute;
 use Attribute;
 
 #[Attribute( Attribute::TARGET_METHOD )]
-final class DocumentResponse {}
+final class ContentResponse {}

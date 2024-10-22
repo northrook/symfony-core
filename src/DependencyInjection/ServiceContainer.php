@@ -5,6 +5,7 @@ namespace Core\DependencyInjection;
 use Exception;
 use Northrook\Exception\{E_Value};
 use Symfony\Component\DependencyInjection\ServiceLocator;
+use Symfony\Contracts\Service\Attribute\Required;
 
 /**
  * @author Martin Nielsen <mn@northrook.com>
@@ -22,9 +23,6 @@ trait ServiceContainer
      */
     final protected function serviceLocator( string $get ) : mixed
     {
-        if ( ServiceLocator::class === $get ) {
-            return $this->serviceLocator;
-        }
         try {
             return $this->serviceLocator->get( $get );
         }
@@ -38,7 +36,15 @@ trait ServiceContainer
         }
     }
 
-    final public function setServiceLocator( ServiceLocator $serviceLocator ): void
+    /**
+     * @internal
+     *
+     * @param ServiceLocator $serviceLocator
+     *
+     * @return void
+     */
+    #[Required]
+    final public function setServiceLocator( ServiceLocator $serviceLocator ) : void
     {
         $this->serviceLocator = $serviceLocator;
     }

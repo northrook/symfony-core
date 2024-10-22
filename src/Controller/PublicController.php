@@ -17,12 +17,10 @@ final class PublicController extends CoreController
 {
     #[DocumentResponse]
     protected function onDocumentResponse(
-            Document   $document,
-            Parameters $parameters,
-            Headers    $headers,
-    ) : void {
-
-    }
+        Document   $document,
+        Parameters $parameters,
+        Headers    $headers,
+    ) : void {}
 
     #[
         Route( '/{route}', 'index' ),
@@ -30,14 +28,16 @@ final class PublicController extends CoreController
     ]
     public function index( ?string $route, Document $document, Headers $headers ) : Response
     {
+        // We always assume the route is getting [content], and will wrap in a [document] by default.
+        // methods with [DocumentResponse] will be parsed before returning the [Response] unless [isHTMX]
         $headers( 'route-type', 'dynamic' );
 
-        return $this->response( $route );
-        //     $document(
-        //         'Index says welcome',
-        //         keywords: ['we', 'like', 'keywords'],
-        //     );
-        //     return $this->response->document();
+        $document(
+            'Index says welcome',
+            keywords: ['we', 'like', 'keywords'],
+        );
+
+        return $this->response();
     }
 
     // public function blog( ?string $route, Document $document, Request $request ) : Response

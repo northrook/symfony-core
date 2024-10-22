@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace Core\DependencyInjection;
 
-use Core\Response\{Attribute\DocumentResponse, Attribute\Template};
-use Core\Service\{Request};
+use Core\Response\Attribute\{ContentResponse, DocumentResponse, Template};
+use Core\View;
+use Core\Response\{Document, Parameters};
+use Core\Service\{Headers, Request};
 use Northrook\Exception\E_Value;
+use Northrook\Latte;
+use Northrook\Logger\Log;
 use ReflectionException;
 use Symfony\Component\HttpFoundation\Response;
 use ReflectionClass;
 use ReflectionMethod;
-use BadMethodCallException;
 use ReflectionAttribute;
+use InvalidArgumentException;
 
 /**
  * @internal
@@ -22,28 +26,66 @@ abstract class CoreController
 {
     use ServiceContainer;
 
-    final protected function response(
-        string $content,
-    ) : Response {
-        $template = $this->resolveResponseTemplate();
-        $this->documentResponseMethods();
-        dump( $template );
+    final protected function response( ?string $content = null ) : Response
+    {
+        // ? This could also be performed on [kernel.finishRequest]
+        $this->controllerResponseMethods();
+
+        $content ??= $this->renderLatte();
+
+        if ( $this->request()->isHtml ) {
+            $content = $this->renderDocumentHtml( $content );
+        }
+
         return new Response( $content );
     }
 
-    private function documentResponseMethods() : void
+    final protected function request() : Request
     {
-        $controller ??= new ReflectionClass( $this );
-
-        $methods = [];
-
-        foreach ( $controller->getAttributes( DocumentResponse::class ) as $attribute ) {
-            // we need to find each, check if they require valid injections, if so, inject and call.
-            dump( $attribute );
-        }
+        return $this->serviceLocator( Request::class );
     }
 
-    private function resolveResponseTemplate() : ?string
+    final protected function parameters() : Parameters
+    {
+        return $this->serviceLocator( Parameters::class );
+    }
+
+    final protected function document() : Document
+    {
+        return $this->serviceLocator( Document::class );
+    }
+
+    /**
+     * @return array{document: string, content: ?string}
+     */
+    final protected function getResponseTemplate() : array
+    {
+        // Only resolve if no cached version is found
+        return $this->resolveResponseTemplate();
+    }
+
+    private function renderDocumentHtml( ?string $content = null ) : string
+    {
+        $document = new View\Document();
+
+        dump( $document );
+
+        return __METHOD__;
+    }
+
+    private function renderLatte() : string
+    {
+        [$template, $content] = \array_values( $this->getResponseTemplate() );
+
+        $this->parameters()->set( 'content', $content );
+
+        return $this->serviceLocator( Latte::class )->render( $template, $this->parameters()->getParameters() );
+    }
+
+    /**
+     * @return array{document: string, content: ?string}
+     */
+    private function resolveResponseTemplate() : array
     {
         $caller = $this->request()->controller;
 
@@ -60,27 +102,67 @@ abstract class CoreController
             );
         }
 
-        // TODO : [low] Cache this value
-        $templates = $attribute->getArguments();
+        // TODO : [low] Cache this value using ArrayStore or other perpetual data store
+        //        there should _never_ be any changed to route<=>template relations in production
+        $templates = [
+            'document' => $attribute->getArguments()[0] ?? throw new InvalidArgumentException( 'A Document template is required.' ),
+            'content'  => $attribute->getArguments()[1] ?? null,
+        ];
 
-        [$document, $content] = $templates;
+        // dump( $attribute, $templates );
 
-        $route = $this->request()->isHtmx ? $content : $document;
-
-        // try {
+        // if ( null !== $templates['htmx'] && $this->request()->isHtmx ) {
+        //     return $templates['htmx'];
         // }
-        // catch ( ReflectionException $exception ) {
-        //     dump( $exception->getMessage() );
-        // }
-        dump( $attribute, $templates, $route );
+        //
+        // return $templates['html'];
 
-        // dump( $attribute[0]->getArguments() );
-
-        return $route;
+        // $route = $this->request()->isHtmx ? $templates['content'] : $templates['document'];
+        //
+        //
+        return $templates;
     }
 
-    final protected function request() : Request
+    private function controllerResponseMethods() : void
     {
-        return $this->serviceLocator( Request::class );
+        $controller   = new ReflectionClass( $this );
+        $responseType = $this->request()->isHtmx ? ContentResponse::class : DocumentResponse::class ;
+
+        $autowire = \array_keys( $this->serviceLocator->getProvidedServices() );
+        // $autowire = [
+        //     Headers::class,
+        //     Parameters::class,
+        //     Document::class,
+        // ];
+
+        foreach ( $controller->getMethods() as $method ) {
+
+            if ( ! $method->getAttributes( $responseType ) ) {
+                continue;
+            }
+
+            $parameters = [];
+
+            foreach ( $method->getParameters() as $parameter ) {
+                $injectableClass = $parameter->getType()->__toString();
+                if ( \in_array( $injectableClass, $autowire, true ) ) {
+                    $parameters[] = $this->serviceLocator->get( $injectableClass );
+                }
+                else {
+                    // TODO : Ensure appropriate exception is thrown on missing dependencies
+                    //        nullable parameters will not throw; log in [dev], ignore in [prod]
+                    dump( $method );
+                }
+            }
+
+            try {
+                $method->invoke( $this, ...$parameters );
+            }
+            catch ( ReflectionException $e ) {
+                Log::exception( $e );
+
+                continue;
+            }
+        }
     }
 }

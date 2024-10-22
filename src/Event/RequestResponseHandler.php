@@ -67,6 +67,8 @@ final class RequestResponseHandler
 
         // * All done!
 
+        dump($this);
+
         $profiler->stop();
     }
 
