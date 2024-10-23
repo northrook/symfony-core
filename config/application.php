@@ -21,7 +21,6 @@ return static function( ContainerConfigurator $container ) : void {
         // Core
         Request::class       => service( Request::class ),
         Latte::class         => service( Latte::class ),
-        RenderService::class => service( RenderService::class ),
         ToastService::class  => service( ToastService::class ),
 
         // Document

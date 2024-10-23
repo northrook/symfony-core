@@ -13,9 +13,11 @@ use Symfony\Component\Yaml\Yaml;
 use UnexpectedValueException;
 use Override;
 
-final readonly class ApplicationPass implements CompilerPassInterface
+final class ApplicationPass implements CompilerPassInterface
 {
-    private string $projectDirectory;
+    private readonly string $projectDirectory;
+
+    private array $status = [];
 
     #[Override]
     public function process( ContainerBuilder $container ) : void

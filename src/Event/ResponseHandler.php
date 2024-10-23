@@ -2,10 +2,15 @@
 
 namespace Core\Event;
 
-use Core\Service\{RenderService, Request};
+use Core\Response\Attribute\Template;
+use Core\Service\{Request};
 use Core\DependencyInjection\{CoreController, ServiceContainer};
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\{Event, Event\ControllerEvent, Event\FinishRequestEvent, KernelEvents};
+use Symfony\Component\HttpFoundation\RequestStack;
+use ReflectionAttribute;
+use ReflectionClass;
+
 /**
  * Handles {@see Response} events for controllers extending the {@see CoreController}.
  *
@@ -22,7 +27,7 @@ final class ResponseHandler implements EventSubscriberInterface
     private ?string $controller = null;
 
     public function __construct(
-        private RenderService $renderService,
+        // private RequestStack $requestStack,
     ) {}
 
     /**
@@ -38,16 +43,30 @@ final class ResponseHandler implements EventSubscriberInterface
         ];
     }
 
+
     public function onKernelController( ControllerEvent $event ) : void
     {
-        if ( $event->getController() instanceof CoreController ) {
-            $this->controller = $event->getController()::class;
+        if ( \is_array( $event->getController() ) && $event->getController()[0] instanceof CoreController ) {
+            $this->controller = $event->getController()[0]::class;
         }
 
-        dd( $this );
-        // $this->value = __METHOD__;
-        // Has reflector already
-        // Check if instanceof CoreController - set templates here
+        $event->getRequest()->attributes->add( $this->resolveResponseTemplate( $event ) );
+        echo __METHOD__ . PHP_EOL;
+    }
+
+    public function onKernelResponse( Event\ResponseEvent $event ) : void
+    {
+        // Bail if the controller doesn't pass validation
+        if ( ! $this->controller ) {
+            return;
+
+        }
+        // Always remove the identifying header
+        \header_remove( 'X-Powered-By' );
+
+        // Merge headers
+        $event->getResponse()->headers->add( $this->headers->response->all() );
+        echo __METHOD__ . PHP_EOL;
     }
 
     public function onKernelFinishRequest( FinishRequestEvent $event ) : void
@@ -57,20 +76,30 @@ final class ResponseHandler implements EventSubscriberInterface
             return;
         }
 
-        dd( $this );
+        // !! Render the Document here
+
+        echo __METHOD__ . PHP_EOL;
     }
 
-    public function onKernelResponse( Event\ResponseEvent $event ) : void
-    {
-        // Bail if the controller doesn't pass validation
-        if ( ! $this->controller ) {
-            return;
-        }
-        // dd( $this->request()->controller );
-    }
 
-    final protected function request() : Request
+
+    /**
+     * TODO : Cache this.
+     *
+     * @param ControllerEvent $event
+     *
+     * @return array{_document_template: ?string, _content_template: ?string}
+     */
+    private function resolveResponseTemplate( ControllerEvent $event ) : array
     {
-        return $this->serviceLocator( Request::class );
+        $method = $event->getControllerReflector();
+
+        $attribute = $method->getAttributes( Template::class, ReflectionAttribute::IS_INSTANCEOF )[0]
+                     ?? ( new ReflectionClass( $event->getController() ) )->getAttributes( Template::class )[0] ?? null;
+
+        return [
+                '_document_template' => $attribute->getArguments()[0] ?? null,
+                '_content_template'  => $attribute->getArguments()[1] ?? null,
+        ];
     }
 }

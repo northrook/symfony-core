@@ -29,7 +29,7 @@ return static function( ContainerConfigurator $container ) : void {
 
         // Event
         ->set( ResponseHandler::class )
-        ->args( [service( RenderService::class )] )
+        // ->args( [service( RenderService::class )] )
         ->call( 'setServiceLocator', [service( 'core.service_locator' )] )
         ->tag( 'kernel.event_subscriber' )
 
