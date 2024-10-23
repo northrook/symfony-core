@@ -10,7 +10,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Core\DependencyInjection\ServiceContainer;
 use Core\Response\{Document, Parameters};
-use Core\Service\{Headers, Request, ToastService};
+use Core\Service\{Headers, RenderService, Request, ToastService};
 use Northrook\Latte;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -19,9 +19,10 @@ return static function( ContainerConfigurator $container ) : void {
 
     $core_services = [
         // Core
-        Request::class      => service( Request::class ),
-        Latte::class        => service( Latte::class ),
-        ToastService::class => service( ToastService::class ),
+        Request::class       => service( Request::class ),
+        Latte::class         => service( Latte::class ),
+        RenderService::class => service( RenderService::class ),
+        ToastService::class  => service( ToastService::class ),
 
         // Document
         Document::class   => service( Document::class ),
@@ -39,7 +40,7 @@ return static function( ContainerConfigurator $container ) : void {
         ->tag( 'container.service_locator' )
         ->args( [$core_services] );
 
-        //
-        // ->set( ServiceContainer::class )
-        // ->args( [service( 'core.service_locator' )] );
+    //
+    // ->set( ServiceContainer::class )
+    // ->args( [service( 'core.service_locator' )] );
 };

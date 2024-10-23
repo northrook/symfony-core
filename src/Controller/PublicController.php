@@ -23,7 +23,7 @@ final class PublicController extends CoreController
     ) : void {}
 
     #[
-        Route( '/{route}', 'index' ),
+        Route( ['/', '/{route}'], 'index' ),
         Template( 'demo.latte' )
     ]
     public function index( ?string $route, Document $document, Headers $headers ) : Response

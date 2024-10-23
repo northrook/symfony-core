@@ -4,6 +4,7 @@
 *.code-workspace
 
 ### Dev
+/config/routes/
 /vendor
 /node_modules
 /*.cache

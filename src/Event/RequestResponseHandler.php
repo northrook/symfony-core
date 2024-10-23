@@ -5,6 +5,7 @@ namespace Core\Event;
 use Symfony\Component\HttpKernel\Event\{ControllerEvent, ResponseEvent, TerminateEvent};
 use Core\Controller\{AdminController, PublicController};
 use Core\Service\Headers;
+use JetBrains\PhpStorm\Deprecated;
 use Northrook\Clerk;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -17,6 +18,7 @@ use Symfony\Component\Routing\RouterInterface;
  * @internal
  * @author Martin Nielsen <mn@northrook.com>
  */
+#[Deprecated]
 final class RequestResponseHandler
 {
     public const string PROFILER_GROUP = 'gateway';

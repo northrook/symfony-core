@@ -2,10 +2,10 @@
 
 namespace Core\Event;
 
-use Core\DependencyInjection\ServiceContainer;
-use Override;
+use Core\Service\{RenderService, Request};
+use Core\DependencyInjection\{CoreController, ServiceContainer};
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\{Event, KernelEvents};
+use Symfony\Component\HttpKernel\{Event, Event\ControllerEvent, Event\FinishRequestEvent, KernelEvents};
 /**
  * Handles {@see Response} events for controllers extending the {@see CoreController}.
  *
@@ -19,25 +19,58 @@ final class ResponseHandler implements EventSubscriberInterface
 {
     use ServiceContainer;
 
+    private ?string $controller = null;
+
+    public function __construct(
+        private RenderService $renderService,
+    ) {}
+
     /**
      * @return array<string, array{0: string, 1: int}|list<array{0: string, 1?: int}>|string>
      */
-    #[Override]
     public static function getSubscribedEvents() : array
     {
+        // dd( __METHOD__);
         return [
+            KernelEvents::CONTROLLER     => ['onKernelController', -100],
             KernelEvents::RESPONSE       => ['onKernelResponse'],
             KernelEvents::FINISH_REQUEST => ['onKernelFinishRequest'],
         ];
     }
 
-    public function onKernelFinishRequest( Event\FinishRequestEvent $event ) : void
+    public function onKernelController( ControllerEvent $event ) : void
     {
-        dump( $event );
+        if ( $event->getController() instanceof CoreController ) {
+            $this->controller = $event->getController()::class;
+        }
+
+        dd( $this );
+        // $this->value = __METHOD__;
+        // Has reflector already
+        // Check if instanceof CoreController - set templates here
+    }
+
+    public function onKernelFinishRequest( FinishRequestEvent $event ) : void
+    {
+        // Bail if the controller doesn't pass validation
+        if ( ! $this->controller ) {
+            return;
+        }
+
+        dd( $this );
     }
 
     public function onKernelResponse( Event\ResponseEvent $event ) : void
     {
-        dump( $event );
+        // Bail if the controller doesn't pass validation
+        if ( ! $this->controller ) {
+            return;
+        }
+        // dd( $this->request()->controller );
+    }
+
+    final protected function request() : Request
+    {
+        return $this->serviceLocator( Request::class );
     }
 }
