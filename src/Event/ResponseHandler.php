@@ -3,7 +3,6 @@
 namespace Core\Event;
 
 use Core\Response\Attribute\Template;
-use Core\Service\{Request};
 use Core\DependencyInjection\{CoreController, ServiceContainer};
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\{Event, Event\ControllerEvent, Event\FinishRequestEvent, KernelEvents};
@@ -43,15 +42,17 @@ final class ResponseHandler implements EventSubscriberInterface
         ];
     }
 
-
+    /**
+     * @param ControllerEvent $event
+     *
+     * @return void
+     */
     public function onKernelController( ControllerEvent $event ) : void
     {
         if ( \is_array( $event->getController() ) && $event->getController()[0] instanceof CoreController ) {
             $this->controller = $event->getController()[0]::class;
+            $event->getRequest()->attributes->add( $this->resolveResponseTemplate( $event ) );
         }
-
-        $event->getRequest()->attributes->add( $this->resolveResponseTemplate( $event ) );
-        echo __METHOD__ . PHP_EOL;
     }
 
     public function onKernelResponse( Event\ResponseEvent $event ) : void
@@ -66,7 +67,6 @@ final class ResponseHandler implements EventSubscriberInterface
 
         // Merge headers
         $event->getResponse()->headers->add( $this->headers->response->all() );
-        echo __METHOD__ . PHP_EOL;
     }
 
     public function onKernelFinishRequest( FinishRequestEvent $event ) : void
@@ -76,12 +76,10 @@ final class ResponseHandler implements EventSubscriberInterface
             return;
         }
 
+        dump( $event );
+
         // !! Render the Document here
-
-        echo __METHOD__ . PHP_EOL;
     }
-
-
 
     /**
      * TODO : Cache this.
@@ -97,9 +95,9 @@ final class ResponseHandler implements EventSubscriberInterface
         $attribute = $method->getAttributes( Template::class, ReflectionAttribute::IS_INSTANCEOF )[0]
                      ?? ( new ReflectionClass( $event->getController() ) )->getAttributes( Template::class )[0] ?? null;
 
-        return [
-                '_document_template' => $attribute->getArguments()[0] ?? null,
-                '_content_template'  => $attribute->getArguments()[1] ?? null,
-        ];
+        return $attribute ? [
+            '_document_template' => $attribute->getArguments()[0] ?? null,
+            '_content_template'  => $attribute->getArguments()[1] ?? null,
+        ] : [];
     }
 }

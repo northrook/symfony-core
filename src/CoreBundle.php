@@ -23,6 +23,7 @@ final class CoreBundle extends AbstractBundle
         '../config/controllers/admin.php',
         '../config/controllers/public.php',
         '../config/latte.php',
+        '../config/security.php',
         '../config/services.php',
         '../config/telemetry.php',
         '../config/theme.php',

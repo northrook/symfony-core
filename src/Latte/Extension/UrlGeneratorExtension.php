@@ -20,8 +20,8 @@ final class UrlGeneratorExtension extends Extension
     public function getFunctions() : array
     {
         return [
-            'url'  => $this->getUrl( ... ),
-            'path' => $this->getPath( ... ),
+                'url'  => $this->generateRouteUrl( ... ),
+                'path' => $this->generateRoutePath( ... ),
         ];
     }
 }

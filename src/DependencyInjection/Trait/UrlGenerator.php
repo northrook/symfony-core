@@ -9,15 +9,21 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  */
 trait UrlGenerator
 {
-    public function getPath( string $name, array $parameters = [], bool $relative = false ) : string
+    public function generateRoutePath( string $name, array $parameters = [], bool $relative = false ) : string
     {
-        $referenceType = $relative ? UrlGeneratorInterface::RELATIVE_PATH : UrlGeneratorInterface::ABSOLUTE_PATH;
-        return $this->urlGenerator->generate( $name, $parameters, $referenceType );
+        return $this->urlGenerator->generate(
+            $name,
+            $parameters,
+            $relative ? UrlGeneratorInterface::RELATIVE_PATH : UrlGeneratorInterface::ABSOLUTE_PATH,
+        );
     }
 
-    public function getUrl( string $name, array $parameters = [], bool $relative = false ) : string
+    public function generateRouteUrl( string $name, array $parameters = [], bool $relative = false ) : string
     {
-        $referenceType = $relative ? UrlGeneratorInterface::NETWORK_PATH : UrlGeneratorInterface::ABSOLUTE_URL;
-        return $this->urlGenerator->generate( $name, $parameters, $referenceType );
+        return $this->urlGenerator->generate(
+            $name,
+            $parameters,
+            $relative ? UrlGeneratorInterface::NETWORK_PATH : UrlGeneratorInterface::ABSOLUTE_URL,
+        );
     }
 }
