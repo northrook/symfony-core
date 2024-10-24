@@ -9,6 +9,7 @@ use Core\Service\Request;
 use Core\Settings;
 use Core\DependencyInjection\{CoreController, ServiceContainer};
 use Northrook\HTML\Element;
+use Northrook\HTML\Element\Attributes;
 use Northrook\UI\Component\Notification;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\{Event\ControllerEvent, Event\ResponseEvent, KernelEvents};
@@ -16,8 +17,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use ReflectionAttribute;
 use ReflectionClass;
 use function Support\toString;
-use const Support\TAB;
-
+use const Support\{EMPTY_STRING, TAB, WHITESPACE};
 /**
  * Handles {@see Response} events for controllers extending the {@see CoreController}.
  *
@@ -112,26 +112,41 @@ final class ResponseHandler implements EventSubscriberInterface
         }
         // Full Document HTML response
         else {
+
+            $this->document->add(
+                [
+                    'html.lang'   => 'en',
+                    'html.id'     => 'top',
+                    'html.theme'  => $this->document->get( 'theme.name' ) ?? 'system',
+                    'html.status' => 'init',
+                ],
+            )
+                ->add( 'meta.viewport', 'width=device-width,initial-scale=1' );
+
             $document->head()
+                ->meta( 'meta.viewport' )
                 ->title()
                 ->meta( 'document' )
                 ->meta( 'robots' )
                 ->meta( 'theme' )
-                ->assets( 'font' )
+                ->meta( 'meta' )
                 ->assets( 'script' )
                 ->assets( 'style' )
                 ->assets( 'link' );
 
             $head   = ['<head>', ...\array_map( static fn( $line ) : string => TAB.$line, ['<meta charset="UTF-8">'], $document->head()->getArray() ), '</head>'];
             $toasts = \implode( PHP_EOL, $this->flashBagMessages() );
-            $body = new Element('body', $this->serviceLocator( Document::class )->pull('body',[]), $content);
+            $body   = new Element( 'body', $this->serviceLocator( Document::class )->pull( 'body', [] ), [$toasts, $content] );
+
+            $htmlAttributes = $this->document->pull( 'html', null );
+            $htmlAttributes = $htmlAttributes ? WHITESPACE.Attributes::from( $htmlAttributes ) : EMPTY_STRING;
 
             $html = [
-                    '<!DOCTYPE html>',
-                '<html lang="en">',
-                    ... $head,
-                    $body->toString( PHP_EOL ),
-                    '</html>',
+                '<!DOCTYPE html>',
+                "<html{$htmlAttributes}>",
+                ...$head,
+                $body->toString( PHP_EOL ),
+                '</html>',
             ] ;
 
             $content = \implode( PHP_EOL, $html );
