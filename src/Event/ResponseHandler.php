@@ -8,13 +8,15 @@ use Core\Response\Attribute\Template;
 use Core\Service\Request;
 use Core\Settings;
 use Core\DependencyInjection\{CoreController, ServiceContainer};
+use Northrook\HTML\Element;
 use Northrook\UI\Component\Notification;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\{Event, Event\ControllerEvent, KernelEvents};
+use Symfony\Component\HttpKernel\{Event\ControllerEvent, Event\ResponseEvent, KernelEvents};
 use Symfony\Component\HttpFoundation\RequestStack;
 use ReflectionAttribute;
 use ReflectionClass;
 use function Support\toString;
+use const Support\TAB;
 
 /**
  * Handles {@see Response} events for controllers extending the {@see CoreController}.
@@ -31,6 +33,8 @@ final class ResponseHandler implements EventSubscriberInterface
 
     private ?string $controller = null;
 
+    private bool $isHtmxRequest = false;
+
     public function __construct(
         // private RequestStack $requestStack,
     ) {}
@@ -42,10 +46,7 @@ final class ResponseHandler implements EventSubscriberInterface
     {
         return [
             KernelEvents::CONTROLLER => ['parseController', -100],
-            KernelEvents::RESPONSE   => [
-                ['prepareResponse'],
-                ['parseResponseContent', 1_024],
-            ],
+            KernelEvents::RESPONSE   => ['parseResponse', 1_024],
         ];
     }
 
@@ -57,42 +58,109 @@ final class ResponseHandler implements EventSubscriberInterface
     public function parseController( ControllerEvent $event ) : void
     {
         if ( \is_array( $event->getController() ) && $event->getController()[0] instanceof CoreController ) {
-            $this->controller = $event->getController()[0]::class;
+            $this->controller    = $event->getController()[0]::class;
+            $this->isHtmxRequest = $event->getRequest()->headers->has( 'hx-request' );
             $event->getRequest()->attributes->add( $this->resolveResponseTemplate( $event ) );
         }
     }
 
-    public function prepareResponse( Event\ResponseEvent $event ) : void
+    public function prepareResponse( ResponseEvent $event ) : void
     {
         // Bail if the controller doesn't pass validation
         if ( ! $this->controller ) {
             return;
         }
+
+    }
+
+    public function parseResponse( ResponseEvent $event ) : void
+    {
+        // Bail if the controller doesn't pass validation
+        if ( ! $this->controller ) {
+            return;
+        }
+
+        $document = new DocumentParser( $this->serviceLocator( Document::class ) );
+
+        // If we have made it this far, we can safely assume we are either sending content HTML as a HTMX response
+        // or we are sending a full document HTML. Either way we need to first append/prepend to ->content.
+
+        $response = $event->getResponse();
+
+        $content = (string) $event->getResponse()->getContent();
+
+        // Contentful HTML response
+        if ( $this->isHtmxRequest ) {
+
+            $document->head()
+                ->title()
+                ->meta( 'document' )
+                ->meta( 'robots' )
+                ->meta( 'theme' )
+                ->assets( 'font' )
+                ->assets( 'script' )
+                ->assets( 'style' )
+                ->assets( 'link' );
+
+            $html = $document->head()->getArray();
+
+            foreach ( $this->flashBagMessages() as $message ) {
+                $html[] = $message;
+            }
+
+            $content = \implode( PHP_EOL, $html );
+        }
+        // Full Document HTML response
+        else {
+            $document->head()
+                ->title()
+                ->meta( 'document' )
+                ->meta( 'robots' )
+                ->meta( 'theme' )
+                ->assets( 'font' )
+                ->assets( 'script' )
+                ->assets( 'style' )
+                ->assets( 'link' );
+
+            $head   = ['<head>', ...\array_map( static fn( $line ) : string => TAB.$line, ['<meta charset="UTF-8">'], $document->head()->getArray() ), '</head>'];
+            $toasts = \implode( PHP_EOL, $this->flashBagMessages() );
+            $body = new Element('body', $this->serviceLocator( Document::class )->pull('body',[]), $content);
+
+            $html = [
+                    '<!DOCTYPE html>',
+                '<html lang="en">',
+                    ... $head,
+                    $body->toString( PHP_EOL ),
+                    '</html>',
+            ] ;
+
+            $content = \implode( PHP_EOL, $html );
+
+        }
+
+        // $content = $this->contentHtml( $event->getResponse()->getContent() );
+
+        // dd( $content );
+
+        $this->responseHeaders( $event );
+
+        $event->getResponse()->setContent( $content );
+    }
+
+    private function responseHeaders( ResponseEvent $event ) : void
+    {
 
         // Always remove the identifying header
         \header_remove( 'X-Powered-By' );
 
         // Merge headers
         $event->getResponse()->headers->add( $this->headers->response->all() );
-    }
 
-    public function parseResponseContent( Event\ResponseEvent $event ) : void
-    {
-        // Bail if the controller doesn't pass validation
-        if ( ! $this->controller ) {
-            return;
-        }
+        $event->getResponse()->headers->set( 'Content-Type', 'text/html', false );
 
-        $head = new DocumentParser( $this->serviceLocator( Document::class ) );
-
-        // If we have made it this far, we can safely assume we are either sending content HTML as a HTMX response
-        // or we are sending a full document HTML. Either way we need to first append/prepend to ->content.
-
-        $content = $this->contentHtml( $event->getResponse()->getContent() );
-
-        dd( $content );
-
-        $event->getResponse()->setContent( $content );
+        // TODO : X-Robots
+        // TODO : lang
+        // TODO : cache
     }
 
     private function contentHtml( ?string $content ) : string

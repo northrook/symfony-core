@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use Core\Service\{AssetManager, RenderService};
+use Core\Service\{AssetManager};
 use Core\Event\ResponseHandler;
 use Core\Response\{Document,Parameters};
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;

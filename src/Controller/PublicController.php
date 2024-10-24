@@ -28,7 +28,7 @@ final class PublicController extends CoreController
     ]
     public function index( ?string $route, Document $document, Headers $headers ) : Response
     {
-        $this->auth()->isGranted();
+        // $this->auth()->isGranted();
         // We always assume the route is getting [content], and will wrap in a [document] by default.
         // methods with [DocumentResponse] will be parsed before returning the [Response] unless [isHTMX]
         $headers( 'route-type', 'dynamic' );
