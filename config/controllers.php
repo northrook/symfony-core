@@ -45,7 +45,7 @@ return static function( ContainerConfigurator $container ) : void {
         ->autowire();
 
     // Document HTML Renderer
-    // ->set( DocumentHtml::class )
+    // ->set( DocumentParser::class )
     // ->args( [
     //     service( Document::class ),
     //     service( 'core.service_locator' ),
@@ -58,6 +58,6 @@ return static function( ContainerConfigurator $container ) : void {
     //     service( Document::class ),
     //     service( Parameters::class ),
     //     service( 'cache.response' ),
-    //     service( DocumentHtml::class ),
+    //     service( DocumentParser::class ),
     // ] );
 };

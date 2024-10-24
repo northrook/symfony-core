@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Core\Response;
 
 use Core\DependencyInjection\ServiceContainer;
-use Core\Response\Compiler\DocumentHtml;
+use Core\Response\Compiler\DocumentParser;
 use Northrook\Clerk;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -20,35 +20,18 @@ final class ResponseHandler
     public ?string $template = null;
 
     /**
-     * @param Document       $document
-     * @param Parameters     $parameters
-     * @param CacheInterface $cache
-     * @param DocumentHtml   $documentHtml
+     * @param Document        $document
+     * @param Parameters      $parameters
+     * @param CacheInterface  $cache
+     * @param DocumentParser  $documentHtml
      */
     public function __construct(
         protected readonly Document     $document,
         protected readonly Parameters   $parameters,
         private readonly CacheInterface $cache,
-        private readonly DocumentHtml   $documentHtml,
+        private readonly DocumentParser $documentHtml,
     ) {
         Clerk::event( $this::class, 'controller' );
-    }
-
-    /**
-     * ## Raw HTML response.
-     *
-     * - Inject Head and Notifications.
-     * - Optimizer pass.
-     *
-     * @param string                $string
-     * @param int                   $status
-     * @param array<string, string> $headers
-     *
-     * @return Response
-     */
-    public function html( string $string, int $status = OK_200, array $headers = [] ) : Response
-    {
-        return $this->response( $string, $status, $headers );
     }
 
     /**

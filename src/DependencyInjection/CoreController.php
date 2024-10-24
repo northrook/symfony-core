@@ -35,7 +35,7 @@ abstract class CoreController
     {
         $this->controllerResponseMethods();
 
-        if ( $string ) {
+        if ( null !== $string ) {
             return new Response( $string );
         }
 

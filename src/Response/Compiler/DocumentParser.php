@@ -23,7 +23,7 @@ use const Support\{EMPTY_STRING, TAB, WHITESPACE};
  * @internal
  * @author Martin Nielsen <mn@northrook.com>
  */
-final class DocumentHtml
+final class DocumentParser
 {
     use ServiceContainer;
 
