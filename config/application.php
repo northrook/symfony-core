@@ -10,8 +10,9 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Core\DependencyInjection\ServiceContainer;
 use Core\Security\Security;
+use Core\Settings;
 use Core\Response\{Document, Parameters};
-use Core\Service\{Headers, Pathfinder, Request, ToastService};
+use Core\Service\{DocumentService, Headers, Pathfinder, Request, ToastService};
 use Northrook\Latte;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Routing\RouterInterface;
@@ -24,6 +25,7 @@ return static function( ContainerConfigurator $container ) : void {
 
     $core_services = [
         // Core
+        Settings::class     => service( Settings::class ),
         Security::class     => service( Security::class ),
         Pathfinder::class   => service( Pathfinder::class ),
         Request::class      => service( Request::class ),
@@ -31,9 +33,10 @@ return static function( ContainerConfigurator $container ) : void {
         ToastService::class => service( ToastService::class ),
 
         // Document
-        Document::class     => service( Document::class ),
-        Parameters::class   => service( Parameters::class ),
-        Headers::class      => service( Headers::class ),
+        Document::class        => service( Document::class ),
+        Parameters::class      => service( Parameters::class ),
+        Headers::class         => service( Headers::class ),
+        DocumentService::class => service( DocumentService::class ),
 
         // Symfony
         RouterInterface::class     => service( 'router' ),
@@ -50,7 +53,12 @@ return static function( ContainerConfigurator $container ) : void {
         /** @used-by ServiceContainer */
         ->set( 'core.service_locator' )
         ->tag( 'container.service_locator' )
-        ->args( [$core_services] );
+        ->args( [$core_services] )
+
+        // Settings
+        ->set( Settings::class )
+        ->args( ['%dir.settings_store%'] )
+        ->tag( 'controller.service_arguments' );
 
     //
     // ->set( ServiceContainer::class )

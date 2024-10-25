@@ -3,9 +3,9 @@
 namespace Core\Event;
 
 use Core\Response\Document;
-use Core\Model\{DocumentParser, Message};
+use Core\Service\{DocumentService, Request};
+use Core\Model\{Message};
 use Core\Response\Attribute\Template;
-use Core\Service\Request;
 use Core\Settings;
 use Core\DependencyInjection\{CoreController, ServiceContainer};
 use Northrook\HTML\Element;
@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use ReflectionAttribute;
 use ReflectionClass;
 use function Support\toString;
-use const Support\{EMPTY_STRING, TAB, WHITESPACE};
+use const Support\{EMPTY_STRING, WHITESPACE};
 /**
  * Handles {@see Response} events for controllers extending the {@see CoreController}.
  *
@@ -80,8 +80,6 @@ final class ResponseHandler implements EventSubscriberInterface
             return;
         }
 
-        $document = new DocumentParser( $this->serviceLocator( Document::class ) );
-
         // If we have made it this far, we can safely assume we are either sending content HTML as a HTMX response
         // or we are sending a full document HTML. Either way we need to first append/prepend to ->content.
 
@@ -92,7 +90,7 @@ final class ResponseHandler implements EventSubscriberInterface
         // Contentful HTML response
         if ( $this->isHtmxRequest ) {
 
-            $document->head()
+            $this->document()
                 ->title()
                 ->meta( 'document' )
                 ->meta( 'robots' )
@@ -102,11 +100,13 @@ final class ResponseHandler implements EventSubscriberInterface
                 ->assets( 'style' )
                 ->assets( 'link' );
 
-            $html = $document->head()->getArray();
+            $html = $this->document()->head;
 
             foreach ( $this->flashBagMessages() as $message ) {
                 $html[] = $message;
             }
+
+            $html[] = $content;
 
             $content = \implode( PHP_EOL, $html );
         }
@@ -123,7 +123,7 @@ final class ResponseHandler implements EventSubscriberInterface
             )
                 ->add( 'meta.viewport', 'width=device-width,initial-scale=1' );
 
-            $document->head()
+            $this->document()
                 ->meta( 'meta.viewport' )
                 ->title()
                 ->meta( 'document' )
@@ -134,7 +134,6 @@ final class ResponseHandler implements EventSubscriberInterface
                 ->assets( 'style' )
                 ->assets( 'link' );
 
-            $head   = ['<head>', ...\array_map( static fn( $line ) : string => TAB.$line, ['<meta charset="UTF-8">'], $document->head()->getArray() ), '</head>'];
             $toasts = \implode( PHP_EOL, $this->flashBagMessages() );
             $body   = new Element( 'body', $this->serviceLocator( Document::class )->pull( 'body', [] ), [$toasts, $content] );
 
@@ -144,7 +143,7 @@ final class ResponseHandler implements EventSubscriberInterface
             $html = [
                 '<!DOCTYPE html>',
                 "<html{$htmlAttributes}>",
-                ...$head,
+                $this->document()->getHead(),
                 $body->toString( PHP_EOL ),
                 '</html>',
             ] ;
@@ -162,6 +161,11 @@ final class ResponseHandler implements EventSubscriberInterface
         $event->getResponse()->setContent( $content );
     }
 
+    private function document() : DocumentService
+    {
+        return $this->serviceLocator( DocumentService::class );
+    }
+
     private function responseHeaders( ResponseEvent $event ) : void
     {
 
@@ -176,19 +180,6 @@ final class ResponseHandler implements EventSubscriberInterface
         // TODO : X-Robots
         // TODO : lang
         // TODO : cache
-    }
-
-    private function contentHtml( ?string $content ) : string
-    {
-        $html = [];
-
-        foreach ( $this->flashBagMessages() as $message ) {
-            $html[] = $message;
-        }
-
-        dump( $html );
-
-        return $content;
     }
 
     /**

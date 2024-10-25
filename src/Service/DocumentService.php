@@ -1,31 +1,58 @@
 <?php
 
-/** @noinspection DuplicatedCode */
-
 declare(strict_types=1);
 
-namespace Core\Model;
+namespace Core\Service;
 
+use Core\Settings;
 use Core\Response\Document;
+use Northrook\Trait\PropertyAccessor;
 use Support\Str;
-use Traversable;
-use ArrayIterator;
-use IteratorAggregate;
 use function Support\toString;
+use InvalidArgumentException;
+use const Support\TAB;
 
-final class DocumentHead implements IteratorAggregate
+/**
+ * @property-read array<int, string> $head
+ */
+final class DocumentService
 {
-    private array $html = [];
+    use PropertyAccessor;
 
-    public function __construct( private readonly Document $document ) {}
+    private array $head = [];
+
+    public function __construct(
+        private readonly Document $document,
+        private readonly Settings $settings,
+    ) {}
+
+    public function __get( string $property )
+    {
+        return match ( $property ) {
+            'head'  => $this->head,
+            default => throw new InvalidArgumentException(),
+        };
+    }
+
+    public function getHead(
+        ?string $charset = null,
+    ) : string {
+
+        $html = $charset ? TAB.'<meta charset="UTF-8">' : '';
+
+        foreach ( $this->head as $name => $value ) {
+            $html .= TAB.$value.PHP_EOL;
+        }
+
+        return PHP_EOL.'<head>'.PHP_EOL.$html.PHP_EOL.'</head>'.PHP_EOL;
+    }
 
     public function title() : self
     {
         $title = $this->document->pull( 'document.title' )
-                    ?? \Northrook\Settings::get( 'site.name' )
-                    ?? $_SERVER['SERVER_NAME'];
+                 ?? $this->settings->get( 'site.name', $_SERVER['SERVER_NAME'] );
 
-        $this->html[] = "<title>{$title}</title>" ;
+        $this->head[] = "<title>{$title}</title>";
 
         return $this;
     }
@@ -37,7 +64,7 @@ final class DocumentHead implements IteratorAggregate
         }
 
         if ( $comment ) {
-            $this->html[] = '<!-- '.$comment.' -->' ;
+            $this->head[] = '<!-- '.$comment.' -->';
         }
 
         $meta = \is_array( $value ) ? $value : [$name => $value];
@@ -46,7 +73,7 @@ final class DocumentHead implements IteratorAggregate
             $value = toString( $value );
             if ( $value ) {
                 $name         = Str::after( $name, '.' );
-                $this->html[] = "<meta name=\"{$name}\" content=\"{$value}\">";
+                $this->head[] = "<meta name=\"{$name}\" content=\"{$value}\">";
             }
         }
 
@@ -57,7 +84,7 @@ final class DocumentHead implements IteratorAggregate
     {
         if ( ! $id ) {
             foreach ( $this->document->pull( "asset.{$type}" ) ?? [] as $asset ) {
-                $this->html[] = $asset ;
+                $this->head[] = $asset;
             }
             return $this;
         }
@@ -65,7 +92,7 @@ final class DocumentHead implements IteratorAggregate
         $asset = $this->document->pull( "asset.{$type}.{$id}" );
 
         if ( $asset ) {
-            $this->html[] = $asset ;
+            $this->head[] = $asset;
         }
 
         return $this;
@@ -79,22 +106,5 @@ final class DocumentHead implements IteratorAggregate
     public function script( ?string $id = null ) : self
     {
         return $this->assets( 'script', $id );
-    }
-
-    // ::: Return :::::
-
-    public function getString( string $separator = '' ) : string
-    {
-        return \implode( $separator, $this->html );
-    }
-
-    public function getArray() : array
-    {
-        return $this->html;
-    }
-
-    public function getIterator() : Traversable
-    {
-        return new ArrayIterator( $this->html );
     }
 }
