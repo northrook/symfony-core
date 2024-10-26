@@ -80,19 +80,19 @@ final class DocumentService
         return $this;
     }
 
-    public function assets( string $type, ?string $id = null ) : self
+    /**
+     * @param null|'link'|'script'|'style' $type
+     *
+     * @return $this
+     */
+    public function assets( ?string $type = null ) : self
     {
-        if ( ! $id ) {
-            foreach ( $this->document->pull( "asset.{$type}" ) ?? [] as $asset ) {
-                $this->head[] = $asset;
-            }
-            return $this;
-        }
+        $type = $type ? [$type] : ['script', 'style', 'link'];
 
-        $asset = $this->document->pull( "asset.{$type}.{$id}" );
+        foreach ( $type as $asset ) {
+            dump( $asset );
 
-        if ( $asset ) {
-            $this->head[] = $asset;
+            dump( $this->document->pull( $asset ) );
         }
 
         return $this;

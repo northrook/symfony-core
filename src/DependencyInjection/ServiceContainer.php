@@ -2,8 +2,8 @@
 
 namespace Core\DependencyInjection;
 
-use Core\Response\{Document, Parameters};
-use Core\Service\{Headers, Pathfinder, Request};
+use Core\Response\{Document, Parameters, Headers};
+use Core\Service\{Pathfinder, Request};
 use Core\Service\Security;
 use Exception;
 use Northrook\Exception\{E_Value};
@@ -20,7 +20,7 @@ use Symfony\Contracts\Service\Attribute\Required;
  * @property-read Document               $document
  * @property-read Parameters             $parameters
  * @property-read Headers                $headers
- * @property-read \Core\Service\Security $security
+ * @property-read Security $security
  * @property-read UrlGeneratorInterface  $urlGenerator
  *
  * @author Martin Nielsen <mn@northrook.com>

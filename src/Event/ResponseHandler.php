@@ -13,7 +13,11 @@ use Northrook\UI\Component\Notification;
 use ReflectionAttribute;
 use ReflectionClass;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\{Event\ControllerEvent, Event\ResponseEvent, KernelEvents};
+use Symfony\Component\HttpKernel\{Event\ControllerEvent,
+    Event\ResponseEvent,
+    Event\TerminateEvent,
+    KernelEvents};
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
 use function Support\toString;
 use const Support\{EMPTY_STRING, WHITESPACE};
 
@@ -46,6 +50,7 @@ final class ResponseHandler implements EventSubscriberInterface
         return [
             KernelEvents::CONTROLLER => ['parseController', -100],
             KernelEvents::RESPONSE   => ['parseResponse', 1_024],
+            KernelEvents::TERMINATE  => ['responseCleanup', 1_024],
         ];
     }
 
@@ -65,8 +70,6 @@ final class ResponseHandler implements EventSubscriberInterface
 
     public function parseResponse( ResponseEvent $event ) : void
     {
-        dump($this->notifications);
-
         // Bail if the controller doesn't pass validation
         if ( ! $this->controller ) {
             return;
@@ -122,9 +125,7 @@ final class ResponseHandler implements EventSubscriberInterface
                 ->meta( 'robots' )
                 ->meta( 'theme' )
                 ->meta( 'meta' )
-                ->assets( 'script' )
-                ->assets( 'style' )
-                ->assets( 'link' );
+                ->assets();
 
             $toasts = \implode( PHP_EOL, $this->flashBagMessages() );
             $body   = new Element( 'body', $this->serviceLocator( Document::class )->pull( 'body', [] ), [$toasts, $content] );
@@ -165,7 +166,7 @@ final class ResponseHandler implements EventSubscriberInterface
         \header_remove( 'X-Powered-By' );
 
         // Merge headers
-        $event->getResponse()->headers->add( $this->headers->response->all() );
+        $event->getResponse()->headers->add( $this->headers->all() );
 
         $event->getResponse()->headers->set( 'Content-Type', 'text/html', false );
 
@@ -175,11 +176,35 @@ final class ResponseHandler implements EventSubscriberInterface
     }
 
     /**
+     * - Commit unused {@see Toast} notifications.
+     * - Commit deferred cache items
+     *
+     * @param TerminateEvent  $event
+     *
+     * @return void
+     */
+    public function responseCleanup( TerminateEvent $event ) : void
+    {
+        foreach ( $this->notifications->getMessages() as $message ) {
+            $this->serviceLocator( Request::class )->flashBag()
+                ->add( $message->type, $message->message );
+        }
+    }
+
+    /**
      * @return array<int, string>
      */
     private function flashBagMessages() : array
     {
         $messages = [];
+
+        // $notifications = $this->notifications->getMessages();
+        $flashBag = $this->serviceLocator( Request::class )->flashBag();
+
+        dump( $flashBag, $this->notifications );
+
+        return $messages;
+
 
         foreach ( $this->serviceLocator( Request::class )->flashBag()->all() as $type => $flash ) {
             foreach ( $flash as $message ) {

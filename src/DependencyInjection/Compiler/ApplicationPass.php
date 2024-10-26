@@ -24,28 +24,34 @@ final class ApplicationPass implements CompilerPassInterface
     {
         $this->projectDirectory = $container->getParameter( 'kernel.project_dir' );
 
-        Output::init( $this::class.' for project directory: '.$this->projectDirectory );
+        // Output::init( $this::class.' for project directory: '.$this->projectDirectory );
 
         // TODO : Purge debug.yaml, explain why
         // TODO : Update monolog.yaml
 
         $this
-            ->removeFile( 'config/packages/debug.yaml' )
-            ->appKernel( true )
-            ->publicIndex( true )
-            ->coreControllerRoutes()
-            ->appControllerRouteConfiguration()
-            ->createConfigServices()
-            ->configurePreload();
+                ->removeFile( 'config/packages/debug.yaml' )
+                ->appKernel( true )
+                ->publicIndex( true )
+                ->coreControllerRoutes()
+                ->appControllerRouteConfiguration()
+                ->createConfigServices()
+                ->configurePreload();
 
-        Output::OK( \implode( ', ', ...$this->status ) );
+        if ( ! empty( $this->status ) ) {
+            Output::OK( \implode( PHP_EOL, [
+                    $this::class.' for project directory: '.$this->projectDirectory,
+                    ...$this->status] ) );
+
+        }
+
     }
 
     public function appKernel( bool $override = false ) : self
     {
         $this->createPhpFile(
-            'src/Kernel.php',
-            <<<PHP
+                'src/Kernel.php',
+                <<<PHP
                 <?php
                 
                 declare(strict_types=1);
@@ -61,7 +67,7 @@ final class ApplicationPass implements CompilerPassInterface
                 }
 
                 PHP,
-            $override,
+                $override,
         );
         return $this;
     }
@@ -69,8 +75,8 @@ final class ApplicationPass implements CompilerPassInterface
     public function publicIndex( bool $override = false ) : self
     {
         $this->createPhpFile(
-            'public/index.php',
-            <<<PHP
+                'public/index.php',
+                <<<PHP
                 <?php
                 
                 declare(strict_types=1);
@@ -82,7 +88,7 @@ final class ApplicationPass implements CompilerPassInterface
                 };
 
                 PHP,
-            $override,
+                $override,
         );
 
         return $this;
@@ -91,34 +97,34 @@ final class ApplicationPass implements CompilerPassInterface
     public function coreControllerRoutes() : self
     {
         $routes = [
-            'core.controller' => [
-                'resource' => [
-                    'path'      => '@CoreBundle/src/Controller',
-                    'namespace' => 'Core\Controller',
+                'core.controller' => [
+                        'resource' => [
+                                'path'      => '@CoreBundle/src/Controller',
+                                'namespace' => 'Core\Controller',
+                        ],
+                        'type' => 'attribute',
+                        // 'prefix'   => '/',
                 ],
-                'type' => 'attribute',
-                // 'prefix'   => '/',
-            ],
-            // 'core.controller.api' => [
-            //     'resource' => '@CoreBundle/config/routes/api.php',
-            //     'prefix'   => '/api',
-            // ],
-            // 'core.controller.admin' => [
-            //     'resource' => '@CoreBundle/config/routes/admin.php',
-            //     'prefix'   => '/admin',
-            // ],
-            // 'core.controller.admin' => [
-            //     'resource' => '@CoreBundle/config/routes/admin.php',
-            //     'prefix'   => '/admin',
-            // ],
-            // 'core.controller.public' => [
-            //     'resource' => '@CoreBundle/config/routes/public.php',
-            //     'prefix'   => '/',
-            // ],
-            // 'core.controller.security' => [
-            //     'resource' => '@CoreBundle/config/routes/security.php',
-            //     'prefix'   => '/',
-            // ],
+                // 'core.controller.api' => [
+                //     'resource' => '@CoreBundle/config/routes/api.php',
+                //     'prefix'   => '/api',
+                // ],
+                // 'core.controller.admin' => [
+                //     'resource' => '@CoreBundle/config/routes/admin.php',
+                //     'prefix'   => '/admin',
+                // ],
+                // 'core.controller.admin' => [
+                //     'resource' => '@CoreBundle/config/routes/admin.php',
+                //     'prefix'   => '/admin',
+                // ],
+                // 'core.controller.public' => [
+                //     'resource' => '@CoreBundle/config/routes/public.php',
+                //     'prefix'   => '/',
+                // ],
+                // 'core.controller.security' => [
+                //     'resource' => '@CoreBundle/config/routes/security.php',
+                //     'prefix'   => '/',
+                // ],
         ] ;
 
         $this->createYamlFile( 'config/routes/core.yaml', $routes, true );
@@ -134,8 +140,8 @@ final class ApplicationPass implements CompilerPassInterface
 
         $this->removeFile( 'config/routes.yaml' );
         $this->createPhpFile(
-            'config/routes.php',
-            <<<PHP
+                'config/routes.php',
+                <<<PHP
                 <?php
                 
                 declare( strict_types = 1 );
@@ -164,8 +170,8 @@ final class ApplicationPass implements CompilerPassInterface
         }
         $this->removeFile( 'config/services.yaml' );
         $this->createPhpFile(
-            'config/services.php',
-            <<<PHP
+                'config/services.php',
+                <<<PHP
                 <?php
                 
                 declare( strict_types = 1 );
@@ -202,8 +208,8 @@ final class ApplicationPass implements CompilerPassInterface
     public function configurePreload( bool $override = false ) : self
     {
         $this->createPhpFile(
-            'config/preload.php',
-            <<<'PHP'
+                'config/preload.php',
+                <<<'PHP'
                 <?php
                 
                 declare(strict_types=1);
@@ -212,7 +218,7 @@ final class ApplicationPass implements CompilerPassInterface
                     \opcache_compile_file(\dirname(__DIR__).'/var/cache/prod/App_KernelProdContainer.preload.php');
                 }
                 PHP,
-            $override,
+                $override,
         );
 
         return $this;
@@ -226,9 +232,9 @@ final class ApplicationPass implements CompilerPassInterface
     }
 
     private function createYamlFile(
-        string $fromProjectDir,
-        #[Language( 'PHP' )] mixed  $input,
-        bool   $overwrite = false,
+            string $fromProjectDir,
+            #[Language( 'PHP' )] mixed  $input,
+            bool   $overwrite = false,
     ) : void {
         $path = new Path( "{$this->projectDirectory}/{$fromProjectDir}" );
 
@@ -239,14 +245,14 @@ final class ApplicationPass implements CompilerPassInterface
         $content = Yaml::dump( $input );
 
         if ( $content && $path->save( $content ) ) {
-            $this->status['created'][] = "Generated {$fromProjectDir}.";
+            $this->status[] = "Generated {$fromProjectDir}.";
         }
     }
 
     private function createPhpFile(
-        string $fromProjectDir,
-        #[Language( 'PHP' )] string $php,
-        bool   $override = false,
+            string $fromProjectDir,
+            #[Language( 'PHP' )] string $php,
+            bool   $override = false,
     ) : void {
         $path = $this->path( $fromProjectDir );
 
@@ -257,21 +263,21 @@ final class ApplicationPass implements CompilerPassInterface
         $content = $this->parsePhpString( $php );
 
         if ( $content && $path->save( $content ) ) {
-            $this->status['created'][] = "Generated {$fromProjectDir}.";
+            $this->status[] = "Generated {$fromProjectDir}.";
         }
     }
 
     private function parsePhpString(
-        #[Language( 'PHP' )] string $php,
+            #[Language( 'PHP' )] string $php,
     ) : string {
         if ( ! \str_starts_with( $php, '<?php' ) ) {
             throw new UnexpectedValueException( 'Autoconfigure was provided a PHP string without an opening tag.' );
         }
 
         $content = \preg_replace(
-            pattern     : '#<\?php\s+?(?=\S)#A',
-            replacement : "<?php\n\n// Generated by ".$this::class."\n\n",
-            subject     : $php,
+                pattern     : '#<\?php\s+?(?=\S)#A',
+                replacement : "<?php\n\n// Generated by ".$this::class."\n\n",
+                subject     : $php,
         );
 
         if ( ! \is_string( $content ) ) {
@@ -285,7 +291,7 @@ final class ApplicationPass implements CompilerPassInterface
         $path = new Path( "{$this->projectDirectory}/{$fromProjectDir}" );
 
         if ( $path->delete() ) {
-            $this->status['removed'][] = "Removed {$fromProjectDir}.";
+            $this->status[] = "Removed {$fromProjectDir}.";
         }
 
         return $this;

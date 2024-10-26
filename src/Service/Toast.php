@@ -16,6 +16,10 @@ final class Toast implements Singleton
     /** @var array<string, Message> */
     private array $messages = [];
 
+    public function __construct() {
+        $this->instantiateSingleton();
+    }
+
     public static function success( string $message, ?string $description = null ) : Message
     {
         return self::getInstance( true )->setMessage( 'success', $message, $description );
@@ -56,8 +60,20 @@ final class Toast implements Singleton
         return $this->messages[$flashKey] = new Message( $type, $title, $description, $timeout );
     }
 
+    public function hasMessages() : bool
+    {
+        return ! empty( $this->messages );
+    }
+
     public function getMessages() : array
     {
         return $this->messages;
+    }
+
+    public function pullMessages() : array
+    {
+        $messages = $this->getMessages();
+        $this->messages = [];
+        return $messages;
     }
 }
