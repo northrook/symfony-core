@@ -1,15 +1,15 @@
 <?php
 
-namespace Core\Security;
+namespace Core\Service;
 
 use Core\DependencyInjection\ServiceContainer;
+use LogicException;
+use SensitiveParameter;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use LogicException;
-use SensitiveParameter;
-use Symfony\Component\Security\Csrf\{CsrfToken, CsrfTokenManagerInterface};
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Csrf\{CsrfToken, CsrfTokenManagerInterface};
 
 final class Security
 {

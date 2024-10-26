@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Core\Response;
 
 /**
@@ -27,12 +29,11 @@ final class Parameters
 
     public function add( string $key, mixed $value ) : Parameters
     {
-
         $this->parameters[$key] ??= $value;
         return $this;
     }
 
-    public function set( string $key, $value ) : self
+    public function set( string $key, mixed $value ) : self
     {
         $this->parameters[$key] = $value;
         return $this;

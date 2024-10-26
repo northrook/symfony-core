@@ -23,3 +23,7 @@ parameters:
 		-
 			message: "#Class .+ has an uninitialized readonly property .+ Assign it in the constructor.#"
 			path: *.php
+
+		-
+			message: "#Class .+ uses generic trait .+ but does not specify its types: .+#"
+			path: *.php

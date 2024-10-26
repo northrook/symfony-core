@@ -2,22 +2,21 @@
 
 namespace Core\Event;
 
-use Core\Response\Document;
-use Core\Service\{DocumentService, Request};
-use Core\Model\{Message};
-use Core\Response\Attribute\Template;
-use Core\Settings;
+use Core\Controller\Attribute\Template;
 use Core\DependencyInjection\{CoreController, ServiceContainer};
+use Core\Model\{Message};
+use Core\Response\Document;
+use Core\Service\{DocumentService, Request, Toast};
 use Northrook\HTML\Element;
 use Northrook\HTML\Element\Attributes;
 use Northrook\UI\Component\Notification;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\{Event\ControllerEvent, Event\ResponseEvent, KernelEvents};
-use Symfony\Component\HttpFoundation\RequestStack;
 use ReflectionAttribute;
 use ReflectionClass;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpKernel\{Event\ControllerEvent, Event\ResponseEvent, KernelEvents};
 use function Support\toString;
 use const Support\{EMPTY_STRING, WHITESPACE};
+
 /**
  * Handles {@see Response} events for controllers extending the {@see CoreController}.
  *
@@ -36,7 +35,7 @@ final class ResponseHandler implements EventSubscriberInterface
     private bool $isHtmxRequest = false;
 
     public function __construct(
-        // private RequestStack $requestStack,
+        private readonly Toast $notifications,
     ) {}
 
     /**
@@ -64,17 +63,10 @@ final class ResponseHandler implements EventSubscriberInterface
         }
     }
 
-    public function prepareResponse( ResponseEvent $event ) : void
-    {
-        // Bail if the controller doesn't pass validation
-        if ( ! $this->controller ) {
-            return;
-        }
-
-    }
-
     public function parseResponse( ResponseEvent $event ) : void
     {
+        dump($this->notifications);
+
         // Bail if the controller doesn't pass validation
         if ( ! $this->controller ) {
             return;

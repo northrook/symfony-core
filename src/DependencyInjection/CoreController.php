@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace Core\DependencyInjection;
 
-use Core\Response\Attribute\{ContentResponse, DocumentResponse};
-use Core\Response\{Document, Parameters};
+use Core\Controller\Attribute\{DocumentResponse};
+use Core\Controller\Attribute\ContentResponse;
 use Exception;
-use Core\Service\{Headers};
 use JetBrains\PhpStorm\Deprecated;
-use Northrook\Latte;
 use Northrook\Logger\Log;
 use Northrook\Resource\URL;
+use ReflectionClass;
 use ReflectionException;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpFoundation\{BinaryFileResponse, JsonResponse, RedirectResponse, Response, ResponseHeaderBag};
-use ReflectionClass;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -39,17 +37,7 @@ abstract class CoreController
             return new Response( $string );
         }
 
-        // $content ??= $this->renderLatte();
-        // [$template, $content] = \array_values( $this->getResponseTemplate() );
-
-        $template = $this->request->parameters( '_document_template' );
-        $content  = $this->request->parameters( '_content_template' );
-
-        dump( $template, $content );
-
         $this->parameters->set( 'content', $this->request->parameters( '_content_template' ) );
-
-        // return $this->serviceLocator( Latte::class )->render( $template, $this->parameters->getParameters() );
 
         return new Response( $this->latte->templateToString(
             $this->request->parameters( '_document_template' ),

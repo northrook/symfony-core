@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Core\Response\Attribute;
+namespace Core\Controller\Attribute;
 
 use Attribute;
 

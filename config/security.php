@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use Core\Security\Security;
+use Core\Service\Security;
 
 return static function( ContainerConfigurator $container ) : void {
 

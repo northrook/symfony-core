@@ -2,9 +2,9 @@
 
 namespace Core\DependencyInjection;
 
-use Core\Security\Security;
 use Core\Response\{Document, Parameters};
 use Core\Service\{Headers, Pathfinder, Request};
+use Core\Service\Security;
 use Exception;
 use Northrook\Exception\{E_Value};
 use Northrook\Latte;
@@ -14,14 +14,14 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
 /**
- * @property-read Request               $request
- * @property-read Pathfinder            $pathfinder
- * @property-read Latte                 $latte
- * @property-read Document              $document
- * @property-read Parameters            $parameters
- * @property-read Headers               $headers
- * @property-read Security              $security
- * @property-read UrlGeneratorInterface $urlGenerator
+ * @property-read Request                $request
+ * @property-read Pathfinder             $pathfinder
+ * @property-read Latte                  $latte
+ * @property-read Document               $document
+ * @property-read Parameters             $parameters
+ * @property-read Headers                $headers
+ * @property-read \Core\Service\Security $security
+ * @property-read UrlGeneratorInterface  $urlGenerator
  *
  * @author Martin Nielsen <mn@northrook.com>
  */

@@ -2,10 +2,10 @@
 
 namespace Core\Controller;
 
+use Core\Controller\Attribute\{Template};
+use Core\Controller\Attribute\DocumentResponse;
 use Core\DependencyInjection\CoreController;
-use Core\Response\{Attribute\DocumentResponse, Document, Parameters};
-use Core\Response\Attribute\Template;
-use Core\Service\{Headers};
+use Core\Response\{Document, Headers, Parameters};
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -28,9 +28,6 @@ final class PublicController extends CoreController
     ]
     public function index( ?string $route, Document $document, Headers $headers ) : Response
     {
-        // $this->auth()->isGranted();
-        // We always assume the route is getting [content], and will wrap in a [document] by default.
-        // methods with [DocumentResponse] will be parsed before returning the [Response] unless [isHTMX]
         $headers( 'route-type', 'dynamic' );
 
         $document(

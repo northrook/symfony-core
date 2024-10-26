@@ -2,8 +2,9 @@
 
 namespace Core\Controller;
 
-use Core\Response\{Controller, Document, Parameters, ResponseHandler};
 use Core\DependencyInjection\CoreController;
+use Core\Response\Document;
+use Core\Response\Parameters;
 use Core\Service\Request;
 use Northrook\Clerk;
 use Symfony\Component\HttpFoundation\Response;

@@ -44,7 +44,7 @@ final class DocumentService
             $html .= TAB.$value.PHP_EOL;
         }
 
-        return PHP_EOL.'<head>'.PHP_EOL.$html.PHP_EOL.'</head>'.PHP_EOL;
+        return PHP_EOL.'<head>'.PHP_EOL.$html.'</head>'.PHP_EOL;
     }
 
     public function title() : self

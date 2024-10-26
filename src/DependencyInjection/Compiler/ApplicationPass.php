@@ -24,7 +24,7 @@ final class ApplicationPass implements CompilerPassInterface
     {
         $this->projectDirectory = $container->getParameter( 'kernel.project_dir' );
 
-        Output::info( 'Using project directory: '.$this->projectDirectory );
+        Output::init( $this::class.' for project directory: '.$this->projectDirectory );
 
         // TODO : Purge debug.yaml, explain why
         // TODO : Update monolog.yaml
@@ -37,6 +37,8 @@ final class ApplicationPass implements CompilerPassInterface
             ->appControllerRouteConfiguration()
             ->createConfigServices()
             ->configurePreload();
+
+        Output::OK( \implode( ', ', ...$this->status ) );
     }
 
     public function appKernel( bool $override = false ) : self
@@ -237,7 +239,7 @@ final class ApplicationPass implements CompilerPassInterface
         $content = Yaml::dump( $input );
 
         if ( $content && $path->save( $content ) ) {
-            Output::info( "Compiler generated {$fromProjectDir}." );
+            $this->status['created'][] = "Generated {$fromProjectDir}.";
         }
     }
 
@@ -255,7 +257,7 @@ final class ApplicationPass implements CompilerPassInterface
         $content = $this->parsePhpString( $php );
 
         if ( $content && $path->save( $content ) ) {
-            Output::info( "Compiler generated {$fromProjectDir}." );
+            $this->status['created'][] = "Generated {$fromProjectDir}.";
         }
     }
 
@@ -283,7 +285,7 @@ final class ApplicationPass implements CompilerPassInterface
         $path = new Path( "{$this->projectDirectory}/{$fromProjectDir}" );
 
         if ( $path->delete() ) {
-            Output::info( "Compiler removed {$fromProjectDir}." );
+            $this->status['removed'][] = "Removed {$fromProjectDir}.";
         }
 
         return $this;
