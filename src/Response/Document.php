@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace Core\Response;
 
-use Northrook\{ArrayAccessor, Clerk, Logger\Log, Resource\Path, Exception\Trigger};
-use Core\Service\AssetManager;
-use Core\Service\AssetManager\Compiler\{Script, Style};
+use Northrook\{ArrayAccessor, Logger\Log, Resource\Path, Exception\Trigger};
 use Northrook\HTML\Element;
 use Support\Normalize;
 use function Support\toString;
-use const Cache\EPHEMERAL;
 
 /**
  * Handles all Document related properties.
@@ -29,8 +26,6 @@ final class Document extends ArrayAccessor
 
     /** @var bool Determines how robot tags will be set */
     public bool $isPublic = false;
-
-    public function __construct( public readonly AssetManager $assetManager ) {}
 
     private function isLocked() : bool
     {
@@ -70,7 +65,6 @@ final class Document extends ArrayAccessor
         ?string           $id = null,
         ?string           $status = null,
     ) : Document {
-
         $set = \array_filter( \get_defined_vars() );
 
         foreach ( $set as $name => $value ) {
@@ -151,97 +145,55 @@ final class Document extends ArrayAccessor
         return $this;
     }
 
-    public function asset( string $label, string $class ) : Document
-    {
-
-        // $profiler = Clerk::event( __METHOD__."->{$label} as {$class}" );
-        // $assets   = $this->assetManager->getAsset( $label,$class );
-        // dump( $assets );
-        // $this->set( $assets );
-        // $profiler->stop();
-
-        return $this;
-    }
-
-    public function assets( string ...$enqueue ) : self
-    {
-        Clerk::event( __METHOD__ );
-
-        foreach ( (array) $enqueue as $label ) {
-            $profiler = Clerk::event( __METHOD__."->{$label}" );
-            $this->set( $this->assetManager->resolveAssets( $label ) );
-            $profiler->stop();
-        }
-
-        Clerk::stop( __METHOD__ );
-        return $this;
+    /**
+     * @param Path|string $path
+     * @param ?string     $id
+     * @param bool        $inline
+     *
+     * @return $this
+     */
+    public function style(
+        string|Path $path, // 'core.{name}' | path
+        ?string     $id = null,
+        bool        $inline = false,
+    ) : Document {
+        return $this->add( 'style', [
+            'path'   => $path,
+            'id'     => $id,
+            'inline' => $inline,
+        ] );
     }
 
     /**
-     * @param string      $href
-     * @param array       $attributes
-     * @param null|string $assetID
+     * @param Path|string $path
+     * @param ?string     $id
+     * @param bool        $inline
+     *
+     * @return $this
+     */
+    public function script(
+        string|Path $path, // 'core.{name}' | path
+        ?string     $id = null,
+        bool        $inline = false,
+    ) : Document {
+        return $this->add( 'script', [
+            'path'   => $path,
+            'id'     => $id,
+            'inline' => $inline,
+        ] );
+    }
+
+    /**
+     * @param string $href
+     * @param        $attributes
      *
      * @return Document
      *
      * @see MDN https://developer.mozilla.org/en-US/docs/Web/HTML/Element/link
      */
-    public function link( string $href, array $attributes = [], ?string $assetID = null ) : Document
+    public function link( string $href, ...$attributes ) : Document
     {
-        // $assetID ??= $attributes['id'] ?? Normalize::key( $href );
-        //
-        // $this->set( "asset.link.{$assetID}", new Link( $href, $assetID, $attributes ) );
-
-        return $this;
-    }
-
-    /**
-     * @param string            $id
-     * @param array|Path|string $path
-     * @param bool              $inline
-     * @param bool              $minify
-     * @param null|int          $persistence
-     *
-     * @return $this
-     */
-    public function style(
-        string            $id,
-        string|array|Path $path,
-        bool              $inline = false,
-        bool              $minify = true,
-        ?int              $persistence = EPHEMERAL,
-    ) : Document {
-
-        // $asset = new Style( $path, $id );
-        // $key   = "asset.style.{$id}";
-        // $html  = $inline ? $asset->getInlineHtml( $minify ) : $asset->getHtml( $minify );
-        // $this->set( $key, $html );
-
-        return $this;
-    }
-
-    /**
-     * @param string            $id
-     * @param array|Path|string $path
-     * @param bool              $inline
-     * @param bool              $minify
-     * @param null|int          $persistence
-     *
-     * @return $this
-     */
-    public function script(
-        string            $id,
-        string|array|Path $path,
-        bool              $inline = false,
-        bool              $minify = true,
-        ?int              $persistence = EPHEMERAL,
-    ) : Document {
-        // $asset = new Script( $path, $id );
-        // $key   = "asset.script.{$id}";
-        // $html  = $inline ? $asset->getInlineHtml( $minify ) : $asset->getHtml( $minify );
-        // $this->set( $key, $html );
-
-        return $this;
+        return $this->add( 'link', ['href' => $href] + $attributes );
     }
 
     public function theme(
@@ -249,7 +201,6 @@ final class Document extends ArrayAccessor
         string  $scheme = 'dark light',
         ?string $name = 'system',
     ) : Document {
-
         // Needs to generate theme.scheme.color,
         // this is to allow for different colors based on light/dark
 
@@ -266,7 +217,6 @@ final class Document extends ArrayAccessor
     public function body( ...$set ) : Document
     {
         foreach ( $set as $name => $value ) {
-
             $separator = match ( $name ) {
                 'class' => ' ',
                 'style' => ';',

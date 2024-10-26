@@ -33,7 +33,6 @@ return static function( ContainerConfigurator $container ) : void {
 
         // Document Properties
         ->set( Document::class )
-        ->args( [service( AssetManager::class )] ) // ?? Unsure if we want to inject this early
 
         // Template Parameters
         ->set( Parameters::class );
