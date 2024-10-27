@@ -28,6 +28,7 @@ final class CoreBundle extends AbstractBundle
         '../config/response.php',
         '../config/telemetry.php',
         '../config/theme.php',
+        '../config/ui.php',
     ];
 
     #[Override]

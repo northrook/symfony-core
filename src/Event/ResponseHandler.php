@@ -4,7 +4,6 @@ namespace Core\Event;
 
 use Core\Controller\Attribute\Template;
 use Core\DependencyInjection\{CoreController, ServiceContainer};
-use Core\Model\{Message};
 use Core\Response\Document;
 use Core\Service\{DocumentService, Request, Toast};
 use Northrook\HTML\Element;
@@ -17,8 +16,6 @@ use Symfony\Component\HttpKernel\{Event\ControllerEvent,
     Event\ResponseEvent,
     Event\TerminateEvent,
     KernelEvents};
-use Symfony\Component\HttpFoundation\Session\Flash\FlashBag;
-use function Support\toString;
 use const Support\{EMPTY_STRING, WHITESPACE};
 
 /**
@@ -50,6 +47,7 @@ final class ResponseHandler implements EventSubscriberInterface
         return [
             KernelEvents::CONTROLLER => ['parseController', -100],
             KernelEvents::RESPONSE   => ['parseResponse', 1_024],
+            KernelEvents::RESPONSE   => ['preserveNotifications', 1_064],
             KernelEvents::TERMINATE  => ['responseCleanup', 1_024],
         ];
     }
@@ -80,7 +78,8 @@ final class ResponseHandler implements EventSubscriberInterface
 
         $response = $event->getResponse();
 
-        $content = (string) $event->getResponse()->getContent();
+        $content = $this->handleNotifications();
+        $content .= (string) $event->getResponse()->getContent();
 
         // Contentful HTML response
         if ( $this->isHtmxRequest ) {
@@ -96,10 +95,6 @@ final class ResponseHandler implements EventSubscriberInterface
                 ->assets( 'link' );
 
             $html = $this->document()->head;
-
-            foreach ( $this->flashBagMessages() as $message ) {
-                $html[] = $message;
-            }
 
             $html[] = $content;
 
@@ -127,8 +122,7 @@ final class ResponseHandler implements EventSubscriberInterface
                 ->meta( 'meta' )
                 ->assets();
 
-            $toasts = \implode( PHP_EOL, $this->flashBagMessages() );
-            $body   = new Element( 'body', $this->serviceLocator( Document::class )->pull( 'body', [] ), [$toasts, $content] );
+            $body = new Element( 'body', $this->serviceLocator( Document::class )->pull( 'body', [] ), $content );
 
             $htmlAttributes = $this->document->pull( 'html', null );
             $htmlAttributes = $htmlAttributes ? WHITESPACE.Attributes::from( $htmlAttributes ) : EMPTY_STRING;
@@ -154,6 +148,17 @@ final class ResponseHandler implements EventSubscriberInterface
         $event->getResponse()->setContent( $content );
     }
 
+    public function preserveNotifications( ResponseEvent $event ) : void
+    {
+        $flashBag = $event->getRequest()->getSession()->getFlashBag();
+
+        foreach ( $this->notifications->getMessages() as $message ) {
+            if ( ! \in_array( $message->message, $flashBag->peek( $message->type ) ) ) {
+                $flashBag->add( $message->type, $message->message );
+            }
+        }
+    }
+
     private function document() : DocumentService
     {
         return $this->serviceLocator( DocumentService::class );
@@ -177,58 +182,51 @@ final class ResponseHandler implements EventSubscriberInterface
 
     /**
      * - Commit unused {@see Toast} notifications.
-     * - Commit deferred cache items
+     * - Commit deferred cache items.
      *
-     * @param TerminateEvent  $event
+     * @param TerminateEvent $event
      *
      * @return void
      */
-    public function responseCleanup( TerminateEvent $event ) : void
-    {
-        foreach ( $this->notifications->getMessages() as $message ) {
-            $this->serviceLocator( Request::class )->flashBag()
-                ->add( $message->type, $message->message );
-        }
-    }
+    public function responseCleanup( TerminateEvent $event ) : void {}
 
     /**
      * @return array<int, string>
      */
-    private function flashBagMessages() : array
+    private function handleNotifications() : string
     {
-        $messages = [];
+        $notifications = '';
 
         // $notifications = $this->notifications->getMessages();
         $flashBag = $this->serviceLocator( Request::class )->flashBag();
 
-        dump( $flashBag, $this->notifications );
-
-        return $messages;
-
-
-        foreach ( $this->serviceLocator( Request::class )->flashBag()->all() as $type => $flash ) {
-            foreach ( $flash as $message ) {
-                $notification = $message instanceof Message ? new Notification(
-                    $message->type,
-                    $message->message,
-                    $message->description,
-                    $message->timeout,
-                ) : new Notification( $type, toString( $message ) );
-
-                if ( ! $notification->description ) {
-                    $notification->attributes->add( 'class', 'compact' );
-                }
-
-                if ( ! $notification->timeout && 'error' !== $notification->type ) {
-                    // $notification->setTimeout( Settings::get( 'notification.timeout' ) ?? 5_000 );
-                    $notification->setTimeout( 5_000 );
-                }
-
-                $messages[] = (string) $notification;
+        foreach ( $flashBag->all() as $type => $flashes ) {
+            foreach ( $flashes as $flash ) {
+                $this->notifications->setMessage( $type, $flash );
             }
         }
 
-        return $messages;
+        foreach ( $this->notifications->pullMessages() as $toast ) {
+            $notification = new Notification(
+                $toast->type,
+                $toast->message,
+                $toast->description,
+                $toast->timeout,
+            );
+
+            if ( ! $notification->description ) {
+                $notification->attributes->add( 'class', 'compact' );
+            }
+
+            if ( ! $notification->timeout && 'error' !== $notification->type ) {
+                // $notification->setTimeout( Settings::get( 'notification.timeout' ) ?? 5_000 );
+                $notification->setTimeout( 5_000 );
+            }
+
+            $notifications .= (string) $notification;
+        }
+
+        return $notifications;
     }
 
     /**

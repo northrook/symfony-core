@@ -9,8 +9,9 @@ declare(strict_types=1);
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Core\Event\ResponseHandler;
+use Core\UI\RenderRuntime;
 use Core\Response\{Document, Headers, Parameters};
-use Core\Service\{AssetManager, Toast};
+use Core\Service\{Toast};
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 return static function( ContainerConfigurator $container ) : void {
@@ -19,7 +20,10 @@ return static function( ContainerConfigurator $container ) : void {
 
     // Response EventSubscriber
     $response->set( ResponseHandler::class )
-        ->args( [service( Toast::class )] )
+        ->args( [
+            service( RenderRuntime::class ),
+            service( Toast::class ),
+        ] )
         ->call( 'setServiceLocator', [service( 'core.service_locator' )] )
         ->tag( 'kernel.event_subscriber' );
 

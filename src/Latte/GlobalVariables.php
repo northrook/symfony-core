@@ -28,7 +28,7 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
  * @property-read ?UserInterface  $user
  * @property-read ?TokenInterface $token
  */
-final readonly class Parameters
+final readonly class GlobalVariables
 {
     use PropertyAccessor;
 

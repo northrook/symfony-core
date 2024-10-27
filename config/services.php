@@ -19,8 +19,8 @@ return static function( ContainerConfigurator $container ) : void {
         ->args( [service( Document::class ), service( Settings::class )] )
 
         // Static Toasts
-        ->set( Toast::class )
+        ->set( Toast::class );
 
         // Toasts
-        ->set( ToastService::class )->args( [service( 'request_stack' )] );
+        // ->set( ToastService::class )->args( [service( 'request_stack' )] );
 };

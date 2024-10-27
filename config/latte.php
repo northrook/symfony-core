@@ -9,7 +9,8 @@ declare(strict_types=1);
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Core\Latte\Extension\UrlGeneratorExtension;
-use Core\Latte\Parameters;
+use Core\Latte\FrameworkExtension;
+use Core\Latte\GlobalVariables;
 use Northrook\Latte;
 use Northrook\Latte\Extension\{CacheExtension, FormatterExtension, OptimizerExtension};
 use Northrook\UI\Compiler\Latte\UiCompileExtension;
@@ -26,7 +27,16 @@ return static function( ContainerConfigurator $container ) : void {
         ],
     );
 
+
+
     $container->services()
+
+            ->set( FrameworkExtension::class)
+
+
+            /// !!!!
+
+
 
             // Template cache
         ->set( 'cache.latte', PhpFilesAdapter::class )
@@ -43,13 +53,13 @@ return static function( ContainerConfigurator $container ) : void {
                 '%kernel.debug%',
             ],
         )
-        ->call( 'addGlobalVariable', ['get', service( Parameters::class )] )
+        ->call( 'addGlobalVariable', ['get', service( GlobalVariables::class )] )
         ->call( 'addExtension', [service( UrlGeneratorExtension::class )] )
         ->call( 'addTemplateDirectory', [param( 'dir.templates' ), 100] )
         ->call( 'addTemplateDirectory', [param( 'dir.core.templates' ), 10] )
 
             // Global Parameters
-        ->set( Parameters::class )
+        ->set( GlobalVariables::class )
         ->args(
             [
                 param( 'kernel.environment' ),

@@ -30,7 +30,6 @@
     "northrook/latte-bundle": "dev-main",
     "northrook/html": "dev-main",
     "northrook/minify": "dev-main",
-    "northrook/ui": "dev-main",
     "symfony/http-kernel": "^7.1",
     "symfony/dependency-injection": "^7.1",
     "symfony/security-csrf": "^7.1",
@@ -41,7 +40,8 @@
     "symfony/debug-bundle": "7.1.*",
     "symfony/monolog-bundle": "^3.10",
     "symfony/security-bundle": "^7.1",
-    "northrook/core-services": "dev-main"
+    "northrook/core-services": "dev-main",
+    "tempest/highlight": "@stable"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",

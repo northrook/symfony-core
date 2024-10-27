@@ -2,6 +2,7 @@
 
 namespace Core\Controller;
 
+use Core\Service\Toast;
 use Core\Controller\Attribute\{Template};
 use Core\Controller\Attribute\DocumentResponse;
 use Core\DependencyInjection\CoreController;
@@ -11,7 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[
     Route( '/', 'core:public' ),
-    Template( 'welcome.latte' )
+    Template( 'welcome.latte' ) // wrapping body - like Admin UI
 ]
 final class PublicController extends CoreController
 {
@@ -24,16 +25,27 @@ final class PublicController extends CoreController
 
     #[
         Route( ['/', '/{route}'], 'index' ),
-        Template( 'demo.latte' )
+        Template( 'demo.latte' ) // content template
     ]
     public function index( ?string $route, Document $document, Headers $headers ) : Response
     {
         $headers( 'route-type', 'dynamic' );
 
+        Toast::info( 'Admin Stylesheet updated.' );
+        Toast::warning( 'Admin Stylesheet updated?!' );
+        Toast::danger( 'Admin Stylesheet updated!!' );
+        Toast::notice( 'Admin Stylesheet updated. 😏' );
+
         $document(
             'Index says welcome',
             keywords: ['we', 'like', 'keywords'],
-        );
+        )->body(
+                id               : 'admin',
+                style            : ['--sidebar-width' => '160px'],
+                sidebar_expanded : true,
+        )
+            ->script( 'core.public' )
+            ->style( 'core.public' );
 
         return $this->response();
     }
