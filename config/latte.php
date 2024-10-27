@@ -11,6 +11,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 use Core\Latte\Extension\UrlGeneratorExtension;
 use Core\Latte\FrameworkExtension;
 use Core\Latte\GlobalVariables;
+use Core\UI\RenderRuntime;
 use Northrook\Latte;
 use Northrook\Latte\Extension\{CacheExtension, FormatterExtension, OptimizerExtension};
 use Northrook\UI\Compiler\Latte\UiCompileExtension;
@@ -31,7 +32,9 @@ return static function( ContainerConfigurator $container ) : void {
 
     $container->services()
 
+
             ->set( FrameworkExtension::class)
+            ->args([service(RenderRuntime::class)])
 
 
             /// !!!!
@@ -54,7 +57,10 @@ return static function( ContainerConfigurator $container ) : void {
             ],
         )
         ->call( 'addGlobalVariable', ['get', service( GlobalVariables::class )] )
-        ->call( 'addExtension', [service( UrlGeneratorExtension::class )] )
+        ->call( 'addExtension', [
+                service( FrameworkExtension::class ),
+                service( UrlGeneratorExtension::class ),
+        ] )
         ->call( 'addTemplateDirectory', [param( 'dir.templates' ), 100] )
         ->call( 'addTemplateDirectory', [param( 'dir.core.templates' ), 10] )
 
@@ -73,8 +79,8 @@ return static function( ContainerConfigurator $container ) : void {
         //
         ->set( FormatterExtension::class )
         ->set( OptimizerExtension::class )
-        ->set( UiCompileExtension::class )
-        ->args( [service( 'core.latte.cache' )->nullOnInvalid()] )
+        // ->set( UiCompileExtension::class )
+        // ->args( [service( 'core.latte.cache' )->nullOnInvalid()] )
 
         // Provides a URL and Path resolver
         ->set( UrlGeneratorExtension::class )

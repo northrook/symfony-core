@@ -59,13 +59,12 @@ abstract class AbstractComponent implements RuntimeRenderInterface
 
         foreach ( $array as $elementKey => $value ) {
             $elementKey = self::recursiveKey( $elementKey, \gettype( $value ) );
-            $elementTag = \strrpos( $elementKey, ':' );
 
             if ( \is_array( $value ) ) {
                 $content[$elementKey] = self::recursiveElement( $value, $elementKey );
             }
             else {
-                static::appendTextString( $value, $content );
+                self::appendTextString( $value, $content );
             }
         }
 

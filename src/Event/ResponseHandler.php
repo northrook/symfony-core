@@ -46,9 +46,11 @@ final class ResponseHandler implements EventSubscriberInterface
     {
         return [
             KernelEvents::CONTROLLER => ['parseController', -100],
-            KernelEvents::RESPONSE   => ['parseResponse', 1_024],
-            KernelEvents::RESPONSE   => ['preserveNotifications', 1_064],
-            KernelEvents::TERMINATE  => ['responseCleanup', 1_024],
+            KernelEvents::RESPONSE   => [
+                ['parseResponse', 1_024],
+                ['preserveNotifications', 1_064],
+            ],
+            KernelEvents::TERMINATE => ['responseCleanup', 1_024],
         ];
     }
 

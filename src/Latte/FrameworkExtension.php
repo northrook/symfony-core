@@ -7,7 +7,14 @@ use Latte\Compiler\{Node, NodeTraverser};
 use Latte\Compiler\Nodes\Html\ElementNode;
 use Latte\Compiler\Nodes\Php\ExpressionNode;
 use Latte\Compiler\Nodes\TemplateNode;
-use Core\UI\{Component\Button, Component\Code, Component\Heading, Component\Icon, RenderRuntime};
+use Core\UI\{Component\Breadcrumbs,
+    Component\Button,
+    Component\Code,
+    Component\Heading,
+    Component\Icon,
+    Component\Navigation,
+    Component\Notification,
+    RenderRuntime};
 use Latte;
 use Override;
 
@@ -21,9 +28,13 @@ final class FrameworkExtension extends Latte\Extension
     public function getPasses() : array
     {
         return [
-            self::class => fn( TemplateNode $templateNode ) => (
-            new NodeTraverser() )->traverse( $templateNode, [$this, 'parseTemplate'] )(),
+            self::class => [$this, 'traverseTemplateNodes'],
         ];
+    }
+
+    public function traverseTemplateNodes( TemplateNode $templateNode ) : void
+    {
+        ( new NodeTraverser() )->traverse( $templateNode, [$this, 'parseTemplate'] );
     }
 
     public function parseTemplate( Node $node ) : int|Node
@@ -39,16 +50,16 @@ final class FrameworkExtension extends Latte\Extension
         $component = new NodeCompiler( $node );
 
         $parsed = match ( true ) {
-            $this::isElement( $node, 'code' ) => Code::nodeCompiler( $component ),
-            $this::isHeading( $node )         => Heading::nodeCompiler( $component ),
+            $component->is( 'pre', 'code' ) => Code::nodeCompiler( $component ),
+            $this::isHeading( $node )       => Heading::nodeCompiler( $component ),
             // $this::isImage( $node )             => Image::nodeCompiler( $node ),
             // $this::isElement( $node, 'a' )      => Anchor::nodeCompiler( $node ),
             // $this::isElement( $node, 'code' )   => Code::nodeCompiler( $node ),
             $component->is( 'button' )          => Button::nodeCompiler( $component ),
             $component->is( 'icon' )            => Icon::nodeCompiler( $component ),
-            // $component->is( 'menu' )            => Menu::nodeCompiler( $component ),
-            // $component->is( 'breadcrumbs' )     => Breadcrumbs::nodeCompiler( $component ),
-            // $component->is( 'ui:notification' ) => Notification::nodeCompiler( $component ),
+            $component->is( 'menu' )            => Navigation::nodeCompiler( $component ),
+            $component->is( 'breadcrumbs' )     => Breadcrumbs::nodeCompiler( $component ),
+            $component->is( 'ui:notification' ) => Notification::nodeCompiler( $component ),
             default                             => null,
         };
 

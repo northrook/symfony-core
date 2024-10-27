@@ -124,7 +124,7 @@ final class NodeExporter
         $value = \trim( $value, " \t\n\r\0\x0B'" );
 
         if ( ! Str::startsWith( $value, ['$', 'LR\Filters'] ) ) {
-            $value = "'$value'";
+            $value = "'" . \addslashes( $value ) . "'";
         }
         return $value;
     }

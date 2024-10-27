@@ -18,18 +18,19 @@ use const Support\{EMPTY_STRING, WHITESPACE};
 class Code extends AbstractComponent
 {
     protected const string
-        INLINE = 'inline',
-        BLOCK  = 'block';
+            INLINE = 'inline',
+            BLOCK  = 'block';
 
     protected readonly Element $component;
 
     public function __construct(
-        private string           $string,
-        private readonly ?string $language = null,
-        private ?string          $type = null,
-        private readonly bool    $tidyCode = true,
-        array                    $attributes = [],
+            private string           $string,
+            private readonly ?string $language = null,
+            private ?string          $type = null,
+            private readonly bool    $tidyCode = true,
+            array                    $attributes = [],
     ) {
+
         if ( Code::INLINE === ( $this->type ??= Code::INLINE ) ) {
             $this->component = new Element( 'code', $attributes );
             $this->component->class( 'inline', prepend : true );
@@ -39,8 +40,6 @@ class Code extends AbstractComponent
             $this->blockCodeContent();
             $this->component = new Element( 'pre', $attributes );
             $this->component->class( 'block', prepend : true );
-
-            // dump( $this->string );
         }
     }
 
@@ -78,8 +77,8 @@ class Code extends AbstractComponent
     {
         if ( $this->tidyCode ) {
             $this->string = Str::replaceEach(
-                [' ), );' => ' ) );'],
-                $this->string,
+                    [' ), );' => ' ) );'],
+                    $this->string,
             );
         }
 
@@ -124,14 +123,14 @@ class Code extends AbstractComponent
         $attributes = $node->attributes();
         $exploded   = \explode( ':', $node->name );
 
-        \array_shift( $exploded );
-        $type     = 'inline';
+        $tag = \array_shift( $exploded );
+        $type     = $tag === 'pre' ? 'block' : 'inline';
         $language = null;
         $tidyCode = \array_key_exists( 'tidyCode', $attributes );
         unset( $attributes['tidyCode'] );
 
         $hasType = \array_search( 'inline', $exploded )
-            ?: \array_search( 'block', $exploded );
+                ?: \array_search( 'block', $exploded );
 
         if ( \is_int( $hasType ) ) {
             $type = $exploded[$hasType];
@@ -155,23 +154,23 @@ class Code extends AbstractComponent
         //         $tidyCode,
         //         $attributes,);
         return RenderRuntime::auxiliaryNode(
-            renderName : Code::class,
-            arguments  : [
-                $node->htmlContent(),
-                $language,
-                $type,
-                $tidyCode,
-                $attributes,
-            ],
+                renderName : Code::class,
+                arguments  : [
+                                     $node->htmlContent(),
+                                     $language,
+                                     $type,
+                                     $tidyCode,
+                                     $attributes,
+                             ],
         );
     }
 
     public static function runtimeRender(
-        ?string $string = null,
-        ?string $language = null,
-        ?string $type = null,
-        bool    $tidyCode = true,
-        array   $attributes = [],
+            ?string $string = null,
+            ?string $language = null,
+            ?string $type = null,
+            bool    $tidyCode = true,
+            array   $attributes = [],
     ) : string {
         if ( ! $string ) {
             return EMPTY_STRING;
