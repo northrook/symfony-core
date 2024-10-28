@@ -24,7 +24,6 @@ return static function( ContainerConfigurator $container ) : void {
     // Response EventSubscriber
     $response->set( ResponseHandler::class )
         ->args( [
-            service( RenderRuntime::class ),
             service( Toast::class ),
         ] )
         ->tag( 'kernel.event_subscriber' );

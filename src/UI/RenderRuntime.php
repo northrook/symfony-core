@@ -3,19 +3,16 @@
 namespace Core\UI;
 
 use Core\Latte\Compiler\NodeExporter;
+use Core\Service\IconService\IconPack;
 use Latte\Compiler\Nodes\AuxiliaryNode;
 use Northrook\Exception\E_Value;
-use Northrook\Interface\Singleton;
 use Northrook\Logger\Log;
 use Support\{Normalize};
-use Northrook\Trait\SingletonClass;
 use Symfony\Component\Cache\CacheItem;
 use Symfony\Contracts\Cache\CacheInterface;
 use function String\hashKey;
 use function Support\classBasename;
-use Closure;
 use const Cache\{AUTO, DISABLED, EPHEMERAL};
-
 
 /*---
 IconPack and tracking called/instantiated Components MUST be globally accessible
@@ -27,10 +24,8 @@ The IconPack and Toast might benefit from a Facade-like ServiceContainer
 
 ----*/
 
-final class RenderRuntime implements Singleton
+final class RenderRuntime
 {
-    use SingletonClass;
-
     /** The method used to trigger a render callback from a .latte template */
     private const string METHOD = 'runtimeRender';
 
@@ -44,17 +39,13 @@ final class RenderRuntime implements Singleton
     private array $argumentCache = [];
 
     /**
-     * @param Closure                       $iconPack
      * @param ?CacheInterface               $cache
      * @param array<class-string, callable> $argumentCallback
      */
     public function __construct(
-        private readonly Closure         $iconPack,
         private readonly ?CacheInterface $cache = null,
         private array                    $argumentCallback = [],
-    ) {
-        $this->instantiateSingleton();
-    }
+    ) {}
 
     /**
      * @param string                  $className
@@ -99,11 +90,6 @@ final class RenderRuntime implements Singleton
         }
     }
 
-    public static function getIconPack() : IconPack
-    {
-        return ( RenderRuntime::$__instance->iconPack )();
-    }
-
     public static function auxiliaryNode(
         string $renderName,
         array  $arguments = [],
@@ -111,6 +97,7 @@ final class RenderRuntime implements Singleton
     ) : AuxiliaryNode {
 
         $export = new NodeExporter();
+
         return new AuxiliaryNode(
             static fn() : string => <<<EOD
                 echo \$this->global->render->__invoke(
@@ -120,33 +107,14 @@ final class RenderRuntime implements Singleton
                 );
                 EOD,
         );
-
-        //
-        // return new AuxiliaryNode(
-        //         static fn() : string => <<<'EOD'
-        //         echo $this->global->render->__invoke(
-        //                         className:
-        //         EOD.NodeExporter::string( $renderName ).<<<'EOD'
-        //         ,
-        //                         arguments:
-        //         EOD.NodeExporter::arguments( $arguments ).<<<'EOD'
-        //         ,
-        //                         cache    :
-        //         EOD.NodeExporter::cacheConstant( $cache ).<<<'EOD'
-        //
-        //                      );
-        //         EOD,
-        // );
     }
 
-    public static function registerInvocation( string $className ) : void
+    public function registerInvocation( string $className ) : void
     {
-        \assert( isset( RenderRuntime::$__instance ) );
-
-        if ( isset( RenderRuntime::$__instance->called[$className] ) ) {
+        if ( isset( $this->called[$className] ) ) {
             return;
         }
-        RenderRuntime::$__instance->called[$className] = classBasename( $className );
+        $this->called[$className] = classBasename( $className );
     }
 
     private function invokedArguments( string $className, array $arguments ) : array

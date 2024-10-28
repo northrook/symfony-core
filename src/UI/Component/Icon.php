@@ -2,8 +2,10 @@
 
 namespace Core\UI\Component;
 
+use Core\DependencyInjection\StaticServices;
 use Core\Latte\Compiler\NodeCompiler;
 use Core\UI\{AbstractComponent, RenderRuntime};
+use Core\Service\IconService;
 use Latte\Compiler\Nodes\AuxiliaryNode;
 use Northrook\HTML\Element;
 use const Support\EMPTY_STRING;
@@ -18,7 +20,7 @@ final class Icon extends AbstractComponent
         protected readonly array $attributes = [],
     ) {
         if ( ! \str_starts_with( $icon, '<svg' ) ) {
-            $this->icon = RenderRuntime::getIconPack()->get( $icon, $tag ? [] : $attributes );
+            $this->icon = $this->iconPack()->get( $icon, $tag ? [] : $attributes );
         }
         else {
             $this->icon = $icon;
@@ -43,7 +45,7 @@ final class Icon extends AbstractComponent
 
         unset( $attributes['get'] );
 
-        $icon = RenderRuntime::getIconPack()->get( $get, $tag ? [] : $attributes );
+        $icon = StaticServices::get( IconService::class )->getIconPack(  )->get( $get, $tag ? [] : $attributes );
 
         return RenderRuntime::auxiliaryNode(
             renderName : Icon::class,

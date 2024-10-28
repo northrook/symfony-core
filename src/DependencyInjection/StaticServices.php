@@ -10,20 +10,7 @@ final class StaticServices
 {
     private static ?self $static = null;
 
-    public function __construct( private readonly ServiceLocator $serviceLocator )
-    {
-        if ( $this::$static ) {
-            return;
-        }
-    }
-
-    /**
-     * Initialize the {@see StaticServices} {@see ServiceLocator} on every request.
-     */
-    public function onKernelRequest() : void
-    {
-        $this::$static = $this;
-    }
+    public function __construct( private readonly ServiceLocator $serviceLocator ) {}
 
     /**
      * @template Service
@@ -51,9 +38,19 @@ final class StaticServices
         }
     }
 
+    /**
+     * Initialize the {@see StaticServices} {@see ServiceLocator} on every request.
+     */
+    public function onKernelRequest() : void
+    {
+        $this::$static ??= $this;
+    }
+
+    /**
+     * Clear the {@see StaticServices} instance for next request.
+     */
     public function onKernelTerminate() : void
     {
-        dump( $this::class.' was destroyed' );
         $this::$static = null;
     }
 }

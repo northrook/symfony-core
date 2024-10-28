@@ -84,7 +84,7 @@ class Notification extends AbstractComponent
     protected function build() : string
     {
         $type = Normalize::key( $this->type );
-        $icon = RenderRuntime::getIconPack()->get( $this->type(), fallback: 'notice' );
+        $icon = $this->iconPack()->get( $this->type(), fallback: 'notice' );
         // $message     = Format::inline( $this->message );
         $message = Format::inline( $this->message );
         if ( $this->description ) {

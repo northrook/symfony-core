@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\UI;
+namespace Core\Service\IconService;
 
 use Northrook\Exception\E_Value;
 use Northrook\HTML\Element;

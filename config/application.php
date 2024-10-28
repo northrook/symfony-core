@@ -8,9 +8,10 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Core\UI\RenderRuntime;
 use Core\DependencyInjection\{StaticServices, ServiceContainer};
 use Core\Response\{Document, Headers, Parameters};
-use Core\Service\{DocumentService, Pathfinder, Request, ToastService};
+use Core\Service\{DocumentService, IconService, Pathfinder, Request, ToastService};
 use Core\Service\Security;
 use Core\Settings;
 use Northrook\Latte;
@@ -37,6 +38,10 @@ return static function( ContainerConfigurator $container ) : void {
         Parameters::class      => service( Parameters::class ),
         Headers::class         => service( Headers::class ),
         DocumentService::class => service( DocumentService::class ),
+
+        // RenderServices
+        RenderRuntime::class => service( RenderRuntime::class ),
+        IconService::class   => service( IconService::class ),
 
         // Symfony
         RouterInterface::class     => service( 'router' ),

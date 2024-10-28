@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use Core\UI\{IconPack, RenderRuntime};
+use Core\UI\RenderRuntime;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 
 return static function( ContainerConfigurator $container ) : void {
@@ -19,13 +19,9 @@ return static function( ContainerConfigurator $container ) : void {
         ->args( ['render', 0, '%dir.cache%'] )
         ->tag( 'cache.pool' )
 
-            // Icon Pack
-        ->set( IconPack::class )
-
             // Static Toasts
         ->set( RenderRuntime::class )
         ->args( [
-            service_closure( IconPack::class ),
             service( 'cache.runtime_render' ),
         ] );
 };

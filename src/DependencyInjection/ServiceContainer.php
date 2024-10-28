@@ -6,6 +6,7 @@ use Core\Response\{Document, Parameters, Headers};
 use Core\Service\{Pathfinder, Request};
 use Core\Service\Security;
 use Northrook\Latte;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -34,6 +35,7 @@ trait ServiceContainer
             'headers'      => $this->serviceLocator( Headers::class ),
             'security'     => $this->serviceLocator( Security::class ),
             'urlGenerator' => $this->serviceLocator( RouterInterface::class ),
+            'serviceLocator' => $this->serviceLocator( ServiceLocator::class ),
         };
     }
 

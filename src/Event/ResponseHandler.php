@@ -39,7 +39,6 @@ final class ResponseHandler implements EventSubscriberInterface
     private bool $isHtmxRequest = false;
 
     public function __construct(
-        private readonly RenderRuntime $renderRuntime,
         private readonly Toast         $notifications,
     ) {}
 
