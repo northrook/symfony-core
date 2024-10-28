@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use Core\DependencyInjection\ServiceContainer;
+use Core\DependencyInjection\{StaticServices, ServiceContainer};
 use Core\Response\{Document, Headers, Parameters};
 use Core\Service\{DocumentService, Pathfinder, Request, ToastService};
 use Core\Service\Security;
@@ -25,18 +25,18 @@ return static function( ContainerConfigurator $container ) : void {
 
     $core_services = [
         // Core
-        Settings::class            => service( Settings::class ),
-        Security::class            => service( Security::class ),
-        Pathfinder::class          => service( Pathfinder::class ),
-        Request::class             => service( Request::class ),
-        Latte::class               => service( Latte::class ),
+        Settings::class   => service( Settings::class ),
+        Security::class   => service( Security::class ),
+        Pathfinder::class => service( Pathfinder::class ),
+        Request::class    => service( Request::class ),
+        Latte::class      => service( Latte::class ),
         // ToastService::class        => service( ToastService::class ),
 
         // Document
-        Document::class            => service( Document::class ),
-        Parameters::class          => service( Parameters::class ),
-        Headers::class             => service( Headers::class ),
-        DocumentService::class     => service( DocumentService::class ),
+        Document::class        => service( Document::class ),
+        Parameters::class      => service( Parameters::class ),
+        Headers::class         => service( Headers::class ),
+        DocumentService::class => service( DocumentService::class ),
 
         // Symfony
         RouterInterface::class     => service( 'router' ),
@@ -50,10 +50,16 @@ return static function( ContainerConfigurator $container ) : void {
     ];
 
     $container->services()
+
         /** @used-by ServiceContainer */
         ->set( 'core.service_locator' )
         ->tag( 'container.service_locator' )
         ->args( [$core_services] )
+
+        // Static Service Locator
+        ->set( StaticServices::class )
+        ->tag( 'kernel.event_listener', ['priority' => 125] )
+        ->args( [service( 'core.service_locator' )] )
 
         // Settings
         ->set( Settings::class )
