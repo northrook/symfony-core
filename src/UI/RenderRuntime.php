@@ -33,13 +33,13 @@ final class RenderRuntime implements Singleton
     private array $argumentCache = [];
 
     /**
-     * @param ?CacheInterface               $cache
      * @param Closure                       $iconPack
-     * @param array{class-string, callable} $argumentCallback
+     * @param ?CacheInterface               $cache
+     * @param array<class-string, callable> $argumentCallback
      */
     public function __construct(
-        private readonly ?CacheInterface $cache = null,
         private readonly Closure         $iconPack,
+        private readonly ?CacheInterface $cache = null,
         private array                    $argumentCallback = [],
     ) {
         $this->instantiateSingleton();

@@ -6,7 +6,7 @@ use Core\Controller\Attribute\Template;
 use Core\UI\Component\Notification;
 use Core\UI\RenderRuntime;
 use Core\DependencyInjection\{CoreController, ServiceContainer};
-use Core\Response\Document;
+use Core\Response\{Document, Headers};
 use Core\Service\{DocumentService, Request, Toast};
 use Northrook\HTML\Element;
 use Northrook\HTML\Element\Attributes;
@@ -121,7 +121,9 @@ final class ResponseHandler implements EventSubscriberInterface
 
             if ( ! $this->document->isPublic ) {
                 $this->document->robots( 'noindex, nofollow' );
+                $this->headers->set( 'X-Robots-Tag', 'noindex, nofollow' );
             }
+            // public robots
 
             $this->document()
                 ->meta( 'meta.viewport' )
@@ -189,6 +191,16 @@ final class ResponseHandler implements EventSubscriberInterface
         $event->getResponse()->headers->add( $this->headers->all() );
 
         $event->getResponse()->headers->set( 'Content-Type', 'text/html', false );
+
+        if ( $this->isHtmxRequest ) {
+            return;
+        }
+
+        // Document only headers
+
+        if ( $this->document->isPublic ) {
+            $event->getResponse()->headers->set( 'X-Robots-Tag', 'noindex, nofollow' );
+        }
 
         // TODO : X-Robots
         // TODO : lang
