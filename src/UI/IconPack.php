@@ -185,7 +185,7 @@ final class IconPack
 
     public function has( string $icon ) : bool
     {
-        return isset( $this->icons[\strstr( $icon, '[', true )] );
+        return isset( $this->icons[\strstr( $icon, '[', true ) ?: $icon] );
     }
 
     public function get(

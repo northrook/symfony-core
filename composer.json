@@ -26,6 +26,7 @@
     "ext-intl": "*",
     "ext-mbstring": "*",
     "northrook/core": "dev-main",
+    "northrook/core-services": "dev-main",
     "northrook/clerk": "dev-main",
     "northrook/latte-bundle": "dev-main",
     "northrook/html": "dev-main",
@@ -40,15 +41,13 @@
     "symfony/debug-bundle": "7.1.*",
     "symfony/monolog-bundle": "^3.10",
     "symfony/security-bundle": "^7.1",
-    "northrook/core-services": "dev-main",
     "tempest/highlight": "@stable"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
     "phpstan/phpstan": "@stable",
-    "northrook/php-cs": "dev-main",
-    "jetbrains/phpstorm-attributes": "^1.1",
-    "northrook/dev-env": "dev-main"
+    "northrook/dev-env": "dev-main",
+    "jetbrains/phpstorm-attributes": "^1.1"
   },
   "replace": {
     "symfony/polyfill-ctype": "*",

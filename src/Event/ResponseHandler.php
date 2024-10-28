@@ -3,15 +3,18 @@
 namespace Core\Event;
 
 use Core\Controller\Attribute\Template;
+use Core\UI\Component\Notification;
+use Core\UI\RenderRuntime;
 use Core\DependencyInjection\{CoreController, ServiceContainer};
 use Core\Response\Document;
 use Core\Service\{DocumentService, Request, Toast};
 use Northrook\HTML\Element;
 use Northrook\HTML\Element\Attributes;
-use Northrook\UI\Component\Notification;
+use Northrook\Logger\Log;
 use ReflectionAttribute;
 use ReflectionClass;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Exception;
 use Symfony\Component\HttpKernel\{Event\ControllerEvent,
     Event\ResponseEvent,
     Event\TerminateEvent,
@@ -36,7 +39,8 @@ final class ResponseHandler implements EventSubscriberInterface
     private bool $isHtmxRequest = false;
 
     public function __construct(
-        private readonly Toast $notifications,
+        private readonly RenderRuntime $renderRuntime,
+        private readonly Toast         $notifications,
     ) {}
 
     /**
@@ -115,6 +119,10 @@ final class ResponseHandler implements EventSubscriberInterface
             )
                 ->add( 'meta.viewport', 'width=device-width,initial-scale=1' );
 
+            if ( ! $this->document->isPublic ) {
+                $this->document->robots( 'noindex, nofollow' );
+            }
+
             $this->document()
                 ->meta( 'meta.viewport' )
                 ->title()
@@ -152,12 +160,17 @@ final class ResponseHandler implements EventSubscriberInterface
 
     public function preserveNotifications( ResponseEvent $event ) : void
     {
-        $flashBag = $event->getRequest()->getSession()->getFlashBag();
+        try {
+            $flashBag = $event->getRequest()->getSession()->getFlashBag();
 
-        foreach ( $this->notifications->getMessages() as $message ) {
-            if ( ! \in_array( $message->message, $flashBag->peek( $message->type ) ) ) {
-                $flashBag->add( $message->type, $message->message );
+            foreach ( $this->notifications->getMessages() as $message ) {
+                if ( ! \in_array( $message->message, $flashBag->peek( $message->type ) ) ) {
+                    $flashBag->add( $message->type, $message->message );
+                }
             }
+        }
+        catch ( Exception $e ) {
+            Log::exception( $e );
         }
     }
 
@@ -193,7 +206,7 @@ final class ResponseHandler implements EventSubscriberInterface
     public function responseCleanup( TerminateEvent $event ) : void {}
 
     /**
-     * @return array<int, string>
+     * @return string
      */
     private function handleNotifications() : string
     {

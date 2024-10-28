@@ -151,8 +151,7 @@ class NodeCompiler
     /**
      * Check is the node is an {@see ElementNode} of any provided `$tag`.
      *
-     * @param string[] $tag
-     * @param string   ...$name
+     * @param string ...$tag
      *
      * @return bool
      */
@@ -163,7 +162,8 @@ class NodeCompiler
         }
 
         foreach ( $tag as $name ) {
-            if ( \strtolower( $name ) === $this->node->name ) {
+            // if ( \strtolower( $name ) === $this->node->name ) {
+            if ( \str_contains( $this->node->name, \strtolower( $name ) ) ) {
                 return true;
             }
         }
