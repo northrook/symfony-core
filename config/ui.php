@@ -25,7 +25,7 @@ return static function( ContainerConfigurator $container ) : void {
             // Static Toasts
         ->set( RenderRuntime::class )
         ->args( [
-            service( 'cache.runtime_render' ),
             service_closure( IconPack::class ),
+            service( 'cache.runtime_render' ),
         ] );
 };

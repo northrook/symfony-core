@@ -27,7 +27,8 @@ use Symfony\Contracts\Service\Attribute\Required;
  */
 trait ServiceContainer
 {
-    private readonly ServiceLocator $serviceLocator;
+    // private readonly ServiceLocator $serviceLocator;
+    private static ServiceLocator $__serviceLocator;
 
     public function __get( string $service )
     {
@@ -53,7 +54,8 @@ trait ServiceContainer
     final protected function serviceLocator( string $get ) : mixed
     {
         try {
-            return $this->serviceLocator->get( $get );
+            // return $this->serviceLocator->get( $get );
+            return $this::$__serviceLocator->get( $get );
         }
         catch ( Exception $exception ) {
             return E_Value::error(
@@ -75,6 +77,12 @@ trait ServiceContainer
     #[Required]
     final public function setServiceLocator( ServiceLocator $serviceLocator ) : void
     {
-        $this->serviceLocator = $serviceLocator;
+        dump( __METHOD__ );
+        $this::$__serviceLocator ??= $serviceLocator;
+    }
+
+    public function __destruct()
+    {
+        dump( $this, $this::$__serviceLocator );
     }
 }

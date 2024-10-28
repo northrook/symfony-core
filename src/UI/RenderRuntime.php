@@ -16,6 +16,17 @@ use function Support\classBasename;
 use Closure;
 use const Cache\{AUTO, DISABLED, EPHEMERAL};
 
+
+/*---
+IconPack and tracking called/instantiated Components MUST be globally accessible
+
+On __construct of the ResponseHandler, we could set $called as empty, as we will only call after deciding we need to send a response
+Components rendered manually through a new Response( 'custom string' ) is the devs own problem.
+
+The IconPack and Toast might benefit from a Facade-like ServiceContainer
+
+----*/
+
 final class RenderRuntime implements Singleton
 {
     use SingletonClass;

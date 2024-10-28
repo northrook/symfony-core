@@ -81,19 +81,6 @@ class Notification extends AbstractComponent
         return $this;
     }
 
-    private function closeButton( string $label = 'Close' ) : string
-    {
-        $attributes = [
-            'class'      => 'close',
-            'aria-label' => $label,
-        ];
-
-        return Element::button(
-            content    : '<i class="close"></i>',
-            attributes : $attributes,
-        );
-    }
-
     protected function build() : string
     {
         $type = Normalize::key( $this->type );

@@ -120,7 +120,7 @@ final class ResponseHandler implements EventSubscriberInterface
                 ->add( 'meta.viewport', 'width=device-width,initial-scale=1' );
 
             if ( ! $this->document->isPublic ) {
-                $this->document->robots( 'noindex, nofollow' );
+                $this->document->set( 'robots', 'noindex, nofollow' );
                 $this->headers->set( 'X-Robots-Tag', 'noindex, nofollow' );
             }
             // public robots
