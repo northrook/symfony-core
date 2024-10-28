@@ -27,7 +27,6 @@ return static function( ContainerConfigurator $container ) : void {
             service( RenderRuntime::class ),
             service( Toast::class ),
         ] )
-        ->call( 'setServiceLocator', [service( 'core.service_locator' )] )
         ->tag( 'kernel.event_subscriber' );
 
     // Response Services

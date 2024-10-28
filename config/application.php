@@ -58,7 +58,14 @@ return static function( ContainerConfigurator $container ) : void {
 
         // Static Service Locator
         ->set( StaticServices::class )
-        ->tag( 'kernel.event_listener', ['priority' => 125] )
+        ->tag( 'kernel.event_listener', [
+            'event'    => 'kernel.request',
+            'priority' => 125,
+        ] )
+        ->tag( 'kernel.event_listener', [
+            'event'    => 'kernel.terminate',
+            'priority' => 2_048,
+        ] )
         ->args( [service( 'core.service_locator' )] )
 
         // Settings

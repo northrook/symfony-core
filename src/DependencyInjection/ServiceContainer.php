@@ -5,13 +5,9 @@ namespace Core\DependencyInjection;
 use Core\Response\{Document, Parameters, Headers};
 use Core\Service\{Pathfinder, Request};
 use Core\Service\Security;
-use Exception;
-use Northrook\Exception\{E_Value};
 use Northrook\Latte;
-use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Contracts\Service\Attribute\Required;
 
 /**
  * @property-read Request                $request
@@ -27,9 +23,6 @@ use Symfony\Contracts\Service\Attribute\Required;
  */
 trait ServiceContainer
 {
-    // private readonly ServiceLocator $serviceLocator;
-    private static ServiceLocator $__serviceLocator;
-
     public function __get( string $service )
     {
         return match ( $service ) {
@@ -53,36 +46,6 @@ trait ServiceContainer
      */
     final protected function serviceLocator( string $get ) : mixed
     {
-        try {
-            // return $this->serviceLocator->get( $get );
-            return $this::$__serviceLocator->get( $get );
-        }
-        catch ( Exception $exception ) {
-            return E_Value::error(
-                'The {ServiceContainer} does not provide access to the {GetService} service.',
-                ['ServiceContainer' => ServiceContainer::class, 'GetService' => $get],
-                $exception,
-                true,
-            );
-        }
-    }
-
-    /**
-     * @internal
-     *
-     * @param ServiceLocator $serviceLocator
-     *
-     * @return void
-     */
-    #[Required]
-    final public function setServiceLocator( ServiceLocator $serviceLocator ) : void
-    {
-        dump( __METHOD__ );
-        $this::$__serviceLocator ??= $serviceLocator;
-    }
-
-    public function __destruct()
-    {
-        dump( $this, $this::$__serviceLocator );
+        return StaticServices::get( $get );
     }
 }

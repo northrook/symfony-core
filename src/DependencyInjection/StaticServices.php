@@ -3,10 +3,8 @@
 namespace Core\DependencyInjection;
 
 use Exception;
-use LogicException;
 use Northrook\Exception\E_Value;
 use Symfony\Component\DependencyInjection\ServiceLocator;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 final class StaticServices
 {
@@ -15,37 +13,16 @@ final class StaticServices
     public function __construct( private readonly ServiceLocator $serviceLocator )
     {
         if ( $this::$static ) {
-            dump( $this::class.' already set' );
+            return;
         }
-    }
-
-    public function __invoke( RequestEvent $event ) : void
-    {
-        dump( $this::class.' has been set by '.__METHOD__ );
-        $this::$static = $this;
     }
 
     /**
-     * @template Service
-     *
-     * @param class-string<Service> $get
-     *
-     * @return Service
+     * Initialize the {@see StaticServices} {@see ServiceLocator} on every request.
      */
-    final protected function serviceLocator( string $get ) : mixed
+    public function onKernelRequest() : void
     {
-        try {
-            // return $this->serviceLocator->get( $get );
-            return $this::get( $get );
-        }
-        catch ( Exception $exception ) {
-            return E_Value::error(
-                'The {ServiceContainer} does not provide access to the {GetService} service.',
-                ['ServiceContainer' => ServiceContainer::class, 'GetService' => $get],
-                $exception,
-                true,
-            );
-        }
+        $this::$static = $this;
     }
 
     /**
@@ -65,11 +42,16 @@ final class StaticServices
             return self::$static->serviceLocator->get( $get );
         }
         catch ( Exception $exception ) {
-            throw new LogicException( message  : "The '".StaticServices::class."' does not provide access to the '".$get."' service.", code     : 500, previous : $exception );
+            return E_Value::error(
+                'The {ServiceContainer} does not provide access to the {GetService} service.',
+                ['ServiceContainer' => ServiceContainer::class, 'GetService' => $get],
+                $exception,
+                true,
+            );
         }
     }
 
-    public function __destruct()
+    public function onKernelTerminate() : void
     {
         dump( $this::class.' was destroyed' );
         $this::$static = null;
