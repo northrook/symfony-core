@@ -74,7 +74,7 @@ class Notification extends AbstractComponent
 
     public function setTimeout( null|int|string $timeout ) : self
     {
-        if ( ! \is_numeric( $timeout ) ) {
+        if ( \is_string( $timeout ) ) {
             $timeout = ( \strtotime( $timeout, 0 ) ) * 100;
         }
         $this->timeout = $timeout;
