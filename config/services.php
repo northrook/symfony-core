@@ -10,7 +10,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Core\Settings;
 use Core\Response\{Document};
-use Core\Service\{DocumentService, IconService, Toast, ToastService};
+use Core\Service\{DocumentService, IconService, ToastService};
 
 return static function( ContainerConfigurator $container ) : void {
 
@@ -21,9 +21,6 @@ return static function( ContainerConfigurator $container ) : void {
         // Icon Manager
         ->set( IconService::class )
 
-        // Static Toasts
-        ->set( Toast::class );
-
-    // Toasts
-    // ->set( ToastService::class )->args( [service( 'request_stack' )] );
+        // Toasts
+        ->set( ToastService::class )->args( [service( 'request_stack' )] );
 };

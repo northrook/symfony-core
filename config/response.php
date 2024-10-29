@@ -10,22 +10,15 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Core\Event\ResponseHandler;
 use Core\UI\RenderRuntime;
-use Core\Response\{Document, Headers, Parameters, ResponseContext};
-use Core\Service\{Toast};
+use Core\Response\{Document, Headers, Parameters};
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 return static function( ContainerConfigurator $container ) : void {
 
     $response = $container->services();
 
-    // Response
-    $response->set( ResponseContext::class );
-
     // Response EventSubscriber
     $response->set( ResponseHandler::class )
-        ->args( [
-            service( Toast::class ),
-        ] )
         ->tag( 'kernel.event_subscriber' );
 
     // Response Services

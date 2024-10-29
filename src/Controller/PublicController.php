@@ -2,11 +2,10 @@
 
 namespace Core\Controller;
 
-use Core\Service\Toast;
-use Core\Controller\Attribute\{Template};
-use Core\Controller\Attribute\DocumentResponse;
-use Core\DependencyInjection\CoreController;
+use Core\Framework\Controller;
+use Core\Framework\Controller\{Template, DocumentResponse};
 use Core\Response\{Document, Headers, Parameters};
+use Core\Facade\Toast;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -14,7 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
     Route( '/', 'core:public' ),
     Template( 'welcome.latte' ) // wrapping body - like Admin UI
 ]
-final class PublicController extends CoreController
+final class PublicController extends Controller
 {
     #[DocumentResponse]
     protected function onDocumentResponse(
@@ -40,9 +39,9 @@ final class PublicController extends CoreController
             'Index says welcome',
             keywords: ['we', 'like', 'keywords'],
         )->body(
-                id               : 'admin',
-                style            : ['--sidebar-width' => '160px'],
-                sidebar_expanded : true,
+            id               : 'admin',
+            style            : ['--sidebar-width' => '160px'],
+            sidebar_expanded : true,
         )
             ->script( 'core.public' )
             ->style( 'core.public' );

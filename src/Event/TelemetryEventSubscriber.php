@@ -2,14 +2,13 @@
 
 declare( strict_types = 1 );
 
-namespace Core\Telemetry;
+namespace Core\Event;
 
 use Northrook\Clerk;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
-
 
 /**
  * @author Martin Nielsen <mn@northrook.com>

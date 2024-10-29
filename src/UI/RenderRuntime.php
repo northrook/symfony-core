@@ -114,7 +114,8 @@ final class RenderRuntime
         if ( isset( $this->called[$className] ) ) {
             return;
         }
-        $this->called[$className] = classBasename( $className );
+
+        $this->called[$className] = \strtolower( classBasename( $className ) );
     }
 
     private function invokedArguments( string $className, array $arguments ) : array

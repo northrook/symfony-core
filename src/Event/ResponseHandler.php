@@ -2,27 +2,23 @@
 
 namespace Core\Event;
 
-use Core\Controller\Attribute\Template;
-use Core\UI\Component\Notification;
-use Core\UI\RenderRuntime;
 use Core\DependencyInjection\{CoreController, ServiceContainer};
-use Core\Response\{Document, Headers};
-use Core\Service\{DocumentService, Request, Toast};
+use Core\Framework;
+use Core\Framework\Controller\Template;
+use Core\Response\{Context, Document};
+use Core\Service\{DocumentService, Request, ToastService};
+use Core\UI\Component\Notification;
 use Northrook\HTML\Element;
 use Northrook\HTML\Element\Attributes;
-use Northrook\Logger\Log;
 use ReflectionAttribute;
 use ReflectionClass;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Exception;
-use Symfony\Component\HttpKernel\{Event\ControllerEvent,
-    Event\ResponseEvent,
-    Event\TerminateEvent,
-    KernelEvents};
+use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
+use Symfony\Component\HttpKernel\{Event\ControllerEvent, Event\ResponseEvent, Event\TerminateEvent, KernelEvents};
 use const Support\{EMPTY_STRING, WHITESPACE};
 
 /**
- * Handles {@see Response} events for controllers extending the {@see CoreController}.
+ * Handles {@see Response} events for controllers extending the {@see Framework\Controller}.
  *
  * - Output parsing
  * - Response header parsing
@@ -37,10 +33,6 @@ final class ResponseHandler implements EventSubscriberInterface
     private ?string $controller = null;
 
     private bool $isHtmxRequest = false;
-
-    public function __construct(
-        private readonly Toast         $notifications,
-    ) {}
 
     /**
      * @return array<string, array{0: string, 1: int}|list<array{0: string, 1?: int}>|string>
@@ -68,6 +60,7 @@ final class ResponseHandler implements EventSubscriberInterface
             $this->controller    = $event->getController()[0]::class;
             $this->isHtmxRequest = $event->getRequest()->headers->has( 'hx-request' );
             $event->getRequest()->attributes->add( $this->resolveResponseTemplate( $event ) );
+            $event->getRequest()->attributes->add( ['context' => new Context()] );
         }
     }
 
@@ -161,18 +154,20 @@ final class ResponseHandler implements EventSubscriberInterface
 
     public function preserveNotifications( ResponseEvent $event ) : void
     {
-        try {
-            $flashBag = $event->getRequest()->getSession()->getFlashBag();
+        if ( ! $this->notifications->hasMessages() ) {
+            return;
+        }
 
-            foreach ( $this->notifications->getMessages() as $message ) {
-                if ( ! \in_array( $message->message, $flashBag->peek( $message->type ) ) ) {
-                    $flashBag->add( $message->type, $message->message );
-                }
+        \assert( $event->getRequest()->getSession() instanceof FlashBagAwareSessionInterface );
+
+        $flashBag = $event->getRequest()->getSession()->getFlashBag();
+
+        foreach ( $this->notifications->getMessages() as $message ) {
+            if ( ! \in_array( $message->message, $flashBag->peek( $message->type ) ) ) {
+                $flashBag->add( $message->type, $message->message );
             }
         }
-        catch ( Exception $e ) {
-            Log::exception( $e );
-        }
+
     }
 
     private function document() : DocumentService
@@ -224,13 +219,7 @@ final class ResponseHandler implements EventSubscriberInterface
         $notifications = '';
 
         // $notifications = $this->notifications->getMessages();
-        $flashBag = $this->serviceLocator( Request::class )->flashBag();
-
-        foreach ( $flashBag->all() as $type => $flashes ) {
-            foreach ( $flashes as $flash ) {
-                $this->notifications->setMessage( $type, $flash );
-            }
-        }
+        $flashBag = $this->serviceLocator( ToastService::class )->getFlashBag();
 
         foreach ( $this->notifications->pullMessages() as $toast ) {
             $notification = new Notification(
@@ -272,8 +261,8 @@ final class ResponseHandler implements EventSubscriberInterface
                      )[0] ?? null;
 
         return $attribute ? [
-            '_document_template' => $attribute->getArguments()[0] ?? null,
-            '_content_template'  => $attribute->getArguments()[1] ?? null,
+            '_document_template' => $attribute->getArguments()[0] ?? null, // from Controller Class
+            '_content_template'  => $attribute->getArguments()[1] ?? null, // from called Method
         ] : [];
     }
 }

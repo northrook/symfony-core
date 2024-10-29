@@ -2,50 +2,159 @@
 
 declare(strict_types=1);
 
-namespace Core\DependencyInjection;
+namespace Core\Framework;
 
-use Core\Framework\Controller\{DocumentResponse};
-use Core\Framework\Controller\ContentResponse;
+use Core\DependencyInjection\StaticServices;
+use Core\Framework\Controller\{ContentResponse, DocumentResponse};
 use Exception;
-use JetBrains\PhpStorm\Deprecated;
+use Northrook\Latte;
 use Northrook\Logger\Log;
 use Northrook\Resource\URL;
+use Core\Service\{Pathfinder, Request, Security};
+use Core\Response\{Document, Headers, Parameters};
 use ReflectionClass;
 use ReflectionException;
+use Symfony\Component\HttpFoundation as Http;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpFoundation\{BinaryFileResponse, JsonResponse, RedirectResponse, Response, ResponseHeaderBag};
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
+use BadMethodCallException;
 use Symfony\Component\Serializer\SerializerInterface;
 use Throwable;
 
 /**
- * @internal
+ * @property-read Request               $request
+ * @property-read Parameters            $parameters
+ * @property-read Pathfinder            $pathfinder
+ * @property-read Security              $security
+ * @property-read UrlGeneratorInterface $urlGenerator
+ *
  * @author Martin Nielsen <mn@northrook.com>
  */
-abstract class CoreController
+abstract class Controller
 {
-    use ServiceContainer;
-
-    final protected function response( ?string $string = null ) : Response
+    /**
+     * Prepares a new {@see Response} object.
+     *
+     * - Calls {@see DocumentResponse} or {@see ContentResponse} methods.
+     * - Renders the {@see Controller\Template} by default.
+     * - Pass a `$content` string to send a raw HTML response, bypassing the template renderer.
+     *
+     * @param ?string $content
+     *
+     * @return Response
+     */
+    final protected function response( ?string $content = null ) : Response
     {
         $this->controllerResponseMethods();
 
-        if ( null !== $string ) {
-            return new Response( $string );
+        // Return raw `text/plain`
+        if ( null !== $content ) {
+            return new Response( $content );
         }
 
-        $this->parameters->set( 'content', $this->request->parameters( '_content_template' ) );
+        $this->parameters->set( 'template', $this->request->parameters( '_content_template' ) );
 
-        return new Response( $this->latte->templateToString(
+        return new Response( $this->serviceLocator( Latte::class )->templateToString(
             $this->request->parameters( '_document_template' ),
             $this->parameters->getParameters(),
         ) );
     }
 
-    // :: Response Methods :::::::::
+    /**
+     * @return void
+     */
+    private function controllerResponseMethods() : void
+    {
+        $responseType = $this->request->isHtmx ? ContentResponse::class : DocumentResponse::class ;
+
+        $autowire = [
+            Headers::class,
+            Parameters::class,
+            Document::class,
+            Pathfinder::class,
+        ];
+
+        foreach ( ( new ReflectionClass( $this ) )->getMethods() as $method ) {
+
+            if ( ! $method->getAttributes( $responseType ) ) {
+                continue;
+            }
+
+            $parameters = [];
+
+            // Locate requested services
+            foreach ( $method->getParameters() as $parameter ) {
+
+                $injectableClass = $parameter->getType()->__toString();
+
+                if ( \in_array( $injectableClass, $autowire, true ) ) {
+                    $parameters[] = $this->serviceLocator( $injectableClass );
+                }
+                else {
+                    // TODO : Ensure appropriate exception is thrown on missing dependencies
+                    //        nullable parameters will not throw; log in [dev], ignore in [prod]
+                    dump( $method );
+                }
+            }
+
+            // Inject requested services
+            try {
+                $method->invoke( $this, ...$parameters );
+            }
+            catch ( ReflectionException $e ) {
+                Log::exception( $e );
+
+                continue;
+            }
+        }
+    }
+
+    final public function __get( string $service )
+    {
+        return match ( $service ) {
+            'request'      => $this->serviceLocator( Request::class ),
+            'pathfinder'   => $this->serviceLocator( Pathfinder::class ),
+            'parameters'   => $this->serviceLocator( Parameters::class ),
+            'urlGenerator' => $this->serviceLocator( RouterInterface::class ),
+            'security'     => $this->serviceLocator( Security::class ),
+            default        => throw new BadMethodCallException(),
+        };
+    }
+
+    /**
+     * @template Service
+     *
+     * @param class-string<Service> $get
+     *
+     * @return Service
+     */
+    private function serviceLocator( string $get ) : mixed
+    {
+        return StaticServices::get( $get );
+    }
+
+    /**
+     * Returns a NotFoundHttpException.
+     *
+     * This will result in a 404 response code. Usage example:
+     *
+     *     throw $this->createNotFoundException('Page not found!');
+     *
+     * @param string     $message
+     * @param ?Throwable $previous
+     *
+     * @return NotFoundHttpException
+     */
+    final protected function notFoundException( string $message = 'Not Found', ?Throwable $previous = null ) : NotFoundHttpException
+    {
+        return new NotFoundHttpException( $message, $previous );
+    }
+
+    // :: Response helpers
 
     /**
      * Forwards the request to another controller.
@@ -68,8 +177,8 @@ abstract class CoreController
                 HttpKernelInterface::SUB_REQUEST,
             );
         }
-        catch ( Exception $e ) {
-            throw $this->notFoundException();
+        catch ( Exception $exception ) {
+            throw $this->notFoundException( previous: $exception );
         }
     }
 
@@ -155,7 +264,7 @@ abstract class CoreController
     }
 
     /**
-     * Return {@see File} object with original or customized
+     * Return {@see Http\File} object with original or customized
      *  file name and disposition header.
      *
      * @param SplFileInfo|string $file
@@ -173,87 +282,5 @@ abstract class CoreController
         $fileName ??= $response->getFile()->getFilename();
 
         return $response->setContentDisposition( $disposition, $fileName );
-    }
-
-    // :: End :: Response Methods ::
-
-    /**
-     * Generates a URL from the given parameters.
-     *
-     * @param string $route
-     * @param array  $parameters
-     * @param int    $referenceType
-     *
-     * @return string
-     *
-     * @see UrlGeneratorInterface
-     */
-    #[Deprecated]
-    protected function generateUrl( string $route, array $parameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH ) : string
-    {
-        return $this->serviceLocator( RouterInterface::class )->generate( $route, $parameters, $referenceType );
-    }
-
-    // !! Exceptions ::::::
-
-    /**
-     * Returns a NotFoundHttpException.
-     *
-     * This will result in a 404 response code. Usage example:
-     *
-     *     throw $this->createNotFoundException('Page not found!');
-     *
-     * @param string     $message
-     * @param ?Throwable $previous
-     *
-     * @return NotFoundHttpException
-     */
-    final protected function notFoundException( string $message = 'Not Found', ?Throwable $previous = null ) : NotFoundHttpException
-    {
-        return new NotFoundHttpException( $message, $previous );
-    }
-
-    // !! End :: Exceptions
-
-    private function controllerResponseMethods() : void
-    {
-        $responseType = $this->request->isHtmx ? ContentResponse::class : DocumentResponse::class ;
-
-        $autowire = \array_keys( $this->serviceLocator->getProvidedServices() );
-        // $autowire = [
-        //     Headers::class,
-        //     Parameters::class,
-        //     Document::class,
-        // ];
-
-        foreach ( ( new ReflectionClass( $this ) )->getMethods() as $method ) {
-
-            if ( ! $method->getAttributes( $responseType ) ) {
-                continue;
-            }
-
-            $parameters = [];
-
-            foreach ( $method->getParameters() as $parameter ) {
-                $injectableClass = $parameter->getType()->__toString();
-                if ( \in_array( $injectableClass, $autowire, true ) ) {
-                    $parameters[] = $this->serviceLocator->get( $injectableClass );
-                }
-                else {
-                    // TODO : Ensure appropriate exception is thrown on missing dependencies
-                    //        nullable parameters will not throw; log in [dev], ignore in [prod]
-                    dump( $method );
-                }
-            }
-
-            try {
-                $method->invoke( $this, ...$parameters );
-            }
-            catch ( ReflectionException $e ) {
-                Log::exception( $e );
-
-                continue;
-            }
-        }
     }
 }

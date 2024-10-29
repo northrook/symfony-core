@@ -5,36 +5,31 @@ declare(strict_types=1);
 namespace Core\Service;
 
 use Core\Model\Message;
-use InvalidArgumentException;
 use Stringable;
 use Symfony\Component\HttpFoundation as Http;
-use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
-use function String\hashKey;
 
 final readonly class ToastService
 {
-    private FlashBagInterface $flashBag;
-
     public function __construct( private Http\RequestStack $requestStack ) {}
 
     private function getFlashBagMessage( string $key ) : ?Message
     {
-        return $this->flashBag()->get( $key )[0] ?? null;
+        return $this->getFlashBag()->get( $key )[0] ?? null;
     }
 
     /**
      * Adds a simple flash message to the current session.
      *
-     * @param string                  $type    = ['info', 'success', 'warning', 'error', 'notice'][$any]
-     * @param array|string|Stringable $message
+     * @param string            $type       = ['info', 'success', 'warning', 'error', 'notice'][$any]
+     * @param string|Stringable ...$message
      *
      * @return $this
      */
-    public function flash( string $type, string|Stringable|array $message ) : ToastService
+    public function flash( string $type, string|Stringable ...$message ) : ToastService
     {
-        $this->flashBag()->add( $type, $message );
+        $this->getFlashBag()->add( $type, $message );
         return $this;
     }
 
@@ -44,17 +39,17 @@ final readonly class ToastService
         ?string $description,
         ?int    $timeout = null,
     ) : Message {
-        $flashKey = hashKey( [$type, $title] );
+        $flashKey = \hash( 'xxh3', $type.$title );
 
         /** @type ?\Core\Model\Message $message } */
-        if ( $this->flashBag()->has( $flashKey ) ) {
+        if ( $this->getFlashBag()->has( $flashKey ) ) {
             $message = $this->getFlashBagMessage( $flashKey );
             $message?->bump( $description );
         }
 
         $message ??= new Message( $type, $title, $description, $timeout );
 
-        $this->flashBag()->add( $flashKey, $message );
+        $this->getFlashBag()->add( $flashKey, $message );
 
         return $message;
     }
@@ -85,18 +80,14 @@ final readonly class ToastService
     }
 
     /**
-     * Retrieve the current {@see FlashBag} from the active {@see Session}.
+     * Retrieve the current {@see getFlashBag} from the active {@see Session}.
      *
      * @return FlashBagInterface
-     * @throws SessionNotFoundException if no session is active
      */
-    private function flashBag() : FlashBagInterface
+    public function getFlashBag() : FlashBagInterface
     {
-        return $this->flashBag ??= ( function() {
-            if ( ! $this->requestStack->getSession() instanceof FlashBagAwareSessionInterface ) {
-                throw new InvalidArgumentException( 'The session does not support Flash Notifications.' );
-            }
-            return $this->requestStack->getSession()->getFlashBag();
-        } )();
+        \assert( $this->requestStack->getSession() instanceof FlashBagAwareSessionInterface );
+
+        return $this->requestStack->getSession()->getFlashBag();
     }
 }

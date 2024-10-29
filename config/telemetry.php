@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use Northrook\Clerk;
 use Core\Telemetry;
+use Northrook\Clerk;
 use Symfony\Component\Stopwatch\Stopwatch;
 
 return static function( ContainerConfigurator $container ) : void {
@@ -21,7 +21,7 @@ return static function( ContainerConfigurator $container ) : void {
         ] )
 
         // TelemetryEventSubscriber
-        ->set( Telemetry\TelemetryEventSubscriber::class )
+        ->set( \Core\Event\TelemetryEventSubscriber::class )
         ->tag( 'kernel.event_subscriber' )
         ->args( [service( Clerk::class )] );
 };
