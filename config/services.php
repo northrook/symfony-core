@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Core\DataCollector\PipelineCollector;
 use Core\Settings;
 use Core\Response\{Document};
 use Core\Service\{DocumentService, IconService, ToastService};

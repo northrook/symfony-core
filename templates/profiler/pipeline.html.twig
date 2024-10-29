@@ -1,0 +1,30 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+
+    {% set icon %}
+        {{ source('@WebProfiler/Icon/request.svg') }}
+        <span class="sf-toolbar-value">{{ collector.allAssets }}</span>
+    {% endset %}
+
+    {% set text %}
+        <div class="sf-toolbar-info-group">
+            <div class="sf-toolbar-info-piece">
+                <b>Request assets</b>
+                <span>0</span>
+            </div>
+
+            <div class="sf-toolbar-info-piece">
+                <b>Response assets</b>
+                <span>0</span>
+            </div>
+
+            <div class="sf-toolbar-info-piece">
+                <b>Document assets</b>
+                <span>{{ collector.allAssets }}</span>
+            </div>
+        </div>
+    {% endset %}
+
+    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: profiler_url }) }}
+{% endblock %}

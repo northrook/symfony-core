@@ -11,7 +11,7 @@ final class PipelineCollector extends AbstractDataCollector
     #[Override]
     public static function getTemplate() : ?string
     {
-        return __DIR__.'/pipeline.html.twig';
+        return '@Core/profiler/pipeline.html.twig';
     }
 
     #[Override]
@@ -26,7 +26,7 @@ final class PipelineCollector extends AbstractDataCollector
             'assets' => [
                 'request'  => $requestAssets,
                 'response' => $response,
-                'document' => $requestAssets,
+                'document' => ['core', 'document'],
             ],
         ];
     }

@@ -13,7 +13,7 @@ use Symfony\Component\HttpKernel\Event\TerminateEvent;
 /**
  * @author Martin Nielsen <mn@northrook.com>
  */
-final readonly class TelemetryEventSubscriber implements EventSubscriberInterface
+final readonly class TelemetryPipeline implements EventSubscriberInterface
 {
     const string GROUP = 'Clerk';
 
