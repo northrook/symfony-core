@@ -6,14 +6,13 @@ use Core\DependencyInjection\{CoreController, ServiceContainer};
 use Core\Framework;
 use Core\Framework\Controller\Template;
 use Core\Response\{Context, Document};
-use Core\Service\{DocumentService, Request, ToastService};
+use Core\Service\{DocumentService, ToastService};
 use Core\UI\Component\Notification;
 use Northrook\HTML\Element;
 use Northrook\HTML\Element\Attributes;
 use ReflectionAttribute;
 use ReflectionClass;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Component\HttpKernel\{Event\ControllerEvent, Event\ResponseEvent, Event\TerminateEvent, KernelEvents};
 use const Support\{EMPTY_STRING, WHITESPACE};
 
@@ -40,12 +39,9 @@ final class ResponseHandler implements EventSubscriberInterface
     public static function getSubscribedEvents() : array
     {
         return [
-            KernelEvents::CONTROLLER => ['parseController', -100],
-            KernelEvents::RESPONSE   => [
-                ['parseResponse', 1_024],
-                ['preserveNotifications', 1_064],
-            ],
-            KernelEvents::TERMINATE => ['responseCleanup', 1_024],
+                KernelEvents::CONTROLLER => ['parseController', -100],
+                KernelEvents::RESPONSE   => ['parseResponse', 1_024],
+                KernelEvents::TERMINATE  => ['responseCleanup', 1_024],
         ];
     }
 
@@ -56,7 +52,7 @@ final class ResponseHandler implements EventSubscriberInterface
      */
     public function parseController( ControllerEvent $event ) : void
     {
-        if ( \is_array( $event->getController() ) && $event->getController()[0] instanceof CoreController ) {
+        if ( \is_array( $event->getController() ) && $event->getController()[0] instanceof Framework\Controller ) {
             $this->controller    = $event->getController()[0]::class;
             $this->isHtmxRequest = $event->getRequest()->headers->has( 'hx-request' );
             $event->getRequest()->attributes->add( $this->resolveResponseTemplate( $event ) );
@@ -83,14 +79,14 @@ final class ResponseHandler implements EventSubscriberInterface
         if ( $this->isHtmxRequest ) {
 
             $this->document()
-                ->title()
-                ->meta( 'document' )
-                ->meta( 'robots' )
-                ->meta( 'theme' )
-                ->assets( 'font' )
-                ->assets( 'script' )
-                ->assets( 'style' )
-                ->assets( 'link' );
+                 ->title()
+                 ->meta( 'document' )
+                 ->meta( 'robots' )
+                 ->meta( 'theme' )
+                 ->assets( 'font' )
+                 ->assets( 'script' )
+                 ->assets( 'style' )
+                 ->assets( 'link' );
 
             $html = $this->document()->head;
 
@@ -102,14 +98,14 @@ final class ResponseHandler implements EventSubscriberInterface
         else {
 
             $this->document->add(
-                [
-                    'html.lang'   => 'en',
-                    'html.id'     => 'top',
-                    'html.theme'  => $this->document->get( 'theme.name' ) ?? 'system',
-                    'html.status' => 'init',
-                ],
+                    [
+                            'html.lang'   => 'en',
+                            'html.id'     => 'top',
+                            'html.theme'  => $this->document->get( 'theme.name' ) ?? 'system',
+                            'html.status' => 'init',
+                    ],
             )
-                ->add( 'meta.viewport', 'width=device-width,initial-scale=1' );
+                           ->add( 'meta.viewport', 'width=device-width,initial-scale=1' );
 
             if ( ! $this->document->isPublic ) {
                 $this->document->set( 'robots', 'noindex, nofollow' );
@@ -118,13 +114,13 @@ final class ResponseHandler implements EventSubscriberInterface
             // public robots
 
             $this->document()
-                ->meta( 'meta.viewport' )
-                ->title()
-                ->meta( 'document' )
-                ->meta( 'robots' )
-                ->meta( 'theme' )
-                ->meta( 'meta' )
-                ->assets();
+                 ->meta( 'meta.viewport' )
+                 ->title()
+                 ->meta( 'document' )
+                 ->meta( 'robots' )
+                 ->meta( 'theme' )
+                 ->meta( 'meta' )
+                 ->assets();
 
             $body = new Element( 'body', $this->serviceLocator( Document::class )->pull( 'body', [] ), $content );
 
@@ -132,11 +128,11 @@ final class ResponseHandler implements EventSubscriberInterface
             $htmlAttributes = $htmlAttributes ? WHITESPACE.Attributes::from( $htmlAttributes ) : EMPTY_STRING;
 
             $html = [
-                '<!DOCTYPE html>',
-                "<html{$htmlAttributes}>",
-                $this->document()->getHead(),
-                $body->toString( PHP_EOL ),
-                '</html>',
+                    '<!DOCTYPE html>',
+                    "<html{$htmlAttributes}>",
+                    $this->document()->getHead(),
+                    $body->toString( PHP_EOL ),
+                    '</html>',
             ] ;
 
             $content = \implode( PHP_EOL, $html );
@@ -150,24 +146,6 @@ final class ResponseHandler implements EventSubscriberInterface
         $this->responseHeaders( $event );
 
         $event->getResponse()->setContent( $content );
-    }
-
-    public function preserveNotifications( ResponseEvent $event ) : void
-    {
-        if ( ! $this->notifications->hasMessages() ) {
-            return;
-        }
-
-        \assert( $event->getRequest()->getSession() instanceof FlashBagAwareSessionInterface );
-
-        $flashBag = $event->getRequest()->getSession()->getFlashBag();
-
-        foreach ( $this->notifications->getMessages() as $message ) {
-            if ( ! \in_array( $message->message, $flashBag->peek( $message->type ) ) ) {
-                $flashBag->add( $message->type, $message->message );
-            }
-        }
-
     }
 
     private function document() : DocumentService
@@ -211,22 +189,19 @@ final class ResponseHandler implements EventSubscriberInterface
      */
     public function responseCleanup( TerminateEvent $event ) : void {}
 
-    /**
-     * @return string
-     */
     private function handleNotifications() : string
     {
         $notifications = '';
 
         // $notifications = $this->notifications->getMessages();
-        $flashBag = $this->serviceLocator( ToastService::class )->getFlashBag();
+        $flashBag = $this->serviceLocator( ToastService::class );
 
-        foreach ( $this->notifications->pullMessages() as $toast ) {
+        foreach ( $flashBag->getMessages() as $message ) {
             $notification = new Notification(
-                $toast->type,
-                $toast->message,
-                $toast->description,
-                $toast->timeout,
+                    $message->type,
+                    $message->title,
+                    $message->description,
+                    $message->timeout,
             );
 
             if ( ! $notification->description ) {
@@ -257,12 +232,12 @@ final class ResponseHandler implements EventSubscriberInterface
 
         $attribute = $method->getAttributes( Template::class, ReflectionAttribute::IS_INSTANCEOF )[0]
                      ?? ( new ReflectionClass( $event->getController() ) )->getAttributes(
-                         Template::class,
-                     )[0] ?? null;
+                Template::class,
+        )[0] ?? null;
 
         return $attribute ? [
-            '_document_template' => $attribute->getArguments()[0] ?? null, // from Controller Class
-            '_content_template'  => $attribute->getArguments()[1] ?? null, // from called Method
+                '_document_template' => $attribute->getArguments()[0] ?? null, // from Controller Class
+                '_content_template'  => $attribute->getArguments()[1] ?? null, // from called Method
         ] : [];
     }
 }

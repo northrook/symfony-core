@@ -15,8 +15,6 @@ use function String\hashKey;
  * @internal
  *
  * @property-read string     $key           // Unique key to identify this object internally
- * @property-read  string    $type          // One of 'info', 'success', 'warning', 'error', or 'notice'
- * @property-read  string    $message       // The main message to show the user
  * @property-read  ?string   $description   // [optional] Provide more details.
  * @property-read  ?int      $timeout       // How long before the message should time out, in milliseconds
  * @property-read  array     $instances     // All the times this exact Notification has been created since it was last rendered
@@ -31,9 +29,11 @@ final class Message implements Countable
 
     private array $occurrences = [];
 
-    private string $type;
+    /** @var string One of 'info', 'success', 'warning', 'error', or 'notice' */
+    public readonly string $type;
 
-    private string $message;
+    /** @var string The main message to show the user */
+    public readonly string $title;
 
     private ?string $description;
 
@@ -41,18 +41,18 @@ final class Message implements Countable
 
     /**
      * @param string      $type        = [ 'info', 'success', 'warning', 'error', 'notice' ][$any]
-     * @param string      $message
+     * @param string      $title
      * @param null|string $description
      * @param null|int    $timeout
      */
     public function __construct(
         string  $type,
-        string  $message,
+        string  $title,
         ?string $description = null,
         ?int    $timeout = null,
     ) {
         $this->setMessageType( $type );
-        $this->message = \trim( $message );
+        $this->title = \trim( $title );
         $this->bump( $description );
         $this->timeout( $timeout );
     }
@@ -60,9 +60,9 @@ final class Message implements Countable
     public function __get( string $property ) : null|string|int|array
     {
         return match ( $property ) {
-            'key'           => hashKey( [$this->type, $this->message, $this->description, $this->timeout] ),
+            'key'           => hashKey( [$this->type, $this->title, $this->description, $this->timeout] ),
             'type'          => $this->type,
-            'message'       => $this->message,
+            'message'       => $this->title,
             'description'   => $this->description,
             'timeout'       => $this->timeout,
             'instances'     => $this->instances,

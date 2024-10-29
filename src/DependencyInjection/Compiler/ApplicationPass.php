@@ -144,11 +144,11 @@ final class ApplicationPass implements CompilerPassInterface
                 <<<PHP
                 <?php
                 
-                declare( strict_types = 1 );
+                declare(strict_types=1);
                 
                 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
                 
-                return static function ( RoutingConfigurator \$routes ) : void {
+                return static function( RoutingConfigurator \$routes ) : void {
                     \$routes->import(
                         [
                             'path'      => '../src/Controller/',
@@ -157,6 +157,7 @@ final class ApplicationPass implements CompilerPassInterface
                         'attribute',
                     );
                 };
+
                 PHP,
         );
 
@@ -174,11 +175,11 @@ final class ApplicationPass implements CompilerPassInterface
                 <<<PHP
                 <?php
                 
-                declare( strict_types = 1 );
+                declare(strict_types=1);
                 
                 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
                 
-                return static function ( ContainerConfigurator \$container ) : void {
+                return static function( ContainerConfigurator \$container ) : void {
                 
                     \$services = \$container->services();
                 
@@ -200,6 +201,7 @@ final class ApplicationPass implements CompilerPassInterface
                             ],
                         );
                 };
+
                 PHP,
         );
         return $this;
@@ -217,6 +219,7 @@ final class ApplicationPass implements CompilerPassInterface
                 if (\file_exists(\dirname(__DIR__).'/var/cache/prod/App_KernelProdContainer.preload.php')) {
                     \opcache_compile_file(\dirname(__DIR__).'/var/cache/prod/App_KernelProdContainer.preload.php');
                 }
+
                 PHP,
                 $override,
         );

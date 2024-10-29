@@ -54,31 +54,6 @@ final readonly class ToastService
         return $message;
     }
 
-    public function success( string $message, ?string $description = null ) : Message
-    {
-        return $this->message( 'success', $message, $description );
-    }
-
-    public function info( string $message, ?string $description = null ) : Message
-    {
-        return $this->message( 'info', $message, $description );
-    }
-
-    public function notice( string $message, ?string $description = null ) : Message
-    {
-        return $this->message( 'notice', $message, $description );
-    }
-
-    public function warning( string $message, ?string $description = null ) : Message
-    {
-        return $this->message( 'warning', $message, $description );
-    }
-
-    public function danger( string $message, ?string $description = null ) : Message
-    {
-        return $this->message( 'danger', $message, $description );
-    }
-
     /**
      * Retrieve the current {@see getFlashBag} from the active {@see Session}.
      *
@@ -89,5 +64,27 @@ final readonly class ToastService
         \assert( $this->requestStack->getSession() instanceof FlashBagAwareSessionInterface );
 
         return $this->requestStack->getSession()->getFlashBag();
+    }
+
+    /**
+     * @return Message[]
+     */
+    public function getMessages() : array
+    {
+        $messages = [];
+
+        foreach ( $this->getFlashBag()->all() as $type => $message ) {
+            \assert( \is_array( $message ) );
+            if ( $message[0] instanceof Message ) {
+                $messages[] = $message[0];
+                continue;
+            }
+
+            foreach ( $message as $title ) {
+                $messages[] = new Message( $type, $title );
+            }
+        }
+
+        return $messages;
     }
 }

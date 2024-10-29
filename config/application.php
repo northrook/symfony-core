@@ -31,7 +31,7 @@ return static function( ContainerConfigurator $container ) : void {
         Pathfinder::class => service( Pathfinder::class ),
         Request::class    => service( Request::class ),
         Latte::class      => service( Latte::class ),
-        // ToastService::class        => service( ToastService::class ),
+        ToastService::class        => service( ToastService::class ),
 
         // Document
         Document::class        => service( Document::class ),
