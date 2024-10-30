@@ -63,7 +63,11 @@ class Notification extends AbstractComponent
         $this->type        = filterHtml( $type );
         $this->message     = filterHtml( $message ?? \ucfirst( $this->type ) );
         $this->description = $description ? filterHtml( $description ) : null;
-        $this->setTimeout( $timeout );
+
+        if ( $timeout ) {
+            $this->setTimeout( $timeout );
+        }
+
         $this->component  = new Element( 'toast', $attributes );
         $this->attributes = $this->component->attributes;
 

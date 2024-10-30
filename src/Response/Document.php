@@ -145,6 +145,15 @@ final class Document extends ArrayAccessor
         return $this;
     }
 
+    /**
+     * Enqueue assets using their `name`.
+     *
+     * The {@see ResponseHandler} will ensure the requested assets are provided if needed.
+     *
+     * @param string ...$enqueue
+     *
+     * @return $this
+     */
     public function assets( string ...$enqueue ) : Document
     {
         foreach ( $enqueue as $asset ) {

@@ -76,12 +76,14 @@ final readonly class ToastService
         foreach ( $this->getFlashBag()->all() as $type => $message ) {
             \assert( \is_array( $message ) );
             if ( $message[0] instanceof Message ) {
-                $messages[] = $message[0];
+                $messages[$type] = $message[0];
+
                 continue;
             }
 
             foreach ( $message as $title ) {
-                $messages[] = new Message( $type, $title );
+                $flashKey            = \hash( 'xxh3', $type.$title );
+                $messages[$flashKey] = new Message( $type, $title );
             }
         }
 

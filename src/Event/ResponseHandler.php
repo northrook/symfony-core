@@ -2,7 +2,6 @@
 
 namespace Core\Event;
 
-use Core\UI\RenderRuntime;
 use Northrook\Logger\Log;
 use ReflectionFunctionAbstract;
 use Core\DependencyInjection\{ServiceContainer};
@@ -73,13 +72,18 @@ final class ResponseHandler implements EventSubscriberInterface
             return;
         }
 
+        $render = new Document\ResponseRenderer(
+            $this->isHtmxRequest,
+            $this->document,
+            $event->getResponse()->getContent(),
+        );
+
+        dump( $render );
         // If we have made it this far, we can safely assume we are either sending content HTML as a HTMX response
         // or we are sending a full document HTML. Either way we need to first append/prepend to ->content.
 
         $content = $this->handleNotifications();
         $content .= (string) $event->getResponse()->getContent();
-
-        $this->resolveResponseAssets();
 
         // Contentful HTML response
         if ( $this->isHtmxRequest ) {
@@ -243,14 +247,5 @@ final class ResponseHandler implements EventSubscriberInterface
         }
 
         return $attribute ? $attribute->getArguments()[0] ?? null : null;
-    }
-
-    private function resolveResponseAssets() : void
-    {
-        $runtime = $this->serviceLocator( RenderRuntime::class );
-
-        $this->document->assets( ...$runtime->getCalledInvocations() );
-
-        dump( $this->document );
     }
 }
