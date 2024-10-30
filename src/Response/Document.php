@@ -145,6 +145,15 @@ final class Document extends ArrayAccessor
         return $this;
     }
 
+    public function assets( string ...$enqueue ) : Document
+    {
+        foreach ( $enqueue as $asset ) {
+            $this->add( 'assets', $asset );
+        }
+
+        return $this;
+    }
+
     /**
      * @param Path|string $path
      * @param ?string     $id

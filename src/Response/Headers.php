@@ -6,6 +6,14 @@ namespace Core\Response;
 
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
+//: Content Type
+//  https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type
+//  https://stackoverflow.com/a/48704300/14986455
+
+//: Robots
+//  https://www.madx.digital/glossary/x-robots-tag
+//  https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag
+
 final class Headers extends ResponseHeaderBag
 {
     /**

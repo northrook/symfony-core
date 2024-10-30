@@ -20,7 +20,9 @@ final class PublicController extends Controller
         Document   $document,
         Parameters $parameters,
         Headers    $headers,
-    ) : void {}
+    ) : void {
+        $document->assets( 'core', 'public' );
+    }
 
     #[
         Route( ['/', '/{route}'], 'index' ),
@@ -42,9 +44,7 @@ final class PublicController extends Controller
             id               : 'admin',
             style            : ['--sidebar-width' => '160px'],
             sidebar_expanded : true,
-        )
-            ->script( 'core.public' )
-            ->style( 'core.public' );
+        );
 
         return $this->response();
     }
