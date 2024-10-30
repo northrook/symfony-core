@@ -157,7 +157,7 @@ final class Document extends ArrayAccessor
     public function assets( string ...$enqueue ) : Document
     {
         foreach ( $enqueue as $asset ) {
-            $this->add( 'assets', $asset );
+            $this->push( 'assets', $asset );
         }
 
         return $this;

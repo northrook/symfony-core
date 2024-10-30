@@ -8,17 +8,14 @@ use Core\DependencyInjection\{ServiceContainer};
 use Core\Framework;
 use Core\Framework\Controller\Template;
 use Core\Response\{Document};
-use Core\Service\{DocumentService, ToastService};
+use Core\Service\{ToastService};
 use Core\UI\Component\Notification;
-use Northrook\HTML\Element;
-use Northrook\HTML\Element\Attributes;
 use ReflectionAttribute;
 use ReflectionClass;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use ReflectionException;
 use ReflectionMethod;
 use Symfony\Component\HttpKernel\{Event\ControllerEvent, Event\ResponseEvent, Event\TerminateEvent, KernelEvents};
-use const Support\{EMPTY_STRING, WHITESPACE};
 
 /**
  * Handles {@see Response} events for controllers extending the {@see Framework\Controller}.
@@ -61,7 +58,10 @@ final class ResponseHandler implements EventSubscriberInterface
             $this->isHtmxRequest = $event->getRequest()->headers->has( 'hx-request' );
 
             $event->getRequest()->attributes->set( '_document_template', $this->getControllerTemplate() );
-            $event->getRequest()->attributes->set( '_content_template', $this->getMethodTemplate( $event->getControllerReflector() ) );
+            $event->getRequest()->attributes->set(
+                '_content_template',
+                $this->getMethodTemplate( $event->getControllerReflector() ),
+            );
         }
     }
 
@@ -72,41 +72,7 @@ final class ResponseHandler implements EventSubscriberInterface
             return;
         }
 
-        $render = new Document\ResponseRenderer(
-            $this->isHtmxRequest,
-            $this->document,
-            $event->getResponse()->getContent(),
-        );
-
-        dump( $render );
-        // If we have made it this far, we can safely assume we are either sending content HTML as a HTMX response
-        // or we are sending a full document HTML. Either way we need to first append/prepend to ->content.
-
-        $content = $this->handleNotifications();
-        $content .= (string) $event->getResponse()->getContent();
-
-        // Contentful HTML response
         if ( $this->isHtmxRequest ) {
-
-            $this->document()
-                ->title()
-                ->meta( 'document' )
-                ->meta( 'robots' )
-                ->meta( 'theme' )
-                ->assets( 'font' )
-                ->assets( 'script' )
-                ->assets( 'style' )
-                ->assets( 'link' );
-
-            $html = $this->document()->head;
-
-            $html[] = $content;
-
-            $content = \implode( PHP_EOL, $html );
-        }
-        // Full Document HTML response
-        else {
-
             $this->document->add(
                 [
                     'html.lang'   => 'en',
@@ -121,51 +87,22 @@ final class ResponseHandler implements EventSubscriberInterface
                 $this->document->set( 'robots', 'noindex, nofollow' );
                 $this->headers->set( 'X-Robots-Tag', 'noindex, nofollow' );
             }
-            // public robots
-
-            $this->document()
-                ->meta( 'meta.viewport' )
-                ->title()
-                ->meta( 'document' )
-                ->meta( 'robots' )
-                ->meta( 'theme' )
-                ->meta( 'meta' )
-                ->assets();
-
-            $body = new Element( 'body', $this->serviceLocator( Document::class )->pull( 'body', [] ), $content );
-
-            $htmlAttributes = $this->document->pull( 'html', null );
-            $htmlAttributes = $htmlAttributes ? WHITESPACE.Attributes::from( $htmlAttributes ) : EMPTY_STRING;
-
-            $html = [
-                '<!DOCTYPE html>',
-                "<html{$htmlAttributes}>",
-                $this->document()->getHead(),
-                $body->toString( PHP_EOL ),
-                '</html>',
-            ] ;
-
-            $content = \implode( PHP_EOL, $html );
-
         }
 
-        // $content = $this->contentHtml( $event->getResponse()->getContent() );
+        $html = new Document\ResponseRenderer(
+            $this->isHtmxRequest,
+            $this->document,
+            $event->getResponse()->getContent(),
+        );
 
-        // dd( $content );
+        $event->getResponse()->setContent( $html );
 
         $this->responseHeaders( $event );
 
-        $event->getResponse()->setContent( $content );
-    }
-
-    private function document() : DocumentService
-    {
-        return $this->serviceLocator( DocumentService::class );
     }
 
     private function responseHeaders( ResponseEvent $event ) : void
     {
-
         // Always remove the identifying header
         \header_remove( 'X-Powered-By' );
 

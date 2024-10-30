@@ -52,16 +52,39 @@ abstract class Controller
         $this->controllerResponseMethods();
 
         // Return raw `text/plain`
-        if ( null !== $content ) {
+        if ( $this->isPlainContent( $content) ) {
             return new Response( $content );
         }
 
         $this->parameters->set( 'template', $this->request->parameters( '_content_template' ) );
 
+        $template = ( $content && \str_ends_with( $content, '.latte' ) ) ? $content : $this->request->parameters( '_document_template' );
+
         return new Response( $this->serviceLocator( Latte::class )->templateToString(
             $this->request->parameters( '_document_template' ),
             $this->parameters->getParameters(),
         ) );
+    }
+
+    private function isPlainContent( ?string $content ) : bool
+    {
+        // If the string is empty, assume attribute template
+        if ( ! $content ) {
+            return false;
+        }
+
+        // Any whitespace and we can safely assume it not a template string
+        if ( \str_contains( $content, ' ')) {
+            return true;
+        }
+
+        // Templates _must_ end with .latte
+        if ( \str_ends_with( $content, '.latte' ) ) {
+            return false;
+        }
+
+        // All other strings will be considered as test/plain
+        return true;
     }
 
     /**

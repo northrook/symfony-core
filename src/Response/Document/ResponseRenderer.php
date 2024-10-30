@@ -36,71 +36,6 @@ final class ResponseRenderer implements Stringable
         return $this->render();
     }
 
-    // ?? Document
-
-    public function title() : self
-    {
-        $title = $this->document->pull( 'document.title' )
-                 ?? $this->settings()->get( 'site.name', $_SERVER['SERVER_NAME'] );
-
-        $this->head[] = "<title>{$title}</title>";
-
-        return $this;
-    }
-
-    public function meta( string $name, ?string $comment = null ) : self
-    {
-        if ( ! $value = $this->document->pull( $name ) ) {
-            return $this;
-        }
-
-        if ( $comment ) {
-            $this->head[] = '<!-- '.$comment.' -->';
-        }
-
-        $meta = \is_array( $value ) ? $value : [$name => $value];
-
-        foreach ( $meta as $name => $content ) {
-            $value = toString( $value );
-            if ( $value ) {
-                $name         = Str::after( $name, '.' );
-                $this->head[] = "<meta name=\"{$name}\" content=\"{$value}\">";
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param null|'link'|'script'|'style' $type
-     *
-     * @return $this
-     */
-    public function assets( ?string $type = null ) : self
-    {
-        $type = $type ? [$type] : ['script', 'style', 'link'];
-
-        foreach ( $type as $asset ) {
-            dump( $asset );
-
-            dump( $this->document->pull( $asset ) );
-        }
-
-        return $this;
-    }
-
-    public function style( ?string $id = null ) : self
-    {
-        return $this->assets( 'style', $id );
-    }
-
-    public function script( ?string $id = null ) : self
-    {
-        return $this->assets( 'script', $id );
-    }
-
-    // :: Document
-
     private function notifications() : string
     {
         return toString( $this->notifications );
@@ -116,22 +51,24 @@ final class ResponseRenderer implements Stringable
 
         $attributes = new Attributes( $attributes );
 
-        return $attributes->toString();
+        return ' '.$attributes->toString();
     }
 
     private function documentHead() : string
     {
-
-        $this->title()
+        $this
+            ->meta( 'meta.viewport' )
             ->meta( 'document' )
             ->meta( 'robots' )
-            ->meta( 'theme' )
+            ->meta( 'meta' )
             ->assets( 'font' )
             ->assets( 'script' )
             ->assets( 'style' )
             ->assets( 'link' );
 
-        $html = TAB.'<meta charset="UTF-8">';
+        \array_unshift( $this->head, '<meta charset="UTF-8">' );
+
+        $html = '';
 
         foreach ( $this->head as $name => $value ) {
             $html .= TAB.$value.PHP_EOL;
@@ -142,9 +79,9 @@ final class ResponseRenderer implements Stringable
 
     private function contentHead() : string
     {
-        $this->title()
+        $this
             ->meta( 'document' )
-            ->meta( 'theme' )
+            ->meta( 'meta' )
             ->assets( 'font' )
             ->assets( 'script' )
             ->assets( 'style' )
@@ -158,24 +95,28 @@ final class ResponseRenderer implements Stringable
         // ? Filter out existing assets from HTMX requests
         $this->enqueueInvokedAssets();
 
-        return $this->isHtmxRequest
-                // Fully rendered Document response
-                ? <<<DOCUMENT
+        $html = $this->isHtmxRequest
+            // Fully rendered Document response
+                ? <<<CONTENT
+                    {$this->contentHead()}
+                    {$this->notifications()}
+                    {$this->innerHtml}
+                    CONTENT
+            // HTMX contentful response
+                : <<<DOCUMENT
                     <!DOCTYPE html>
-                    <html{$this->attributes( 'head' )}>
+                    <html{$this->attributes( 'html' )}>
                         {$this->documentHead()}
                     <body{$this->attributes( 'body' )}>
                         {$this->notifications()}
                         {$this->innerHtml}
                     </body>
                     </html>
-                    DOCUMENT
-                // HTMX contentful response
-                : <<<CONTENT
-                    {$this->contentHead()}
-                    {$this->notifications()}
-                    {$this->innerHtml}
-                    CONTENT;
+                    DOCUMENT;
+
+        $this->innerHtml = '';
+
+        return $html;
     }
 
     private function resolveNotifications() : void
@@ -195,6 +136,8 @@ final class ResponseRenderer implements Stringable
             if ( ! $message->timeout && 'error' !== $message->type ) {
                 $this->notifications[$id]->setTimeout( 5_000 );
             }
+
+            $this->notifications[$id] = (string) $this->notifications[$id];
         }
     }
 
@@ -207,4 +150,73 @@ final class ResponseRenderer implements Stringable
     }
 
     // : end
+
+    // ?? Document
+
+    protected function metaTitle( ?string $value ) : string
+    {
+        $value ??= $this->settings()->get( 'site.name', $_SERVER['SERVER_NAME'] );
+
+        return "<title>{$value}</title>";
+    }
+
+    public function meta( string $name, ?string $comment = null ) : self
+    {
+        if ( ! $value = $this->document->pull( $name ) ) {
+            return $this;
+        }
+
+        if ( $comment ) {
+            $this->head[] = '<!-- '.$comment.' -->';
+        }
+
+        // dump(
+        //         $this->document,
+        //         $name,
+        //         $value);
+
+        $meta = \is_array( $value ) ? $value : [$name => $value];
+
+        foreach ( $meta as $name => $value ) {
+            if ( $value = toString( $value ) ) {
+                $name         = Str::after( $name, '.' );
+                $this->head[] = match ( $name ) {
+                    'title' => $this->metaTitle( $value ),
+                    default => "<meta name=\"{$name}\" content=\"{$value}\">",
+                };
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param null|'link'|'script'|'style' $type
+     *
+     * @return $this
+     */
+    public function assets( ?string $type = null ) : self
+    {
+        $type = $type ? [$type] : ['script', 'style', 'link'];
+
+        foreach ( $type as $asset ) {
+            // dump( $asset );
+            //
+            // dump( $this->document->pull( $asset ) );
+        }
+
+        return $this;
+    }
+
+    public function style( ?string $id = null ) : self
+    {
+        return $this->assets( 'style', $id );
+    }
+
+    public function script( ?string $id = null ) : self
+    {
+        return $this->assets( 'script', $id );
+    }
+
+    // :: Document
 }
