@@ -41,6 +41,18 @@ recompile with the stored settings.
 
  */
 
+/*? Themes
+
+    Have a default theme as core/config/themes/default.php
+
+    If no named theme matching to an ArrayStore is found, generate from default.
+
+    This can will be used as a base when generating the Core, Public, and Admin styles.
+
+    : Theme styles can be used to override existing themes for users if desired.
+    ? We may want to limit the user theme to colours and some typography changes
+ */
+
 /**
  * @internal
  * @author Martin Nielsen <mn@northrook.com>

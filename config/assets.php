@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Core\Service\{AssetManager, Request};
+use Core\Response\Document\AssetResolver;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 
 return static function( ContainerConfigurator $container ) : void {
@@ -20,7 +21,21 @@ return static function( ContainerConfigurator $container ) : void {
         ->args( ['assets', 0, '%dir.cache%/assets'] )
         ->tag( 'cache.pool' )
 
+        // AssetResolver
+        ->set( AssetResolver::class )
+        ->args( [
+            '%dir.public.assets%',
+            [
+                'app'  => '%dir.assets%',
+                'core' => '%core.assets%',
+            ],
+            '%path.asset_manifest%',
+            '%dir.assets.storage%',
+            service( 'cache.assets' ),
+        ] )
+
         // AssetManager
+        // DEPRECATED
         ->set( AssetManager::class )
         ->args( [
             service( Request::class ),

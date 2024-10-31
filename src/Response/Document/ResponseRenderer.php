@@ -96,13 +96,13 @@ final class ResponseRenderer implements Stringable
         $this->enqueueInvokedAssets();
 
         $html = $this->isHtmxRequest
-            // Fully rendered Document response
+            // HTMX contentful response
                 ? <<<CONTENT
                     {$this->contentHead()}
                     {$this->notifications()}
                     {$this->innerHtml}
                     CONTENT
-            // HTMX contentful response
+            // Fully rendered Document response
                 : <<<DOCUMENT
                     <!DOCTYPE html>
                     <html{$this->attributes( 'html' )}>

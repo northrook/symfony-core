@@ -2,6 +2,7 @@
 
 namespace Core\DependencyInjection\Facade;
 
+use Core\Response\Document\AssetResolver;
 use Core\Settings;
 use Core\Service\ToastService;
 use Core\DependencyInjection\{StaticServices};
@@ -17,6 +18,11 @@ trait ResponseServices
     final protected function renderRuntime() : RenderRuntime
     {
         return StaticServices::get( RenderRuntime::class );
+    }
+
+    final protected function assetResolver() : AssetResolver
+    {
+        return StaticServices::get( AssetResolver::class );
     }
 
     final protected function toastService() : ToastService

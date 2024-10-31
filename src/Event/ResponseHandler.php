@@ -40,7 +40,7 @@ final class ResponseHandler implements EventSubscriberInterface
     public static function getSubscribedEvents() : array
     {
         return [
-            KernelEvents::CONTROLLER => ['parseController', -100],
+            KernelEvents::CONTROLLER => ['parseController', 192],
             KernelEvents::RESPONSE   => ['parseResponse', 1_024],
             KernelEvents::TERMINATE  => ['responseCleanup', 1_024],
         ];

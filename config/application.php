@@ -65,7 +65,7 @@ return static function( ContainerConfigurator $container ) : void {
         ->set( StaticServices::class )
         ->tag( 'kernel.event_listener', [
             'event'    => 'kernel.request',
-            'priority' => 125,
+            'priority' => 1024,
         ] )
         ->tag( 'kernel.event_listener', [
             'event'    => 'kernel.terminate',
