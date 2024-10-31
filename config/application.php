@@ -24,42 +24,42 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 return static function( ContainerConfigurator $container ) : void {
 
-    $core_services = [
-        // Core
-        Settings::class   => service( Settings::class ),
-        Security::class   => service( Security::class ),
-        Pathfinder::class => service( Pathfinder::class ),
-        Request::class    => service( Request::class ),
-        Latte::class      => service( Latte::class ),
-        ToastService::class        => service( ToastService::class ),
-
-        // Document
-        Document::class        => service( Document::class ),
-        Parameters::class      => service( Parameters::class ),
-        Headers::class         => service( Headers::class ),
-        DocumentService::class => service( DocumentService::class ),
-
-        // RenderServices
-        RenderRuntime::class => service( RenderRuntime::class ),
-        IconService::class   => service( IconService::class ),
-
-        // Symfony
-        RouterInterface::class     => service( 'router' ),
-        HttpKernelInterface::class => service( 'http_kernel' ),
-        SerializerInterface::class => service( 'serializer' ),
-
-        // Security
-        TokenStorageInterface::class         => service( 'security.token_storage' )->nullOnInvalid(),
-        CsrfTokenManagerInterface::class     => service( 'security.csrf.token_manager' )->nullOnInvalid(),
-        AuthorizationCheckerInterface::class => service( 'security.authorization_checker' ),
-    ];
+    // $core_services = [
+    //     // Core
+    //     Settings::class   => service( Settings::class ),
+    //     Security::class   => service( Security::class ),
+    //     Pathfinder::class => service( Pathfinder::class ),
+    //     Request::class    => service( Request::class ),
+    //     Latte::class      => service( Latte::class ),
+    //     ToastService::class        => service( ToastService::class ),
+    //
+    //     // Document
+    //     Document::class        => service( Document::class ),
+    //     Parameters::class      => service( Parameters::class ),
+    //     Headers::class         => service( Headers::class ),
+    //     DocumentService::class => service( DocumentService::class ),
+    //
+    //     // RenderServices
+    //     RenderRuntime::class => service( RenderRuntime::class ),
+    //     IconService::class   => service( IconService::class ),
+    //
+    //     // Symfony
+    //     RouterInterface::class     => service( 'router' ),
+    //     HttpKernelInterface::class => service( 'http_kernel' ),
+    //     SerializerInterface::class => service( 'serializer' ),
+    //
+    //     // Security
+    //     TokenStorageInterface::class         => service( 'security.token_storage' )->nullOnInvalid(),
+    //     CsrfTokenManagerInterface::class     => service( 'security.csrf.token_manager' )->nullOnInvalid(),
+    //     AuthorizationCheckerInterface::class => service( 'security.authorization_checker' ),
+    // ];
 
     $container->services()
 
-        /** @used-by ServiceContainer */
-        ->set( 'core.service_locator' )
-        ->tag( 'container.service_locator' )
-        ->args( [$core_services] )
+        // /** @used-by ServiceContainer */
+        // ->set( 'core.service_locator' )
+        // ->tag( 'container.service_locator' )
+        // ->args( [$core_services] )
 
         // Static Service Locator
         ->set( StaticServices::class )

@@ -41,7 +41,8 @@
     "symfony/debug-bundle": "7.1.*",
     "symfony/monolog-bundle": "^3.10",
     "symfony/security-bundle": "^7.1",
-    "tempest/highlight": "@stable"
+    "tempest/highlight": "@stable",
+    "northrook/core-framework": "dev-main"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",

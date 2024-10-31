@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Core\Service;
 
-use Core\Settings;
-use Core\Response\Document;
+use Core\Framework\Response\Document;
 use Northrook\Trait\PropertyAccessor;
 use Support\Str;
 use function Support\toString;

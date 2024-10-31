@@ -7,7 +7,7 @@ declare(strict_types=1);
 namespace Core\Response\Document;
 
 use Core\DependencyInjection\Facade\ResponseServices;
-use Core\Response\Document;
+use Core\Framework\Response\Document;
 use Core\UI\Component\Notification;
 use Northrook\HTML\Element\Attributes;
 use Stringable;

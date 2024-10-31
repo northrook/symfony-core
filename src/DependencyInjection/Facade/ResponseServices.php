@@ -3,7 +3,7 @@
 namespace Core\DependencyInjection\Facade;
 
 use Core\Response\Document\AssetResolver;
-use Core\Settings;
+use Core\Service\Settings;
 use Core\Service\ToastService;
 use Core\DependencyInjection\{StaticServices};
 use Core\UI\RenderRuntime;

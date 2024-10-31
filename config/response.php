@@ -21,17 +21,17 @@ return static function( ContainerConfigurator $container ) : void {
     $response->set( ResponseHandler::class )
         ->tag( 'kernel.event_subscriber' );
 
-    // Response Services
-    $response->defaults()
-        ->tag( 'controller.service_arguments' )
-        ->autowire()
-
-        // ResponseHeaderBag Service
-        ->set( Headers::class )
-
-        // Document Properties
-        ->set( Document::class )
-
-        // Template Parameters
-        ->set( Parameters::class );
+    // // Response Services
+    // $response->defaults()
+    //     ->tag( 'controller.service_arguments' )
+    //     ->autowire()
+    //
+    //     // ResponseHeaderBag Service
+    //     ->set( Headers::class )
+    //
+    //     // Document Properties
+    //     ->set( Document::class )
+    //
+    //     // Template Parameters
+    //     ->set( Parameters::class );
 };

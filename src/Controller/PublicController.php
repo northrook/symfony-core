@@ -3,8 +3,10 @@
 namespace Core\Controller;
 
 use Core\Framework\Controller;
+use Core\Framework\Response\Document;
+use Core\Framework\Response\Headers;
+use Core\Framework\Response\Parameters;
 use Core\Framework\Controller\{Template, DocumentResponse};
-use Core\Response\{Document, Headers, Parameters};
 use Core\Facade\Toast;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -32,10 +34,10 @@ final class PublicController extends Controller
     {
         $headers( 'route-type', 'dynamic' );
 
-        Toast::info( 'Admin Stylesheet updated.' );
-        Toast::warning( 'Admin Stylesheet updated?!' );
-        Toast::danger( 'Admin Stylesheet updated!!' );
-        Toast::notice( 'Admin Stylesheet updated. 😏' );
+        // Toast::info( 'Admin Stylesheet updated.' );
+        // Toast::warning( 'Admin Stylesheet updated?!' );
+        // Toast::danger( 'Admin Stylesheet updated!!' );
+        // Toast::notice( 'Admin Stylesheet updated. 😏' );
 
         $document(
             'Index says welcome',

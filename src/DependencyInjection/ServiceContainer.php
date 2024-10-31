@@ -2,7 +2,9 @@
 
 namespace Core\DependencyInjection;
 
-use Core\Response\{Document, Parameters, Headers};
+use Core\Framework\Response\Document;
+use Core\Framework\Response\Headers;
+use Core\Framework\Response\Parameters;
 use Core\Service\{Pathfinder, Request};
 use Core\Service\Security;
 use Northrook\Latte;
