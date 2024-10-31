@@ -4,7 +4,7 @@ namespace Core\Event;
 
 use Northrook\Logger\Log;
 use ReflectionFunctionAbstract;
-use Core\DependencyInjection\{ServiceContainer};
+use Core\Framework\{ServiceContainer};
 use Core\Framework;
 use Core\Framework\Controller\Template;
 use Core\Response\{Document};
@@ -67,6 +67,7 @@ final class ResponseHandler implements EventSubscriberInterface
 
     public function parseResponse( ResponseEvent $event ) : void
     {
+        return;
         // Bail if the controller doesn't pass validation
         if ( ! $this->controller ) {
             return;
@@ -103,6 +104,7 @@ final class ResponseHandler implements EventSubscriberInterface
 
     private function responseHeaders( ResponseEvent $event ) : void
     {
+        return;
         // Always remove the identifying header
         \header_remove( 'X-Powered-By' );
 

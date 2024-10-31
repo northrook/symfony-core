@@ -9,11 +9,8 @@ declare(strict_types=1);
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Core\UI\RenderRuntime;
-use Core\DependencyInjection\{StaticServices, ServiceContainer};
-use Core\Response\{Document, Headers, Parameters};
 use Core\Service\{DocumentService, IconService, Pathfinder, Request, ToastService};
 use Core\Service\Security;
-use Core\Settings;
 use Northrook\Latte;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Routing\RouterInterface;
@@ -54,27 +51,27 @@ return static function( ContainerConfigurator $container ) : void {
     //     AuthorizationCheckerInterface::class => service( 'security.authorization_checker' ),
     // ];
 
-    $container->services()
-
-        // /** @used-by ServiceContainer */
-        // ->set( 'core.service_locator' )
-        // ->tag( 'container.service_locator' )
-        // ->args( [$core_services] )
-
-        // Static Service Locator
-        ->set( StaticServices::class )
-        ->tag( 'kernel.event_listener', [
-            'event'    => 'kernel.request',
-            'priority' => 1024,
-        ] )
-        ->tag( 'kernel.event_listener', [
-            'event'    => 'kernel.terminate',
-            'priority' => 2_048,
-        ] )
-        ->args( [service( 'core.service_locator' )] )
-
-        // Settings
-        ->set( Settings::class )
-        ->args( ['%path.settings_store%'] )
-        ->tag( 'controller.service_arguments' );
+    // $container->services()
+    //
+    //     // /** @used-by ServiceContainer */
+    //     // ->set( 'core.service_locator' )
+    //     // ->tag( 'container.service_locator' )
+    //     // ->args( [$core_services] )
+    //
+    //     // Static Service Locator
+    //     ->set( StaticServices::class )
+    //     ->tag( 'kernel.event_listener', [
+    //         'event'    => 'kernel.request',
+    //         'priority' => 1024,
+    //     ] )
+    //     ->tag( 'kernel.event_listener', [
+    //         'event'    => 'kernel.terminate',
+    //         'priority' => 2_048,
+    //     ] )
+    //     ->args( [service( 'core.service_locator' )] )
+    //
+    //     // Settings
+    //     ->set( Settings::class )
+    //     ->args( ['%path.settings_store%'] )
+    //     ->tag( 'controller.service_arguments' );
 };
