@@ -2,6 +2,7 @@
 
 namespace Core\Latte;
 
+use Core\Framework\DependencyInjection\UrlGenerator;
 use Core\Latte\Compiler\{NodeCompiler, NodeCompilerMethods};
 use Latte\Compiler\{Node, NodeTraverser};
 use Latte\Compiler\Nodes\Html\ElementNode;
@@ -20,9 +21,17 @@ use Override;
 
 final class FrameworkExtension extends Latte\Extension
 {
-    use NodeCompilerMethods;
+    use NodeCompilerMethods, UrlGenerator;
 
     public function __construct( public readonly RenderRuntime $runtime ) {}
+
+    public function getFunctions() : array
+    {
+        return [
+                'url'  => $this->generateRouteUrl( ... ),
+                'path' => $this->generateRoutePath( ... ),
+        ];
+    }
 
     #[Override]
     public function getPasses() : array

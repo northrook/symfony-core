@@ -10,6 +10,7 @@ use Core\UI\RenderRuntime;
 
 trait ResponseServices
 {
+
     final protected function settings() : Settings
     {
         return StaticServices::get( Settings::class );

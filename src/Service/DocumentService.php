@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Core\Service;
 
 use Core\Framework\Response\Document;
+use JetBrains\PhpStorm\Deprecated;
 use Northrook\Trait\PropertyAccessor;
 use Support\Str;
 use function Support\toString;
@@ -14,6 +15,7 @@ use const Support\TAB;
 /**
  * @property-read array<int, string> $head
  */
+#[Deprecated]
 final class DocumentService
 {
     use PropertyAccessor;

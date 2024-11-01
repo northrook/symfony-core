@@ -2,9 +2,9 @@
 
 namespace Core\Event;
 
+use Core\Framework\DependencyInjection\ServiceContainer;
 use Northrook\Logger\Log;
 use ReflectionFunctionAbstract;
-use Core\Framework\{ServiceContainer};
 use Core\Framework;
 use Core\Framework\Controller\Template;
 use Core\Response\{Document};
