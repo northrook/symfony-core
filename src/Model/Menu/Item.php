@@ -2,8 +2,7 @@
 
 namespace Core\Model\Menu;
 
-use Core\DependencyInjection\Static\RenderServices;
-use Core\UI\RenderRuntime;
+use Core\DependencyInjection\IconService;
 use InvalidArgumentException;
 use Northrook\HTML\{Element, Format};
 use Northrook\Trait\PropertyAccessor;
@@ -20,7 +19,7 @@ use function Support\toString;
  */
 final class Item implements Stringable
 {
-    use PropertyAccessor, RenderServices;
+    use PropertyAccessor, IconService;
 
     private array $items = [];
 
@@ -39,15 +38,15 @@ final class Item implements Stringable
     private ?string $submenuId = null;
 
     /**
-     * @param string                           $title
-     * @param ?string                          $href
-     * @param ?string                          $icon
-     * @param ?string                          $description
-     * @param null|string                      $id
-     * @param ?bool                            $isLink
-     * @param bool                             $canRender
-     * @param null|Item|\Core\Model\Menu\Menu  $parent
-     * @param array                            $attributes
+     * @param string         $title
+     * @param ?string        $href
+     * @param ?string        $icon
+     * @param ?string        $description
+     * @param null|string    $id
+     * @param ?bool          $isLink
+     * @param bool           $canRender
+     * @param null|Item|Menu $parent
+     * @param array          $attributes
      */
     public function __construct(
         string                 $title,
@@ -64,7 +63,7 @@ final class Item implements Stringable
         $this->id          = Normalize::key( $id ?? $this->title );
         $this->link        = $href ? filterUrl( $href ) : null;
         $this->isLink      = $isLink ?? $href;
-        $this->icon        = $icon ? $this->iconPack()->get( $icon ) : null;
+        $this->icon        = $icon ? $this->getIcon( $icon ) : null;
         $this->description = Format::newline( escapeHtml( $description ) );
     }
 

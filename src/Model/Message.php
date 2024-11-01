@@ -7,8 +7,8 @@ namespace Core\Model;
 use Countable;
 use InvalidArgumentException;
 use Northrook\Logger\Log;
-use Northrook\Time;
 use Northrook\Trait\PropertyAccessor;
+use Support\Time;
 use function String\hashKey;
 
 /**
@@ -18,7 +18,7 @@ use function String\hashKey;
  * @property-read  ?string   $description   // [optional] Provide more details.
  * @property-read  ?int      $timeout       // How long before the message should time out, in milliseconds
  * @property-read  array     $instances     // All the times this exact Notification has been created since it was last rendered
- * @property-read  Time $timestamp     // The most recent timestamp object
+ * @property-read  Time      $timestamp     // The most recent timestamp object
  * @property-read  int       $unixTimestamp // The most recent timestamps' unix int
  *
  * @author Martin Nielsen <mn@northrook.com>

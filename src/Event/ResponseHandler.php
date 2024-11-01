@@ -3,13 +3,12 @@
 namespace Core\Event;
 
 use Core\Framework\DependencyInjection\ServiceContainer;
+use Core\Response\ResponseRenderer;
+use Core\Framework\Response\{Document, Headers};
 use Northrook\Logger\Log;
 use ReflectionFunctionAbstract;
 use Core\Framework;
 use Core\Framework\Controller\Template;
-use Core\Response\{Document};
-use Core\Service\{ToastService};
-use Core\UI\Component\Notification;
 use ReflectionAttribute;
 use ReflectionClass;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -65,34 +64,45 @@ final class ResponseHandler implements EventSubscriberInterface
         }
     }
 
+    protected function document() : Document
+    {
+        return $this->serviceLocator( Document::class );
+    }
+
+    protected function headers() : Headers
+    {
+        return $this->serviceLocator( Headers::class );
+    }
+
     public function parseResponse( ResponseEvent $event ) : void
     {
-        return;
+        // We will receive either raw HTML, a .latte template, or null; indicating we use a controller::method template
+
         // Bail if the controller doesn't pass validation
         if ( ! $this->controller ) {
             return;
         }
 
         if ( $this->isHtmxRequest ) {
-            $this->document->add(
+            $this->document()->add(
                 [
                     'html.lang'   => 'en',
                     'html.id'     => 'top',
-                    'html.theme'  => $this->document->get( 'theme.name' ) ?? 'system',
+                    'html.theme'  => $this->document()->get( 'theme.name' ) ?? 'system',
                     'html.status' => 'init',
                 ],
             )
                 ->add( 'meta.viewport', 'width=device-width,initial-scale=1' );
 
-            if ( ! $this->document->isPublic ) {
-                $this->document->set( 'robots', 'noindex, nofollow' );
-                $this->headers->set( 'X-Robots-Tag', 'noindex, nofollow' );
+            if ( ! $this->document()->isPublic ) {
+                $this->document()->set( 'robots', 'noindex, nofollow' );
+                $this->headers()->set( 'X-Robots-Tag', 'noindex, nofollow' );
             }
         }
 
-        $html = new Document\ResponseRenderer(
+        $html = new ResponseRenderer(
             $this->isHtmxRequest,
-            $this->document,
+            $this->document(),
             $event->getResponse()->getContent(),
         );
 
@@ -104,12 +114,11 @@ final class ResponseHandler implements EventSubscriberInterface
 
     private function responseHeaders( ResponseEvent $event ) : void
     {
-        return;
         // Always remove the identifying header
         \header_remove( 'X-Powered-By' );
 
         // Merge headers
-        $event->getResponse()->headers->add( $this->headers->all() );
+        $event->getResponse()->headers->add( $this->headers()->all() );
 
         $event->getResponse()->headers->set( 'Content-Type', 'text/html', false );
 
@@ -119,7 +128,7 @@ final class ResponseHandler implements EventSubscriberInterface
 
         // Document only headers
 
-        if ( $this->document->isPublic ) {
+        if ( $this->document()->isPublic ) {
             $event->getResponse()->headers->set( 'X-Robots-Tag', 'noindex, nofollow' );
         }
 
@@ -129,7 +138,6 @@ final class ResponseHandler implements EventSubscriberInterface
     }
 
     /**
-     * - Commit unused {@see Toast} notifications.
      * - Commit deferred cache items.
      *
      * @param TerminateEvent $event
@@ -137,36 +145,6 @@ final class ResponseHandler implements EventSubscriberInterface
      * @return void
      */
     public function responseCleanup( TerminateEvent $event ) : void {}
-
-    private function handleNotifications() : string
-    {
-        $notifications = '';
-
-        // $notifications = $this->notifications->getMessages();
-        $flashBag = $this->serviceLocator( ToastService::class );
-
-        foreach ( $flashBag->getMessages() as $message ) {
-            $notification = new Notification(
-                $message->type,
-                $message->title,
-                $message->description,
-                $message->timeout,
-            );
-
-            if ( ! $notification->description ) {
-                $notification->attributes->add( 'class', 'compact' );
-            }
-
-            if ( ! $notification->timeout && 'error' !== $notification->type ) {
-                // $notification->setTimeout( Settings::get( 'notification.timeout' ) ?? 5_000 );
-                $notification->setTimeout( 5_000 );
-            }
-
-            $notifications .= (string) $notification;
-        }
-
-        return $notifications;
-    }
 
     private function getMethodTemplate( ReflectionMethod|ReflectionFunctionAbstract $method ) : ?string
     {

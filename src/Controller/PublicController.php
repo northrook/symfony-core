@@ -7,7 +7,6 @@ use Core\Framework\Response\Document;
 use Core\Framework\Response\Headers;
 use Core\Framework\Response\Parameters;
 use Core\Framework\Controller\{Template, DocumentResponse};
-use Core\Facade\Toast;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 

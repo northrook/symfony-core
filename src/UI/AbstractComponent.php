@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Core\UI;
 
-use Core\DependencyInjection\Static\RenderServices;
+use Core\Framework\DependencyInjection\ServiceContainer;
 use Core\Latte\RuntimeRenderInterface;
 use Core\UI\Component\Icon;
 use Northrook\HTML\Element;
@@ -14,7 +14,7 @@ use const Support\WHITESPACE;
 
 abstract class AbstractComponent implements RuntimeRenderInterface
 {
-    use RenderServices;
+    use ServiceContainer;
 
     /**
      * Called when the Component is stringified.
@@ -25,7 +25,7 @@ abstract class AbstractComponent implements RuntimeRenderInterface
 
     final public function __toString() : string
     {
-        $this->registerInvocation( $this::class );
+        $this->serviceLocator( RenderRuntime::class )->registerInvocation( $this::class );
         return $this->build();
     }
 

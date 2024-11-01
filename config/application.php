@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Core\UI\RenderRuntime;
-use Core\Service\{DocumentService, IconService, Pathfinder, Request, ToastService};
+use Core\Service\{IconService, Pathfinder, Request, ToastService};
 use Core\Service\Security;
 use Northrook\Latte;
 use Symfony\Component\HttpKernel\HttpKernelInterface;

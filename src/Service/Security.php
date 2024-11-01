@@ -2,7 +2,7 @@
 
 namespace Core\Service;
 
-use Core\Framework\ServiceContainer;
+use Core\Framework\DependencyInjection\ServiceContainer;
 use LogicException;
 use SensitiveParameter;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;

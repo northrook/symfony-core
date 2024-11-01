@@ -4,11 +4,15 @@
 
 declare(strict_types=1);
 
-namespace Core\Response\Document;
+namespace Core\Response;
 
-use Core\DependencyInjection\Facade\ResponseServices;
+use Core\Framework\DependencyInjection\ServiceContainer;
+use Core\Framework\DependencyInjection\Settings;
 use Core\Framework\Response\Document;
+use Core\Response\Document\AssetResolver;
+use Core\Service\ToastService;
 use Core\UI\Component\Notification;
+use Core\UI\RenderRuntime;
 use Northrook\HTML\Element\Attributes;
 use Stringable;
 use Support\Str;
@@ -17,7 +21,7 @@ use const Support\TAB;
 
 final class ResponseRenderer implements Stringable
 {
-    use ResponseServices;
+    use ServiceContainer, Settings;
 
     private array $head = [];
 
@@ -121,7 +125,7 @@ final class ResponseRenderer implements Stringable
 
     private function resolveNotifications() : void
     {
-        foreach ( $this->toastService()->getMessages() as $id => $message ) {
+        foreach ( $this->serviceLocator( ToastService::class )->getMessages() as $id => $message ) {
             $this->notifications[$id] = new Notification(
                 $message->type,
                 $message->title,
@@ -143,7 +147,7 @@ final class ResponseRenderer implements Stringable
 
     private function enqueueInvokedAssets() : void
     {
-        $this->document->assets( ...$this->renderRuntime()->getCalledInvocations() );
+        $this->document->assets( ...$this->serviceLocator( RenderRuntime::class )->getCalledInvocations() );
 
         $resolver = new AssetResolver();
         dump( $resolver, $this->document->get( 'assets' ) );

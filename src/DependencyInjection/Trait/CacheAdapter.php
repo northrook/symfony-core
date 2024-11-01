@@ -13,7 +13,7 @@ use Symfony\Contracts\Cache\CacheInterface;
  */
 trait CacheAdapter
 {
-    protected function cacheHasItem( mixed $key ) : bool
+    final protected function cacheHasItem( mixed $key ) : bool
     {
         try {
             return $this->cacheAdapter->hasItem( $key );
@@ -24,12 +24,12 @@ trait CacheAdapter
         }
     }
 
-    protected function cacheGetValue( mixed $key, mixed $default = null ) : mixed
+    final protected function cacheGetValue( mixed $key, mixed $default = null ) : mixed
     {
         return $this->cacheGetItem( $key )?->get() ?? $default;
     }
 
-    protected function cacheGetItem( mixed $key ) : ?CacheItem
+    final protected function cacheGetItem( mixed $key ) : ?CacheItem
     {
         try {
             return $this->cacheAdapter->getItem( $key );
