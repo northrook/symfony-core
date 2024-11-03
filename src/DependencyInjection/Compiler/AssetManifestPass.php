@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Core\DependencyInjection\Compiler;
 
-use Core\Service\{AssetManager, Pathfinder, ThemeManager};
+use Core\Service\{AssetManager, ThemeManager};
+use Core\Framework\Pathfinder;
 use Core\Service\AssetManager\Compiler\{Style,Script};
 use Override;
 use Northrook\ArrayStore;

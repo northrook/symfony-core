@@ -6,8 +6,8 @@ declare(strict_types=1);
 
 namespace Core\Response;
 
-use Core\Framework\DependencyInjection\ServiceContainer;
-use Core\Framework\DependencyInjection\Settings;
+use Core\Framework\Autowire\Settings;
+use Core\Framework\DependencyInjection\{ServiceContainer};
 use Core\Framework\Response\Document;
 use Core\Response\Document\AssetResolver;
 use Core\Service\ToastService;
@@ -16,6 +16,7 @@ use Core\UI\RenderRuntime;
 use Northrook\HTML\Element\Attributes;
 use Stringable;
 use Support\Str;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 use function Support\toString;
 use const Support\TAB;
 
@@ -28,9 +29,10 @@ final class ResponseRenderer implements Stringable
     private array $notifications = [];
 
     public function __construct(
-        private readonly bool     $isHtmxRequest,
-        private readonly Document $document,
-        private string            $innerHtml,
+        private readonly bool             $isHtmxRequest,
+        private readonly Document         $document,
+        private string                    $innerHtml,
+        protected readonly ServiceLocator $serviceLocator,
     ) {
         $this->resolveNotifications();
     }
@@ -149,8 +151,8 @@ final class ResponseRenderer implements Stringable
     {
         $this->document->assets( ...$this->serviceLocator( RenderRuntime::class )->getCalledInvocations() );
 
-        $resolver = new AssetResolver();
-        dump( $resolver, $this->document->get( 'assets' ) );
+        // $resolver = new AssetResolver();
+        dump( $this->document->get( 'assets' ) );
     }
 
     // : end

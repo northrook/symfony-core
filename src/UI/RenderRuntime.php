@@ -34,7 +34,7 @@ final class RenderRuntime
      *
      * @var array<class-string, non-empty-string>
      */
-    private array $called;
+    private array $called = [];
 
     private array $argumentCache = [];
 
@@ -54,7 +54,7 @@ final class RenderRuntime
      *
      * @return null|string
      */
-    public function __invoke(
+    public function component(
         string $className,
         array  $arguments = [],
         ?int   $cache = AUTO,
@@ -100,7 +100,7 @@ final class RenderRuntime
 
         return new AuxiliaryNode(
             static fn() : string => <<<EOD
-                echo \$this->global->render->__invoke(
+                echo \$this->global->render->component(
                     className : {$export->string( $renderName )},
                     arguments : {$export->arguments( $arguments )},
                     cache     : {$export->cacheConstant( $cache )},

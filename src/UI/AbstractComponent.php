@@ -25,7 +25,7 @@ abstract class AbstractComponent implements RuntimeRenderInterface
 
     final public function __toString() : string
     {
-        $this->serviceLocator( RenderRuntime::class )->registerInvocation( $this::class );
+        // $this->serviceLocator( RenderRuntime::class )->registerInvocation( $this::class );
         return $this->build();
     }
 

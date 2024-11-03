@@ -2,7 +2,7 @@
 
 namespace Core\Model\Menu;
 
-use Core\DependencyInjection\IconService;
+// use Core\DependencyInjection\IconService;
 use InvalidArgumentException;
 use Northrook\HTML\{Element, Format};
 use Northrook\Trait\PropertyAccessor;
@@ -19,7 +19,7 @@ use function Support\toString;
  */
 final class Item implements Stringable
 {
-    use PropertyAccessor, IconService;
+    use PropertyAccessor;
 
     private array $items = [];
 
@@ -59,11 +59,12 @@ final class Item implements Stringable
         private null|Item|Menu $parent = null,
         private readonly array $attributes = [],
     ) {
-        $this->title       = escapeHtml( $title );
-        $this->id          = Normalize::key( $id ?? $this->title );
-        $this->link        = $href ? filterUrl( $href ) : null;
-        $this->isLink      = $isLink ?? $href;
-        $this->icon        = $icon ? $this->getIcon( $icon ) : null;
+        $this->title  = escapeHtml( $title );
+        $this->id     = Normalize::key( $id ?? $this->title );
+        $this->link   = $href ? filterUrl( $href ) : null;
+        $this->isLink = $isLink ?? $href;
+        // $this->icon        = $icon ? $this->getIcon( $icon ) : null;
+        $this->icon        = null;
         $this->description = Format::newline( escapeHtml( $description ) );
     }
 

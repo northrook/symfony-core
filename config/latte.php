@@ -46,6 +46,7 @@ return static function( ContainerConfigurator $container ) : void {
 
             // The Latte Environment and Renderer
         ->set( Latte::class )
+        ->tag( 'core.service_locator' )
         ->args(
             [
                 '%dir.root%',

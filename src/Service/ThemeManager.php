@@ -2,6 +2,7 @@
 
 namespace Core\Service;
 
+use Core\Framework\Pathfinder;
 use Northrook\Exception\E_Value;
 use Support\{Str};
 use Symfony\Component\Yaml\Yaml;

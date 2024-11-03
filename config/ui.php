@@ -14,14 +14,16 @@ use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 return static function( ContainerConfigurator $container ) : void {
 
     $container->services()
-            // Template cache
+
+        // Latte template cache
         ->set( 'cache.runtime_render', PhpFilesAdapter::class )
         ->args( ['render', 0, '%dir.cache%'] )
         ->tag( 'cache.pool' )
 
-            // Static Toasts
+        // Latte template component renderer
         ->set( RenderRuntime::class )
         ->args( [
             service( 'cache.runtime_render' ),
-        ] );
+        ] )
+        ->tag( 'core.service_locator' );
 };

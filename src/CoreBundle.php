@@ -45,11 +45,6 @@ final class CoreBundle extends AbstractBundle
         if ( isCLI() ) {
             return;
         }
-
-        new App(
-            $this->container->getParameter( 'kernel.environment' ),
-            $this->container->getParameter( 'kernel.debug' ),
-        );
     }
 
     #[Override]

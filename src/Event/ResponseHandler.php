@@ -4,7 +4,9 @@ namespace Core\Event;
 
 use Core\Framework\DependencyInjection\ServiceContainer;
 use Core\Response\ResponseRenderer;
-use Core\Framework\Response\{Document, Headers};
+use Core\Service\Request;
+use Core\Framework\Response\{Document, Headers, Parameters};
+use Northrook\Latte;
 use Northrook\Logger\Log;
 use ReflectionFunctionAbstract;
 use Core\Framework;
@@ -14,6 +16,7 @@ use ReflectionClass;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use ReflectionException;
 use ReflectionMethod;
+use InvalidArgumentException;
 use Symfony\Component\HttpKernel\{Event\ControllerEvent, Event\ResponseEvent, Event\TerminateEvent, KernelEvents};
 
 /**
@@ -32,6 +35,8 @@ final class ResponseHandler implements EventSubscriberInterface
     private ?string $controller = null;
 
     private bool $isHtmxRequest = false;
+
+    protected string $content;
 
     /**
      * @return array<string, array{0: string, 1: int}|list<array{0: string, 1?: int}>|string>
@@ -64,6 +69,11 @@ final class ResponseHandler implements EventSubscriberInterface
         }
     }
 
+    protected function request() : Request
+    {
+        return $this->serviceLocator( Request::class );
+    }
+
     protected function document() : Document
     {
         return $this->serviceLocator( Document::class );
@@ -74,6 +84,26 @@ final class ResponseHandler implements EventSubscriberInterface
         return $this->serviceLocator( Headers::class );
     }
 
+    protected function parameters() : Parameters
+    {
+        return $this->serviceLocator( Parameters::class );
+    }
+
+    private function content( ResponseEvent $event ) : void
+    {
+        $this->content = $event->getResponse()->getContent();
+
+        if ( $this->contentIsTemplate() ) {
+
+            $this->parameters()->set( 'content', $this->request()->parameters( '_content_template' ) );
+
+            $this->content = $this->serviceLocator( Latte::class )->templateToString(
+                $this->request()->parameters( '_document_template' ),
+                $this->parameters()->getParameters(),
+            ) ;
+        }
+    }
+
     public function parseResponse( ResponseEvent $event ) : void
     {
         // We will receive either raw HTML, a .latte template, or null; indicating we use a controller::method template
@@ -82,6 +112,8 @@ final class ResponseHandler implements EventSubscriberInterface
         if ( ! $this->controller ) {
             return;
         }
+
+        $this->content( $event );
 
         if ( $this->isHtmxRequest ) {
             $this->document()->add(
@@ -103,7 +135,8 @@ final class ResponseHandler implements EventSubscriberInterface
         $html = new ResponseRenderer(
             $this->isHtmxRequest,
             $this->document(),
-            $event->getResponse()->getContent(),
+            $this->content,
+            $this->serviceLocator,
         );
 
         $event->getResponse()->setContent( $html );
@@ -164,5 +197,33 @@ final class ResponseHandler implements EventSubscriberInterface
         }
 
         return $attribute ? $attribute->getArguments()[0] ?? null : null;
+    }
+
+    /**
+     * Determine if the {@see \Symfony\Component\HttpFoundation\Response} `$content` is a template.
+     *
+     * - Empty `$content` will use {@see Framework\Controller} attribute templates.
+     * - If the `$content` contains no whitespace, and ends with `.latte`, it is a template
+     * - All other strings will be considered as `text/plain`
+     *
+     * @param ?string $content
+     *
+     * @return bool
+     */
+    private function contentIsTemplate( ?string $content = null ) : bool
+    {
+        $content ??= $this->content ?? throw new InvalidArgumentException( __METHOD__.': No content string available.' );
+
+        // If the string is empty, use Controller attributes
+        if ( ! $content ) {
+            return true;
+        }
+
+        // Any whitespace and we can safely assume it not a template string
+        if ( \str_contains( $content, ' ' ) ) {
+            return false;
+        }
+
+        return (bool) ( \str_ends_with( $content, '.latte' ) );
     }
 }

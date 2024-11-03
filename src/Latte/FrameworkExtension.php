@@ -2,7 +2,7 @@
 
 namespace Core\Latte;
 
-use Core\Framework\DependencyInjection\UrlGenerator;
+use Core\Framework\Autowire\UrlGenerator;
 use Core\Latte\Compiler\{NodeCompiler, NodeCompilerMethods};
 use Latte\Compiler\{Node, NodeTraverser};
 use Latte\Compiler\Nodes\Html\ElementNode;
