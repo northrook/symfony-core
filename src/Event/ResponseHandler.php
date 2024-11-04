@@ -4,7 +4,7 @@ namespace Core\Event;
 
 use Core\Framework\DependencyInjection\ServiceContainer;
 use Core\Response\ResponseRenderer;
-use Core\Service\Request;
+use Symfony\Component\HttpFoundation\Request;
 use Core\Framework\Response\{Document, Headers, Parameters};
 use Northrook\Latte;
 use Northrook\Logger\Log;
@@ -44,9 +44,9 @@ final class ResponseHandler implements EventSubscriberInterface
     public static function getSubscribedEvents() : array
     {
         return [
-            KernelEvents::CONTROLLER => ['parseController', 192],
-            KernelEvents::RESPONSE   => ['parseResponse', 1_024],
-            KernelEvents::TERMINATE  => ['responseCleanup', 1_024],
+                KernelEvents::CONTROLLER => ['parseController', 192],
+                KernelEvents::RESPONSE   => ['parseResponse', 1_024],
+                KernelEvents::TERMINATE  => ['responseCleanup', 1_024],
         ];
     }
 
@@ -63,8 +63,8 @@ final class ResponseHandler implements EventSubscriberInterface
 
             $event->getRequest()->attributes->set( '_document_template', $this->getControllerTemplate() );
             $event->getRequest()->attributes->set(
-                '_content_template',
-                $this->getMethodTemplate( $event->getControllerReflector() ),
+                    '_content_template',
+                    $this->getMethodTemplate( $event->getControllerReflector() ),
             );
         }
     }
@@ -95,11 +95,11 @@ final class ResponseHandler implements EventSubscriberInterface
 
         if ( $this->contentIsTemplate() ) {
 
-            $this->parameters()->set( 'content', $this->request()->parameters( '_content_template' ) );
+            $this->parameters()->set( 'content', $this->request()->attributes->get( '_content_template' ) );
 
             $this->content = $this->serviceLocator( Latte::class )->templateToString(
-                $this->request()->parameters( '_document_template' ),
-                $this->parameters()->getParameters(),
+                    $this->request()->attributes->get( '_document_template' ),
+                    $this->parameters()->getParameters(),
             ) ;
         }
     }
@@ -117,14 +117,14 @@ final class ResponseHandler implements EventSubscriberInterface
 
         if ( $this->isHtmxRequest ) {
             $this->document()->add(
-                [
-                    'html.lang'   => 'en',
-                    'html.id'     => 'top',
-                    'html.theme'  => $this->document()->get( 'theme.name' ) ?? 'system',
-                    'html.status' => 'init',
-                ],
+                    [
+                            'html.lang'   => 'en',
+                            'html.id'     => 'top',
+                            'html.theme'  => $this->document()->get( 'theme.name' ) ?? 'system',
+                            'html.status' => 'init',
+                    ],
             )
-                ->add( 'meta.viewport', 'width=device-width,initial-scale=1' );
+                 ->add( 'meta.viewport', 'width=device-width,initial-scale=1' );
 
             if ( ! $this->document()->isPublic ) {
                 $this->document()->set( 'robots', 'noindex, nofollow' );
@@ -133,10 +133,10 @@ final class ResponseHandler implements EventSubscriberInterface
         }
 
         $html = new ResponseRenderer(
-            $this->isHtmxRequest,
-            $this->document(),
-            $this->content,
-            $this->serviceLocator,
+                $this->isHtmxRequest,
+                $this->document(),
+                $this->content,
+                $this->serviceLocator,
         );
 
         $event->getResponse()->setContent( $html );
@@ -148,7 +148,7 @@ final class ResponseHandler implements EventSubscriberInterface
     private function responseHeaders( ResponseEvent $event ) : void
     {
         // Always remove the identifying header
-        \header_remove( 'X-Powered-By' );
+        // \header_remove( 'X-Powered-By' );
 
         // Merge headers
         $event->getResponse()->headers->add( $this->headers()->all() );

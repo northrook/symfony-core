@@ -24,8 +24,8 @@ final class CoreBundle extends AbstractBundle
         '../config/latte.php',
         '../config/security.php',
         '../config/services.php',
-        '../config/response.php',
-        '../config/telemetry.php',
+        // '../config/response.php',
+        // '../config/telemetry.php',
         '../config/theme.php',
         '../config/ui.php',
     ];

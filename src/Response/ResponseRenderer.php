@@ -29,10 +29,10 @@ final class ResponseRenderer implements Stringable
     private array $notifications = [];
 
     public function __construct(
-        private readonly bool             $isHtmxRequest,
-        private readonly Document         $document,
-        private string                    $innerHtml,
-        protected readonly ServiceLocator $serviceLocator,
+            private readonly bool             $isHtmxRequest,
+            private readonly Document         $document,
+            private string                    $innerHtml,
+            protected readonly ServiceLocator $serviceLocator,
     ) {
         $this->resolveNotifications();
     }
@@ -63,14 +63,14 @@ final class ResponseRenderer implements Stringable
     private function documentHead() : string
     {
         $this
-            ->meta( 'meta.viewport' )
-            ->meta( 'document' )
-            ->meta( 'robots' )
-            ->meta( 'meta' )
-            ->assets( 'font' )
-            ->assets( 'script' )
-            ->assets( 'style' )
-            ->assets( 'link' );
+                ->meta( 'meta.viewport' )
+                ->meta( 'document' )
+                ->meta( 'robots' )
+                ->meta( 'meta' )
+                ->assets( 'font' )
+                ->assets( 'script' )
+                ->assets( 'style' )
+                ->assets( 'link' );
 
         \array_unshift( $this->head, '<meta charset="UTF-8">' );
 
@@ -86,12 +86,12 @@ final class ResponseRenderer implements Stringable
     private function contentHead() : string
     {
         $this
-            ->meta( 'document' )
-            ->meta( 'meta' )
-            ->assets( 'font' )
-            ->assets( 'script' )
-            ->assets( 'style' )
-            ->assets( 'link' );
+                ->meta( 'document' )
+                ->meta( 'meta' )
+                ->assets( 'font' )
+                ->assets( 'script' )
+                ->assets( 'style' )
+                ->assets( 'link' );
 
         return \implode( PHP_EOL, $this->head ).PHP_EOL;
     }
@@ -127,24 +127,25 @@ final class ResponseRenderer implements Stringable
 
     private function resolveNotifications() : void
     {
-        foreach ( $this->serviceLocator( ToastService::class )->getMessages() as $id => $message ) {
-            $this->notifications[$id] = new Notification(
-                $message->type,
-                $message->title,
-                $message->description,
-                $message->timeout,
-            );
-
-            if ( ! $message->description ) {
-                $this->notifications[$id]->attributes->add( 'class', 'compact' );
-            }
-
-            if ( ! $message->timeout && 'error' !== $message->type ) {
-                $this->notifications[$id]->setTimeout( 5_000 );
-            }
-
-            $this->notifications[$id] = (string) $this->notifications[$id];
-        }
+        return;
+        // foreach ( $this->serviceLocator( ToastService::class )->getMessages() as $id => $message ) {
+        //     $this->notifications[$id] = new Notification(
+        //             $message->type,
+        //             $message->title,
+        //             $message->description,
+        //             $message->timeout,
+        //     );
+        //
+        //     if ( ! $message->description ) {
+        //         $this->notifications[$id]->attributes->add( 'class', 'compact' );
+        //     }
+        //
+        //     if ( ! $message->timeout && 'error' !== $message->type ) {
+        //         $this->notifications[$id]->setTimeout( 5_000 );
+        //     }
+        //
+        //     $this->notifications[$id] = (string) $this->notifications[$id];
+        // }
     }
 
     private function enqueueInvokedAssets() : void
@@ -205,11 +206,11 @@ final class ResponseRenderer implements Stringable
     {
         $type = $type ? [$type] : ['script', 'style', 'link'];
 
-        foreach ( $type as $asset ) {
-            // dump( $asset );
-            //
-            // dump( $this->document->pull( $asset ) );
-        }
+        // foreach ( $type as $asset ) {
+        //     // dump( $asset );
+        //     //
+        //     // dump( $this->document->pull( $asset ) );
+        // }
 
         return $this;
     }
