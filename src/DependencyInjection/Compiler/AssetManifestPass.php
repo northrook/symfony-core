@@ -6,15 +6,17 @@ namespace Core\DependencyInjection\Compiler;
 
 use Core\Service\{AssetManager, ThemeManager};
 use Core\Framework\Pathfinder;
+use JetBrains\PhpStorm\Deprecated;
+use Northrook\Filesystem\Path;
 use Core\Service\AssetManager\Compiler\{Style,Script};
 use Override;
 use Northrook\ArrayStore;
 use Northrook\Exception\CompileException;
-use Northrook\Resource\Path;
 use Symfony\Component\DependencyInjection\{ContainerBuilder};
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
+#[Deprecated]
 final readonly class AssetManifestPass implements CompilerPassInterface
 {
     private ArrayStore $inventory;
@@ -77,12 +79,12 @@ final readonly class AssetManifestPass implements CompilerPassInterface
             $asset = new Path( $path );
 
             if ( ! $asset->isReadable ) {
-                throw new CompileException( "The asset at '{$asset->path}' is not readable.'" );
+                throw new CompileException( "The asset at '{$asset}' is not readable.'" );
             }
 
             $basename = \strrchr( $asset->basename, '.', true );
 
-            $inventory["{$label}.{$type}.{$basename}"] = $asset->path;
+            $inventory["{$label}.{$type}.{$basename}"] = $asset;
         }
 
         $this->inventory->set( $inventory );

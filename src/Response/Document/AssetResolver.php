@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Core\Response\Document;
 
-use Northrook\Resource\Path;
 use Symfony\Contracts\Cache\CacheInterface;
 
 /**
@@ -21,6 +20,7 @@ final class AssetResolver
      * @param string                $publicPath
      * @param array<string, string> $assetDirectories `[bundle=>path]`
      * @param string                $manifestPath
+     * @param string                $storagePath
      * @param ?CacheInterface       $cache
      */
     public function __construct(

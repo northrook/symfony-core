@@ -6,6 +6,7 @@ use Override;
 use Symfony\Bundle\FrameworkBundle\DataCollector\AbstractDataCollector;
 use Throwable;
 use Symfony\Component\HttpFoundation\{Request, Response};
+
 final class PipelineCollector extends AbstractDataCollector
 {
     #[Override]

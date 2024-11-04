@@ -8,7 +8,8 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use Core\Service\{Pathfinder, ThemeManager};
+use Core\Framework\Pathfinder;
+use Core\Service\ThemeManager;
 use Support\Normalize;
 
 return static function( ContainerConfigurator $theme ) : void {

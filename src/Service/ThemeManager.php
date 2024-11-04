@@ -94,18 +94,18 @@ final class ThemeManager
     {
         $file = $this->pathfinder->getPath( $file );
 
-        if ( ! $file || ! $file->exists ) {
+        if ( ! $file || ! $file->exists() ) {
             throw new InvalidArgumentException( 'The theme configuration file does not exists.' );
         }
 
         $config = match ( $file->extension ) {
-            'php'   => require $file->path,
-            'yaml'  => Yaml::parseFile( $file->path ),
-            'json'  => \json_decode( $file->read ),
+            'php'   => require (string)$file,
+            'yaml'  => Yaml::parseFile( (string)$file ),
+            'json'  => \json_decode( $file->read() ),
             default => E_Value::error(
                 'The theme configuration file {path} does not have a valid extension. {extension}',
                 [
-                    'path'      => $file->path,
+                    'path'      => $file,
                     'extension' => $file->extension,
                     'accepted'  => ['php', 'yaml', 'json'],
                 ],
@@ -116,7 +116,7 @@ final class ThemeManager
             E_Value::error(
                 'The theme configuration file {path} does not produce a valid array.',
                 [
-                    'path'      => $file->path,
+                    'path'      => $file,
                     'extension' => $file->extension,
                     'accepted'  => ['php', 'yaml', 'json'],
                 ],

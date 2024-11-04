@@ -3,9 +3,9 @@
 namespace Core\Service\IconService;
 
 use Northrook\Exception\E_Value;
+use Northrook\Filesystem\Path;
 use Northrook\HTML\Element;
 use Northrook\Logger\Log;
-use Northrook\Resource\Path;
 use Support\{Str};
 use const Support\EMPTY_STRING;
 
