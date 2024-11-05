@@ -8,7 +8,7 @@ namespace Core\Response;
 
 use Core\Framework\Autowire\Settings;
 use Core\Framework\DependencyInjection\{ServiceContainer};
-use Core\Framework\Response\Document;
+use Core\Framework\Lifecycle\Response\Document;
 use Core\Response\Document\AssetResolver;
 use Core\Service\ToastService;
 use Core\UI\Component\Notification;

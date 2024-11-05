@@ -5,7 +5,7 @@ namespace Core\Event;
 use Core\Framework\DependencyInjection\ServiceContainer;
 use Core\Response\ResponseRenderer;
 use Symfony\Component\HttpFoundation\Request;
-use Core\Framework\Response\{Document, Headers, Parameters};
+use Core\Framework\Lifecycle\Response\{Document, Headers, Parameters};
 use Northrook\Latte;
 use Northrook\Logger\Log;
 use ReflectionFunctionAbstract;

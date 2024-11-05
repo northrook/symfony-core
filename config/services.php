@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use Core\Framework\Response\Document;
 use Core\Service\{IconService, ToastService};
 
 return static function( ContainerConfigurator $container ) : void {
