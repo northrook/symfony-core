@@ -3,7 +3,7 @@
 namespace Core\Controller;
 
 use Core\Framework\Controller;
-use Core\Response\{Document, Parameters};
+use Core\Framework\Lifecycle\Response\{Document, Parameters};
 use Core\Service\Request;
 use Northrook\Clerk;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,8 +20,6 @@ final class AdminController extends Controller
             'Welcome - Admin!',
             'This is an example template.',
         );
-
-        $this->response->template = 'welcome.latte';
     }
 
     public function index( ?string $route, Document $document, Parameters $parameters ) : Response
@@ -30,7 +28,7 @@ final class AdminController extends Controller
             'Index says welcome',
         );
 
-        return $this->response->template( $route );
+        return $this->response( $route );
     }
 
     public function blog( ?string $route, Request $request ) : Response
