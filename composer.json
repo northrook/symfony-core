@@ -42,7 +42,8 @@
     "symfony/monolog-bundle": "^3.10",
     "symfony/security-bundle": "^7.1",
     "tempest/highlight": "@stable",
-    "northrook/core-framework": "dev-main"
+    "northrook/core-framework": "dev-main",
+    "northrook/core-ui": "dev-main"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",

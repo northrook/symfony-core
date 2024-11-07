@@ -4,7 +4,7 @@ namespace Core\Controller;
 
 use Core\Framework\Attribute\OnDocument;
 use Core\Framework\Controller;
-use Core\Framework\Lifecycle\Response\{Document, Headers, Parameters};
+use Core\Framework\Response\{Document, Headers, Parameters};
 use Core\Framework\Controller\{Template};
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;

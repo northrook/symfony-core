@@ -3,7 +3,7 @@
 namespace Core\Controller;
 
 use Core\Framework\Controller;
-use Core\Framework\Lifecycle\Response\{Document, Parameters};
+use Core\Framework\Response\{Document, Parameters};
 use Core\Service\Request;
 use Northrook\Clerk;
 use Symfony\Component\HttpFoundation\Response;
