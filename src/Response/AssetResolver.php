@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Core\Response\Document;
+namespace Core\Response;
 
 use Symfony\Contracts\Cache\CacheInterface;
 
