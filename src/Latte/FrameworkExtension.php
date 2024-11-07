@@ -15,7 +15,9 @@ use Core\UI\{Component\Breadcrumbs,
     Component\Icon,
     Component\Navigation,
     Component\Notification,
-    RenderRuntime};
+    ComponentFactory,
+    RenderRuntime
+};
 use Latte;
 use Override;
 
@@ -23,13 +25,16 @@ final class FrameworkExtension extends Latte\Extension
 {
     use NodeCompilerMethods, UrlGenerator;
 
-    public function __construct( public readonly RenderRuntime $runtime ) {}
+    public function __construct(
+        public readonly ComponentFactory $factory,
+        public readonly RenderRuntime    $runtime,
+    ) {}
 
     public function getFunctions() : array
     {
         return [
-                'url'  => $this->generateRouteUrl( ... ),
-                'path' => $this->generateRoutePath( ... ),
+            'url'  => $this->generateRouteUrl( ... ),
+            'path' => $this->generateRoutePath( ... ),
         ];
     }
 
@@ -48,6 +53,7 @@ final class FrameworkExtension extends Latte\Extension
 
     public function parseTemplate( Node $node ) : int|Node
     {
+        dump( $this->factory->getRegisteredComponents());
         if ( $node instanceof ExpressionNode ) {
             return NodeTraverser::DontTraverseChildren;
         }
@@ -83,7 +89,8 @@ final class FrameworkExtension extends Latte\Extension
     public function getProviders() : array
     {
         return [
-            'render' => $this->runtime,
+            'component' => $this->factory,
+            'render'    => $this->runtime,
         ];
     }
 }

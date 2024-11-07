@@ -10,7 +10,7 @@ use InvalidArgumentException;
 use Northrook\Latte;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\{Event\ResponseEvent, KernelEvents};
+use Symfony\Component\HttpKernel\{Event\KernelEvent, Event\ResponseEvent, KernelEvents};
 
 /**
  * Handles {@see Response} events for controllers extending the {@see Framework\Controller}.
@@ -37,7 +37,7 @@ final class ResponseHandler implements EventSubscriberInterface
     public static function getSubscribedEvents() : array
     {
         return [
-            KernelEvents::RESPONSE => ['parseResponse', -1_024],
+            KernelEvents::RESPONSE => ['parseResponse', -128],
         ];
     }
 
@@ -45,32 +45,35 @@ final class ResponseHandler implements EventSubscriberInterface
     {
         $this->content = $event->getResponse()->getContent();
 
-        dump(
-            $this,
-            $event,
-        );
-        // if ( $this->contentIsTemplate() ) {
-        //     $this->parameters()->set( 'content', $this->request()->attributes->get( '_content_template' ) );
-        //
-        //     $this->content = $this->serviceLocator( Latte::class )->templateToString(
-        //         $this->request()->attributes->get( '_document_template' ),
-        //         $this->parameters()->getParameters(),
-        //     );
-        // }
+        if ( $this->contentIsTemplate() ) {
+            $this->parameters()->set( 'content', $this->request()->attributes->get( '_content_template' ) );
+
+            $this->content = $this->serviceLocator( Latte::class )->templateToString(
+                $this->request()->attributes->get( '_document_template' ),
+                $this->parameters()->getParameters(),
+            );
+        }
+    }
+
+    private function eventRequestType( KernelEvent $event ) : false|string
+    {
+        return $event->getRequest()->attributes->get( '_request_type', false );
     }
 
     public function parseResponse( ResponseEvent $event ) : void
     {
         // We will receive either raw HTML, a .latte template, or null; indicating we use a controller::method template
 
+        $requestType = $this->eventRequestType( $event );
+
         // Bail if the controller doesn't pass validation
-        if ( ! $this->controller ) {
+        if ( ! $requestType ) {
             return;
         }
 
         $this->content( $event );
 
-        if ( $this->isHtmxRequest ) {
+        if ( 'document' === $requestType ) {
             $this->document()->add(
                 [
                     'html.lang'   => 'en',
@@ -137,7 +140,7 @@ final class ResponseHandler implements EventSubscriberInterface
      */
     private function contentIsTemplate( ?string $content = null ) : bool
     {
-        $content ??= $this->content ?? throw new InvalidArgumentException( __METHOD__.': No content string available.');
+        $content ??= $this->content ?? throw new InvalidArgumentException( __METHOD__.': No content string available.' );
 
         // If the string is empty, use Controller attributes
         if ( ! $content ) {
